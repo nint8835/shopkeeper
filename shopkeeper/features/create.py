@@ -3,7 +3,9 @@ import traceback
 import discord
 
 from shopkeeper.bot import client, guild
-from shopkeeper.models.listing import Listing, ListingType
+from shopkeeper.config import config
+from shopkeeper.db import async_session
+from shopkeeper.models.listing import Listing, ListingStatus, ListingType
 
 
 class CreateListingModal(discord.ui.Modal):
@@ -26,11 +28,31 @@ class CreateListingModal(discord.ui.Modal):
         new_listing = Listing(
             type=self.listing_type,
             title=self.listing_title.value,
-            description=self.listing_description.value,
+            description=self.listing_description.value or None,
             owner_id=interaction.user.id,
+            status=ListingStatus.OPEN,
         )
 
-        await interaction.response.send_message(embed=new_listing.embed, ephemeral=True)
+        marketplace_channel = await client.fetch_channel(config.channel_id)
+
+        thread_message = await marketplace_channel.send(embed=new_listing.embed)
+
+        thread = await marketplace_channel.create_thread(
+            name=new_listing.title,
+            message=thread_message,
+            auto_archive_duration=10080,
+        )
+        new_listing.thread_id = thread.id
+        new_listing.message_id = thread_message.id
+
+        async with async_session() as session:
+            async with session.begin():
+                session.add(new_listing)
+                await session.commit()
+
+        await interaction.response.send_message(
+            f"Listing created: {thread_message.jump_url}", ephemeral=True
+        )
 
     async def on_error(
         self, interaction: discord.Interaction, error: Exception

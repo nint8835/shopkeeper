@@ -5,8 +5,10 @@ class Config(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="shopkeeper_", env_file=".env")
 
     token: str
-    guild_id: str
     db_path: str = "shopkeeper.sqlite"
+
+    guild_id: str
+    channel_id: int
 
     sync_commands: bool = False
 
