@@ -13,6 +13,7 @@ class ShopkeeperBot(discord.Client):
         self.tree = app_commands.CommandTree(self)
 
     async def setup_hook(self) -> None:
+        # TODO: Better place for syncing?
         await self.tree.sync(guild=guild)
 
 

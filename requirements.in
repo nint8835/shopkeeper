@@ -1,3 +1,6 @@
+aiosqlite==0.20.0
+alembic==1.13.1
 discord.py==2.3.2
 pydantic-settings==2.2.1
 pydantic==2.6.4
+sqlalchemy[asyncio]==2.0.28

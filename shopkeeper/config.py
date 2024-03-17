@@ -6,6 +6,15 @@ class Config(BaseSettings):
 
     token: str
     guild_id: str
+    db_path: str = "shopkeeper.sqlite"
+
+    @property
+    def async_db_connection_uri(self) -> str:
+        return f"sqlite+aiosqlite:///{self.db_path}"
+
+    @property
+    def sync_db_connection_uri(self) -> str:
+        return f"sqlite:///{self.db_path}"
 
 
 config = Config()
