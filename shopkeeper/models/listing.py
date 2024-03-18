@@ -30,9 +30,9 @@ class Listing(Base):
     type: Mapped[ListingType]
     status: Mapped[ListingStatus]
 
-    owner_id: Mapped[str]
-    message_id: Mapped[str]
-    thread_id: Mapped[str]
+    owner_id: Mapped[int]
+    message_id: Mapped[int]
+    thread_id: Mapped[int]
 
     @property
     def embed(self) -> discord.Embed:
@@ -49,9 +49,10 @@ class Listing(Base):
     async def update_listing_state(self) -> None:
         channel = await client.fetch_channel(config.channel_id)
         message = await channel.fetch_message(self.message_id)
+        thread = cast(discord.Thread, await client.fetch_channel(self.thread_id))
 
         await message.edit(embed=self.embed)
+        await thread.edit(name=self.title)
 
         if self.status == ListingStatus.Closed:
-            thread = cast(discord.Thread, await client.fetch_channel(self.thread_id))
             await thread.edit(locked=True, archived=True)
