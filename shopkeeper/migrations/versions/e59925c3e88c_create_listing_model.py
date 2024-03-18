@@ -1,8 +1,8 @@
 """Create listing model
 
-Revision ID: 218dc344cc2d
+Revision ID: e59925c3e88c
 Revises:
-Create Date: 2024-03-17 19:13:01.423027
+Create Date: 2024-03-18 20:46:21.860112
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "218dc344cc2d"
+revision: str = "e59925c3e88c"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,13 +26,13 @@ def upgrade() -> None:
         sa.Column("description", sa.String(), nullable=True),
         sa.Column(
             "type",
-            sa.Enum("BUY", "SELL", name="listingtype", native_enum=False),
+            sa.Enum("Buy", "Sell", name="listingtype", native_enum=False),
             nullable=False,
         ),
         sa.Column(
             "status",
             sa.Enum(
-                "OPEN", "PENDING", "CLOSED", name="listingstatus", native_enum=False
+                "Open", "Pending", "Closed", name="listingstatus", native_enum=False
             ),
             nullable=False,
         ),

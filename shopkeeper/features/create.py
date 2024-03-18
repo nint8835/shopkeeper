@@ -18,8 +18,8 @@ class CreateListingModal(discord.ui.Modal):
         self.listing_type = listing_type
 
         type_titles = {
-            ListingType.BUY: "Create a buy request",
-            ListingType.SELL: "List an item for sale",
+            ListingType.Buy: "Create a buy request",
+            ListingType.Sell: "List an item for sale",
         }
 
         super().__init__(title=type_titles[listing_type])
@@ -30,7 +30,7 @@ class CreateListingModal(discord.ui.Modal):
             title=self.listing_title.value,
             description=self.listing_description.value or None,
             owner_id=interaction.user.id,
-            status=ListingStatus.OPEN,
+            status=ListingStatus.Open,
         )
 
         marketplace_channel = await client.fetch_channel(config.channel_id)
@@ -66,10 +66,10 @@ class CreateListingModal(discord.ui.Modal):
 @client.tree.command(guild=guild)
 async def sell(interaction: discord.Interaction):
     """List a new item for sale."""
-    await interaction.response.send_modal(CreateListingModal(ListingType.SELL))
+    await interaction.response.send_modal(CreateListingModal(ListingType.Sell))
 
 
 @client.tree.command(guild=guild)
 async def buy(interaction: discord.Interaction):
     """Create a new buy request."""
-    await interaction.response.send_modal(CreateListingModal(ListingType.BUY))
+    await interaction.response.send_modal(CreateListingModal(ListingType.Buy))
