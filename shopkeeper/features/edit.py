@@ -41,6 +41,9 @@ class EditListingInfoModal(discord.ui.Modal):
 
 class EditListing(app_commands.Group):
     @app_commands.command()
+    @app_commands.describe(
+        listing="The listing to edit.", status="The new status of the listing."
+    )
     async def status(
         self, interaction: discord.Interaction, listing: int, status: ListingStatus
     ) -> None:
@@ -69,6 +72,7 @@ class EditListing(app_commands.Group):
             ]
 
     @app_commands.command()
+    @app_commands.describe(listing="The listing to edit.")
     async def info(self, interaction: discord.Interaction, listing: int) -> None:
         """Edit information about a listing."""
         async with async_session() as session:

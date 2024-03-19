@@ -20,8 +20,3 @@ class ShopkeeperBot(discord.Client):
 
 intents = discord.Intents.default()
 client = ShopkeeperBot(intents=intents)
-
-
-@client.tree.command(guild=guild)
-async def test(interaction: discord.Interaction) -> None:
-    await interaction.response.send_message("Hello, world!")
