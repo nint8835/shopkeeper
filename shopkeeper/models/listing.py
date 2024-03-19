@@ -21,6 +21,16 @@ class ListingStatus(Enum):
     Closed = "closed"
 
 
+listing_colours: dict[tuple[ListingType, ListingStatus], discord.Colour] = {
+    (ListingType.Buy, ListingStatus.Open): discord.Colour.blue(),
+    (ListingType.Buy, ListingStatus.Pending): discord.Colour.gold(),
+    (ListingType.Buy, ListingStatus.Closed): discord.Colour.red(),
+    (ListingType.Sell, ListingStatus.Open): discord.Colour.green(),
+    (ListingType.Sell, ListingStatus.Pending): discord.Colour.gold(),
+    (ListingType.Sell, ListingStatus.Closed): discord.Colour.red(),
+}
+
+
 class Listing(Base):
     __tablename__ = "listings"
 
@@ -40,11 +50,12 @@ class Listing(Base):
         return (
             discord.Embed(
                 title=self.title,
-                description=self.description or "No description",
-                color=discord.Color.blurple(),
+                description=self.description or "No description.",
+                color=listing_colours[(self.type, self.status)],
             )
-            .add_field(name="Type", value=self.type.name)
-            .add_field(name="Status", value=self.status.name)
+            .add_field(name="Type", value=self.type.name, inline=True)
+            .add_field(name="Status", value=self.status.name, inline=True)
+            .add_field(name="Owner", value=f"<@{self.owner_id}>", inline=True)
         )
 
     @classmethod
