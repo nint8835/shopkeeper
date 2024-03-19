@@ -21,6 +21,6 @@ class Config(BaseSettings):
         return f"sqlite:///{self.db_path}"
 
 
-config = Config()
+config = Config()  # type: ignore - Pydantic and Pyright don't play nice, but Discord.py doesn't work with Mypy
 
 __all__ = ["config"]

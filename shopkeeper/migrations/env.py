@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import create_engine
 
-import shopkeeper.models._all_models  # noqa: F401
+import shopkeeper.models._all_models  # noqa: F401 # type: ignore
 from shopkeeper.config import config as shopkeeper_config
 from shopkeeper.db import Base
 

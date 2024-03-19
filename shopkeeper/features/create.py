@@ -1,4 +1,5 @@
 import traceback
+from typing import cast
 
 import discord
 
@@ -9,8 +10,8 @@ from shopkeeper.models.listing import Listing, ListingStatus, ListingType
 
 
 class CreateListingModal(discord.ui.Modal):
-    listing_title = discord.ui.TextInput(label="Title")
-    listing_description = discord.ui.TextInput(
+    listing_title = discord.ui.TextInput["CreateListingModal"](label="Title")
+    listing_description = discord.ui.TextInput["CreateListingModal"](
         label="Description", style=discord.TextStyle.paragraph, required=False
     )
 
@@ -33,7 +34,9 @@ class CreateListingModal(discord.ui.Modal):
             status=ListingStatus.Open,
         )
 
-        marketplace_channel = await client.fetch_channel(config.channel_id)
+        marketplace_channel = cast(
+            discord.TextChannel, await client.fetch_channel(config.channel_id)
+        )
 
         thread_message = await marketplace_channel.send(embed=new_listing.embed)
 

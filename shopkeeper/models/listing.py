@@ -1,4 +1,5 @@
 from enum import Enum
+from types import EllipsisType
 from typing import Optional, cast
 
 import discord
@@ -52,9 +53,9 @@ class Listing(Base):
         interaction: discord.Interaction,
         listing: int,
         *,
-        title: str | None = ...,
-        description: str | None = ...,
-        status: ListingStatus | None = ...,
+        title: str | EllipsisType = ...,
+        description: str | None | EllipsisType = ...,
+        status: ListingStatus | EllipsisType = ...,
     ) -> None:
         async with async_session() as session:
             async with session.begin():
@@ -84,7 +85,9 @@ class Listing(Base):
 
                 await session.commit()
 
-        channel = await client.fetch_channel(config.channel_id)
+        channel = cast(
+            discord.TextChannel, await client.fetch_channel(config.channel_id)
+        )
         message = await channel.fetch_message(listing_instance.message_id)
         thread = cast(
             discord.Thread,
