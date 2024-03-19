@@ -23,30 +23,11 @@ class EditListingInfoModal(discord.ui.Modal):
         self.listing_description.default = listing.description or ""
 
     async def on_submit(self, interaction: discord.Interaction):
-        async with async_session() as session:
-            async with session.begin():
-                listing_instance = await session.get(Listing, self.listing.id)
-
-                if listing_instance is None:
-                    return await interaction.response.send_message(
-                        "Listing not found", ephemeral=True
-                    )
-
-                if listing_instance.owner_id != interaction.user.id:
-                    return await interaction.response.send_message(
-                        "You do not own this listing", ephemeral=True
-                    )
-
-                listing_instance.title = self.listing_title.value
-                listing_instance.description = self.listing_description.value or None
-
-                session.add(listing_instance)
-                await session.commit()
-
-        await listing_instance.update_listing_state()
-
-        await interaction.response.send_message(
-            "Listing information updated", ephemeral=True
+        await Listing.edit(
+            interaction,
+            self.listing.id,
+            title=self.listing_title.value,
+            description=self.listing_description.value,
         )
 
     async def on_error(
@@ -64,27 +45,10 @@ class EditListing(app_commands.Group):
         self, interaction: discord.Interaction, listing: int, status: ListingStatus
     ):
         """Edit the status of a listing."""
-        async with async_session() as session:
-            async with session.begin():
-                listing_instance = await session.get(Listing, listing)
-
-                if listing_instance is None:
-                    return await interaction.response.send_message(
-                        "Listing not found", ephemeral=True
-                    )
-
-                if listing_instance.owner_id != interaction.user.id:
-                    return await interaction.response.send_message(
-                        "You do not own this listing", ephemeral=True
-                    )
-
-                listing_instance.status = status
-                await session.commit()
-
-        await listing_instance.update_listing_state()
-
-        await interaction.response.send_message(
-            f"Listing status updated to {status.name}", ephemeral=True
+        await Listing.edit(
+            interaction,
+            listing,
+            status=status,
         )
 
     @staticmethod

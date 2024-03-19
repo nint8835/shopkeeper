@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from shopkeeper.bot import client
 from shopkeeper.config import config
-from shopkeeper.db import Base
+from shopkeeper.db import Base, async_session
 
 
 class ListingType(Enum):
@@ -46,13 +46,58 @@ class Listing(Base):
             .add_field(name="Status", value=self.status.name)
         )
 
-    async def update_listing_state(self) -> None:
+    @classmethod
+    async def edit(
+        cls,
+        interaction: discord.Interaction,
+        listing: int,
+        *,
+        title: str | None = ...,
+        description: str | None = ...,
+        status: ListingStatus | None = ...,
+    ) -> None:
+        async with async_session() as session:
+            async with session.begin():
+                listing_instance = await session.get(Listing, listing)
+
+                if listing_instance is None:
+                    return await interaction.response.send_message(
+                        "Listing not found", ephemeral=True
+                    )
+
+                if listing_instance.owner_id != interaction.user.id:
+                    return await interaction.response.send_message(
+                        "You do not own this listing", ephemeral=True
+                    )
+
+                if listing_instance.status == ListingStatus.Closed:
+                    return await interaction.response.send_message(
+                        "Listing is closed", ephemeral=True
+                    )
+
+                if title is not ...:
+                    listing_instance.title = title
+                if description is not ...:
+                    listing_instance.description = description
+                if status is not ...:
+                    listing_instance.status = status
+
+                await session.commit()
+
         channel = await client.fetch_channel(config.channel_id)
-        message = await channel.fetch_message(self.message_id)
-        thread = cast(discord.Thread, await client.fetch_channel(self.thread_id))
+        message = await channel.fetch_message(listing_instance.message_id)
+        thread = cast(
+            discord.Thread,
+            await client.fetch_channel(listing_instance.thread_id),
+        )
 
-        await message.edit(embed=self.embed)
-        await thread.edit(name=self.title)
+        if any(value is not ... for value in (title, description, status)):
+            await message.edit(embed=listing_instance.embed)
 
-        if self.status == ListingStatus.Closed:
+        if title is not ...:
+            await thread.edit(name=title)
+
+        if status == ListingStatus.Closed:
             await thread.edit(locked=True, archived=True)
+
+        await interaction.response.send_message("Listing updated", ephemeral=True)
