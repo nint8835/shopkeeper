@@ -15,6 +15,6 @@ class Base(AsyncAttrs, DeclarativeBase):
     }
 
 
-engine = create_async_engine(config.async_db_connection_uri, echo=True)
+engine = create_async_engine(config.async_db_connection_uri, echo=config.db_log_queries)
 
 async_session = async_sessionmaker(engine, expire_on_commit=False)
