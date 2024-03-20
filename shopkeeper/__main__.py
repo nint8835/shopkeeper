@@ -1,5 +1,3 @@
-from .bot import client
-from .config import config
-from .features import *  # noqa: F401, F403
+from .cmd import app
 
-client.run(config.token)
+app()

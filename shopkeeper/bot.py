@@ -12,11 +12,6 @@ class ShopkeeperBot(discord.Client):
 
         self.tree = app_commands.CommandTree(self)
 
-    async def setup_hook(self) -> None:
-        # TODO: Better place for syncing?
-        if config.sync_commands:
-            await self.tree.sync(guild=guild)
-
 
 intents = discord.Intents.default()
 client = ShopkeeperBot(intents=intents)
