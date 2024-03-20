@@ -1,3 +1,4 @@
+import alembic.config
 import typer
 
 from shopkeeper.bot import client, guild
@@ -24,6 +25,12 @@ async def sync() -> None:
 
     # Explicitly closing is required as otherwise it will warn of unclosed connectors
     await client.close()
+
+
+@app.command()
+def upgrade() -> None:
+    """Perform database migrations."""
+    alembic.config.main(argv=["--raiseerr", "upgrade", "head"])
 
 
 __all__ = ["app"]
