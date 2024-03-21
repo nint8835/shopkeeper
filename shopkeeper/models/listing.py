@@ -5,7 +5,7 @@ from typing import Optional, cast
 import discord
 from sqlalchemy.orm import Mapped, mapped_column
 
-from shopkeeper.bot import client
+import shopkeeper.bot as bot
 from shopkeeper.config import config
 from shopkeeper.db import Base, async_session
 
@@ -97,12 +97,12 @@ class Listing(Base):
                 await session.commit()
 
         channel = cast(
-            discord.TextChannel, await client.fetch_channel(config.channel_id)
+            discord.TextChannel, await bot.client.fetch_channel(config.channel_id)
         )
         message = await channel.fetch_message(listing_instance.message_id)
         thread = cast(
             discord.Thread,
-            await client.fetch_channel(listing_instance.thread_id),
+            await bot.client.fetch_channel(listing_instance.thread_id),
         )
 
         if any(value is not ... for value in (title, description, status)):
