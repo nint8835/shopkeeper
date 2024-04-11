@@ -30,7 +30,6 @@ async def sync() -> None:
 @app.command()
 def upgrade() -> None:
     """Perform database migrations."""
-    print("Performing migrations against path", config.sync_db_connection_uri)
     alembic.config.main(argv=["--raiseerr", "upgrade", "head"])
 
 
