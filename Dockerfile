@@ -12,7 +12,7 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-FROM cgr.dev/chainguard/python-dev:latest
+FROM cgr.dev/chainguard/python:latest-dev
 
 ENV PYTHONUNBUFFERED=1
 ENV PATH="/shopkeeper/venv/bin:$PATH"
