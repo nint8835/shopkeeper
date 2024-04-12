@@ -48,6 +48,8 @@ class CreateListingModal(discord.ui.Modal):
         new_listing.thread_id = thread.id
         new_listing.message_id = thread_message.id
 
+        await thread.add_user(discord.Object(interaction.user.id))
+
         async with async_session() as session:
             async with session.begin():
                 session.add(new_listing)
