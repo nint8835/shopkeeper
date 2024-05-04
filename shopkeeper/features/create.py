@@ -14,6 +14,9 @@ class CreateListingModal(discord.ui.Modal):
     listing_description = discord.ui.TextInput["CreateListingModal"](
         label="Description", style=discord.TextStyle.paragraph, required=False
     )
+    listing_price = discord.ui.TextInput["CreateListingModal"](
+        label="Price", required=False
+    )
 
     def __init__(self, listing_type: ListingType):
         self.listing_type = listing_type
@@ -30,6 +33,7 @@ class CreateListingModal(discord.ui.Modal):
             type=self.listing_type,
             title=self.listing_title.value,
             description=self.listing_description.value or None,
+            price=self.listing_price.value or None,
             owner_id=interaction.user.id,
             status=ListingStatus.Open,
         )

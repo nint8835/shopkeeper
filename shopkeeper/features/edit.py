@@ -14,6 +14,9 @@ class EditListingInfoModal(discord.ui.Modal):
     listing_description = discord.ui.TextInput["EditListingInfoModal"](
         label="Description", style=discord.TextStyle.paragraph, required=False
     )
+    listing_price = discord.ui.TextInput["EditListingInfoModal"](
+        label="Price", required=False
+    )
 
     def __init__(self, listing: Listing):
         super().__init__(title="Edit listing information")
@@ -21,13 +24,15 @@ class EditListingInfoModal(discord.ui.Modal):
 
         self.listing_title.default = listing.title
         self.listing_description.default = listing.description or ""
+        self.listing_price.default = listing.price or ""
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         await Listing.edit(
             interaction,
             self.listing.id,
             title=self.listing_title.value,
-            description=self.listing_description.value,
+            description=self.listing_description.value or None,
+            price=self.listing_price.value or None,
         )
 
     async def on_error(

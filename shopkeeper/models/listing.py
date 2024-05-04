@@ -38,6 +38,7 @@ class Listing(Base):
 
     title: Mapped[str]
     description: Mapped[Optional[str]]
+    price: Mapped[Optional[str]]
     type: Mapped[ListingType]
     status: Mapped[ListingStatus]
 
@@ -47,7 +48,7 @@ class Listing(Base):
 
     @property
     def embed(self) -> discord.Embed:
-        return (
+        embed = (
             discord.Embed(
                 title=self.title,
                 description=self.description or "No description.",
@@ -58,6 +59,11 @@ class Listing(Base):
             .add_field(name="Owner", value=f"<@{self.owner_id}>", inline=True)
         )
 
+        if self.price is not None:
+            embed.add_field(name="Price", value=self.price, inline=True)
+
+        return embed
+
     @classmethod
     async def edit(
         cls,
@@ -66,6 +72,7 @@ class Listing(Base):
         *,
         title: str | EllipsisType = ...,
         description: str | None | EllipsisType = ...,
+        price: str | None | EllipsisType = ...,
         status: ListingStatus | EllipsisType = ...,
     ) -> None:
         async with async_session() as session:
@@ -91,6 +98,8 @@ class Listing(Base):
                     listing_instance.title = title
                 if description is not ...:
                     listing_instance.description = description
+                if price is not ...:
+                    listing_instance.price = price
                 if status is not ...:
                     listing_instance.status = status
 
