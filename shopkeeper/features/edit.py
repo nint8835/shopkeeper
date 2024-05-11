@@ -44,6 +44,23 @@ class EditListingInfoModal(discord.ui.Modal):
         )
 
 
+async def edit_autocomplete(
+    interaction: discord.Interaction, current: str
+) -> list[app_commands.Choice[int]]:
+    async with async_session() as session:
+        result = await session.execute(
+            select(Listing)
+            .filter_by(owner_id=interaction.user.id)
+            .filter(Listing.title.ilike(f"%{current}%"))
+            .filter(Listing.status != ListingStatus.Closed)
+        )
+
+        return [
+            app_commands.Choice(name=listing.title, value=listing.id)
+            for listing in result.scalars().all()
+        ]
+
+
 class EditListing(app_commands.Group):
     @app_commands.command()
     @app_commands.describe(
@@ -63,18 +80,7 @@ class EditListing(app_commands.Group):
     async def status_listing_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> list[app_commands.Choice[int]]:
-        async with async_session() as session:
-            result = await session.execute(
-                select(Listing)
-                .filter_by(owner_id=interaction.user.id)
-                .filter(Listing.title.ilike(f"%{current}%"))
-                .filter(Listing.status != ListingStatus.Closed)
-            )
-
-            return [
-                app_commands.Choice(name=listing.title, value=listing.id)
-                for listing in result.scalars().all()
-            ]
+        return await edit_autocomplete(interaction, current)
 
     @app_commands.command()
     @app_commands.describe(listing="The listing to edit.")
@@ -99,18 +105,7 @@ class EditListing(app_commands.Group):
     async def info_listing_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> list[app_commands.Choice[int]]:
-        async with async_session() as session:
-            result = await session.execute(
-                select(Listing)
-                .filter_by(owner_id=interaction.user.id)
-                .filter(Listing.title.ilike(f"%{current}%"))
-                .filter(Listing.status != ListingStatus.Closed)
-            )
-
-            return [
-                app_commands.Choice(name=listing.title, value=listing.id)
-                for listing in result.scalars().all()
-            ]
+        return await edit_autocomplete(interaction, current)
 
 
 client.tree.add_command(EditListing(), guild=guild)
