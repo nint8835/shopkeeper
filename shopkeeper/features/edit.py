@@ -5,6 +5,7 @@ from discord import app_commands
 from sqlalchemy import select
 
 from shopkeeper.bot import client, guild
+from shopkeeper.config import config
 from shopkeeper.db import async_session
 from shopkeeper.models.listing import Listing, ListingStatus
 
@@ -48,12 +49,25 @@ async def edit_autocomplete(
     interaction: discord.Interaction, current: str
 ) -> list[app_commands.Choice[int]]:
     async with async_session() as session:
-        result = await session.execute(
+        is_admin_query = interaction.user.id == config.owner_id and current.startswith(
+            "admin:"
+        )
+
+        if is_admin_query:
+            current = current.removeprefix("admin:")
+
+        query = (
             select(Listing)
-            .filter_by(owner_id=interaction.user.id)
             .filter(Listing.title.ilike(f"%{current}%"))
             .filter(Listing.status != ListingStatus.Closed)
         )
+
+        if is_admin_query:
+            query = query.filter(Listing.owner_id != interaction.user.id)
+        else:
+            query = query.filter(Listing.owner_id == interaction.user.id)
+
+        result = await session.execute(query)
 
         return [
             app_commands.Choice(name=listing.title, value=listing.id)
@@ -94,7 +108,10 @@ class EditListing(app_commands.Group):
                     "Listing not found", ephemeral=True
                 )
 
-            if listing_instance.owner_id != interaction.user.id:
+            if (
+                listing_instance.owner_id != interaction.user.id
+                and interaction.user.id != config.owner_id
+            ):
                 return await interaction.response.send_message(
                     "You do not own this listing", ephemeral=True
                 )

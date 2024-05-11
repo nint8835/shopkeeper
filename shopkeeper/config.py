@@ -11,6 +11,7 @@ class Config(BaseSettings):
 
     guild_id: str
     channel_id: int
+    owner_id: int
 
     @property
     def async_db_connection_uri(self) -> str:

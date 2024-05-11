@@ -84,7 +84,10 @@ class Listing(Base):
                         "Listing not found", ephemeral=True
                     )
 
-                if listing_instance.owner_id != interaction.user.id:
+                if (
+                    listing_instance.owner_id != interaction.user.id
+                    and interaction.user.id != config.owner_id
+                ):
                     return await interaction.response.send_message(
                         "You do not own this listing", ephemeral=True
                     )
