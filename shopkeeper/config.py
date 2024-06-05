@@ -12,6 +12,7 @@ class Config(BaseSettings):
     guild_id: str
     channel_id: int
     owner_id: int
+    events_channel_id: int | None = None
 
     @property
     def async_db_connection_uri(self) -> str:
