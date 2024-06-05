@@ -1,3 +1,4 @@
+from difflib import unified_diff
 from enum import Enum
 from types import EllipsisType
 from typing import Optional, cast
@@ -29,6 +30,10 @@ listing_colours: dict[tuple[ListingType, ListingStatus], discord.Colour] = {
     (ListingType.Sell, ListingStatus.Pending): discord.Colour.gold(),
     (ListingType.Sell, ListingStatus.Closed): discord.Colour.red(),
 }
+
+
+def stringify_diff_field(val: str | None, empty_placeholder: str = "`(empty)`") -> str:
+    return val if val is not None else empty_placeholder
 
 
 class Listing(Base):
@@ -97,13 +102,46 @@ class Listing(Base):
                         "Listing is closed", ephemeral=True
                     )
 
+                edited_message_sections: list[str] = []
+
                 if title is not ...:
+                    if listing_instance.title != title:
+                        edited_message_sections.append(
+                            f"Title changed from {listing_instance.title} to {title}"
+                        )
+
                     listing_instance.title = title
+
                 if description is not ...:
+                    if listing_instance.description != description:
+                        diff = unified_diff(
+                            stringify_diff_field(
+                                listing_instance.description, ""
+                            ).splitlines(),
+                            stringify_diff_field(description, "").splitlines(),
+                            lineterm="",
+                            fromfile="Old description",
+                            tofile="New description",
+                        )
+
+                        edited_message_sections.append(
+                            f"Description changed:\n```diff\n{'\n'.join(diff)}\n```"
+                        )
+
                     listing_instance.description = description
                 if price is not ...:
+                    if listing_instance.price != price:
+                        edited_message_sections.append(
+                            f"Price changed from {stringify_diff_field(listing_instance.price)} to {stringify_diff_field(price)}"
+                        )
+
                     listing_instance.price = price
                 if status is not ...:
+                    if listing_instance.status != status:
+                        edited_message_sections.append(
+                            f"Status changed from {listing_instance.status.name} to {status.name}"
+                        )
+
                     listing_instance.status = status
 
                 await session.commit()
@@ -127,3 +165,12 @@ class Listing(Base):
             await thread.edit(locked=True, archived=True)
 
         await interaction.response.send_message("Listing updated", ephemeral=True)
+
+        if config.events_channel_id is not None:
+            await cast(
+                discord.TextChannel,
+                await bot.client.fetch_channel(config.events_channel_id),
+            ).send(
+                content=f"## Listing **[{listing_instance.title}]({message.jump_url})** edited\n{'\n'.join(edited_message_sections)}",
+                suppress_embeds=True,
+            )
