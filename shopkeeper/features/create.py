@@ -68,7 +68,7 @@ class CreateListingModal(discord.ui.Modal):
                 discord.TextChannel,
                 await client.fetch_channel(config.events_channel_id),
             ).send(
-                content=f"Listing **[{new_listing.title}]({thread_message.jump_url})** created",
+                content=f"## Listing **[{new_listing.title}]({thread_message.jump_url})** created",
                 suppress_embeds=True,
             )
 
