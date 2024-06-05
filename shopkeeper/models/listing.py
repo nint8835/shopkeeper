@@ -164,8 +164,6 @@ class Listing(Base):
         if status == ListingStatus.Closed:
             await thread.edit(locked=True, archived=True)
 
-        await interaction.response.send_message("Listing updated", ephemeral=True)
-
         if config.events_channel_id is not None:
             await cast(
                 discord.TextChannel,
@@ -174,3 +172,5 @@ class Listing(Base):
                 content=f"## Listing **[{listing_instance.title}]({message.jump_url})** edited\n{'\n'.join(edited_message_sections)}",
                 suppress_embeds=True,
             )
+
+        await interaction.response.send_message("Listing updated", ephemeral=True)

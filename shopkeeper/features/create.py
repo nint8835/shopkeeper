@@ -59,10 +59,6 @@ class CreateListingModal(discord.ui.Modal):
                 session.add(new_listing)
                 await session.commit()
 
-        await interaction.response.send_message(
-            f"Listing created: {thread_message.jump_url}", ephemeral=True
-        )
-
         if config.events_channel_id is not None:
             await cast(
                 discord.TextChannel,
@@ -71,6 +67,10 @@ class CreateListingModal(discord.ui.Modal):
                 content=f"## Listing **[{new_listing.title}]({thread_message.jump_url})** created",
                 suppress_embeds=True,
             )
+
+        await interaction.response.send_message(
+            f"Listing created: {thread_message.jump_url}", ephemeral=True
+        )
 
     async def on_error(
         self, interaction: discord.Interaction, error: Exception
