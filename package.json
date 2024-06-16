@@ -10,10 +10,15 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@tanstack/react-query": "^5.45.0",
+        "@tanstack/react-query-devtools": "^5.45.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },
     "devDependencies": {
+        "@openapi-codegen/cli": "^2.0.2",
+        "@openapi-codegen/typescript": "^8.0.2",
+        "@tanstack/eslint-plugin-query": "^5.43.1",
         "@types/react": "^18.2.66",
         "@types/react-dom": "^18.2.22",
         "@typescript-eslint/eslint-plugin": "^7.2.0",
