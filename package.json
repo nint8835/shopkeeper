@@ -13,7 +13,8 @@
         "@tanstack/react-query": "^5.45.0",
         "@tanstack/react-query-devtools": "^5.45.0",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0"
+        "react-dom": "^18.2.0",
+        "react-router-dom": "^6.23.1"
     },
     "devDependencies": {
         "@openapi-codegen/cli": "^2.0.2",
