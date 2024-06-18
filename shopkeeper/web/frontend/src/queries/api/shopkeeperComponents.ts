@@ -9,35 +9,35 @@ import type * as Fetcher from './shopkeeperFetcher';
 import { shopkeeperFetch } from './shopkeeperFetcher';
 import type * as Schemas from './shopkeeperSchemas';
 
-export type GetListingsApiListingsGetError = Fetcher.ErrorWrapper<undefined>;
+export type GetListingsError = Fetcher.ErrorWrapper<undefined>;
 
-export type GetListingsApiListingsGetResponse = Schemas.ListingSchema[];
+export type GetListingsResponse = Schemas.ListingSchema[];
 
-export type GetListingsApiListingsGetVariables = ShopkeeperContext['fetcherOptions'];
+export type GetListingsVariables = ShopkeeperContext['fetcherOptions'];
 
-export const fetchGetListingsApiListingsGet = (variables: GetListingsApiListingsGetVariables, signal?: AbortSignal) =>
-    shopkeeperFetch<GetListingsApiListingsGetResponse, GetListingsApiListingsGetError, undefined, {}, {}, {}>({
+export const fetchGetListings = (variables: GetListingsVariables, signal?: AbortSignal) =>
+    shopkeeperFetch<GetListingsResponse, GetListingsError, undefined, {}, {}, {}>({
         url: '/api/listings/',
         method: 'get',
         ...variables,
         signal,
     });
 
-export const useGetListingsApiListingsGet = <TData = GetListingsApiListingsGetResponse>(
-    variables: GetListingsApiListingsGetVariables,
+export const useGetListings = <TData = GetListingsResponse>(
+    variables: GetListingsVariables,
     options?: Omit<
-        reactQuery.UseQueryOptions<GetListingsApiListingsGetResponse, GetListingsApiListingsGetError, TData>,
+        reactQuery.UseQueryOptions<GetListingsResponse, GetListingsError, TData>,
         'queryKey' | 'queryFn' | 'initialData'
     >,
 ) => {
     const { fetcherOptions, queryOptions, queryKeyFn } = useShopkeeperContext(options);
-    return reactQuery.useQuery<GetListingsApiListingsGetResponse, GetListingsApiListingsGetError, TData>({
+    return reactQuery.useQuery<GetListingsResponse, GetListingsError, TData>({
         queryKey: queryKeyFn({
             path: '/api/listings/',
-            operationId: 'getListingsApiListingsGet',
+            operationId: 'getListings',
             variables,
         }),
-        queryFn: ({ signal }) => fetchGetListingsApiListingsGet({ ...fetcherOptions, ...variables }, signal),
+        queryFn: ({ signal }) => fetchGetListings({ ...fetcherOptions, ...variables }, signal),
         ...options,
         ...queryOptions,
     });
@@ -45,6 +45,6 @@ export const useGetListingsApiListingsGet = <TData = GetListingsApiListingsGetRe
 
 export type QueryOperation = {
     path: '/api/listings/';
-    operationId: 'getListingsApiListingsGet';
-    variables: GetListingsApiListingsGetVariables;
+    operationId: 'getListings';
+    variables: GetListingsVariables;
 };

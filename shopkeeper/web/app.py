@@ -2,6 +2,7 @@ import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.routing import APIRoute
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import Response
 from starlette.staticfiles import StaticFiles
@@ -32,7 +33,15 @@ class SPAStaticFiles(StaticFiles):
                 raise exc
 
 
-app = FastAPI(title="Shopkeeper", lifespan=lifespan)
+def generate_unique_id(route: APIRoute) -> str:
+    return route.name
+
+
+app = FastAPI(
+    title="Shopkeeper",
+    lifespan=lifespan,
+    generate_unique_id_function=generate_unique_id,
+)
 
 app.include_router(listings_router, prefix="/api/listings")
 app.mount(
