@@ -48,22 +48,22 @@ export type GetCurrentUserError = Fetcher.ErrorWrapper<undefined>;
 export type GetCurrentUserVariables = ShopkeeperContext['fetcherOptions'];
 
 export const fetchGetCurrentUser = (variables: GetCurrentUserVariables, signal?: AbortSignal) =>
-    shopkeeperFetch<Schemas.DiscordUser, GetCurrentUserError, undefined, {}, {}, {}>({
+    shopkeeperFetch<Schemas.DiscordUser | null, GetCurrentUserError, undefined, {}, {}, {}>({
         url: '/auth/me',
         method: 'get',
         ...variables,
         signal,
     });
 
-export const useGetCurrentUser = <TData = Schemas.DiscordUser>(
+export const useGetCurrentUser = <TData = Schemas.DiscordUser | null>(
     variables: GetCurrentUserVariables,
     options?: Omit<
-        reactQuery.UseQueryOptions<Schemas.DiscordUser, GetCurrentUserError, TData>,
+        reactQuery.UseQueryOptions<Schemas.DiscordUser | null, GetCurrentUserError, TData>,
         'queryKey' | 'queryFn' | 'initialData'
     >,
 ) => {
     const { fetcherOptions, queryOptions, queryKeyFn } = useShopkeeperContext(options);
-    return reactQuery.useQuery<Schemas.DiscordUser, GetCurrentUserError, TData>({
+    return reactQuery.useQuery<Schemas.DiscordUser | null, GetCurrentUserError, TData>({
         queryKey: queryKeyFn({
             path: '/auth/me',
             operationId: 'getCurrentUser',

@@ -41,7 +41,7 @@ async def logout(request: Request) -> Response:
 @auth_router.get("/me")
 async def get_current_user(
     user: DiscordUser = Depends(get_discord_user),
-) -> DiscordUser:
+) -> DiscordUser | None:
     return user
 
 

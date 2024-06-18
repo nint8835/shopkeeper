@@ -1,20 +1,23 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import { useGetCurrentUser } from './queries/api/shopkeeperComponents';
+import { RouterProvider, createBrowserRouter, redirectDocument } from 'react-router-dom';
+import { fetchGetCurrentUser } from './queries/api/shopkeeperComponents';
+import RootRoute from './routes/root';
 
 const queryClient = new QueryClient();
-
-function TestComponent() {
-    const { data } = useGetCurrentUser({});
-
-    return <div>{JSON.stringify(data)}</div>;
-}
 
 const router = createBrowserRouter([
     {
         path: '/',
-        element: <TestComponent />,
+        element: <RootRoute />,
+        loader: async () => {
+            const currentUser = await fetchGetCurrentUser({});
+            if (!currentUser) {
+                return redirectDocument('/auth/login');
+            }
+
+            return currentUser;
+        },
     },
 ]);
 

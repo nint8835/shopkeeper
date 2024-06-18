@@ -19,8 +19,16 @@ oauth.register(
 )
 
 
-def get_discord_user(request: Request) -> DiscordUser:
+def get_discord_user(request: Request) -> DiscordUser | None:
     if "user" not in request.session:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+        return None
 
     return DiscordUser(**request.session["user"])
+
+
+def require_discord_user(request: Request) -> DiscordUser:
+    user = get_discord_user(request)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    return user
