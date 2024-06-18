@@ -3,6 +3,11 @@
  *
  * @version 0.1.0
  */
+export type DiscordUser = {
+    id: string;
+    username: string;
+};
+
 export type ListingSchema = {
     id: number;
     title: string;

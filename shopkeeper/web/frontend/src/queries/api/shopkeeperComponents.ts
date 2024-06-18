@@ -43,8 +43,46 @@ export const useGetListings = <TData = GetListingsResponse>(
     });
 };
 
-export type QueryOperation = {
-    path: '/api/listings/';
-    operationId: 'getListings';
-    variables: GetListingsVariables;
+export type GetCurrentUserError = Fetcher.ErrorWrapper<undefined>;
+
+export type GetCurrentUserVariables = ShopkeeperContext['fetcherOptions'];
+
+export const fetchGetCurrentUser = (variables: GetCurrentUserVariables, signal?: AbortSignal) =>
+    shopkeeperFetch<Schemas.DiscordUser, GetCurrentUserError, undefined, {}, {}, {}>({
+        url: '/auth/me',
+        method: 'get',
+        ...variables,
+        signal,
+    });
+
+export const useGetCurrentUser = <TData = Schemas.DiscordUser>(
+    variables: GetCurrentUserVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<Schemas.DiscordUser, GetCurrentUserError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { fetcherOptions, queryOptions, queryKeyFn } = useShopkeeperContext(options);
+    return reactQuery.useQuery<Schemas.DiscordUser, GetCurrentUserError, TData>({
+        queryKey: queryKeyFn({
+            path: '/auth/me',
+            operationId: 'getCurrentUser',
+            variables,
+        }),
+        queryFn: ({ signal }) => fetchGetCurrentUser({ ...fetcherOptions, ...variables }, signal),
+        ...options,
+        ...queryOptions,
+    });
 };
+
+export type QueryOperation =
+    | {
+          path: '/api/listings/';
+          operationId: 'getListings';
+          variables: GetListingsVariables;
+      }
+    | {
+          path: '/auth/me';
+          operationId: 'getCurrentUser';
+          variables: GetCurrentUserVariables;
+      };

@@ -1,12 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import { useGetListings } from './queries/api/shopkeeperComponents';
+import { useGetCurrentUser } from './queries/api/shopkeeperComponents';
 
 const queryClient = new QueryClient();
 
 function TestComponent() {
-    const { data } = useGetListings({});
+    const { data } = useGetCurrentUser({});
 
     return <div>{JSON.stringify(data)}</div>;
 }

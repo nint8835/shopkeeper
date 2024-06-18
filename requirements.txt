@@ -21,14 +21,20 @@ anyio==4.4.0
     #   watchfiles
 attrs==23.2.0
     # via aiohttp
+authlib==1.3.1
+    # via -r requirements.in
 certifi==2024.6.2
     # via
     #   httpcore
     #   httpx
+cffi==1.16.0
+    # via cryptography
 click==8.1.7
     # via
     #   typer
     #   uvicorn
+cryptography==42.0.8
+    # via authlib
 discord-py==2.3.2
     # via -r requirements.in
 dnspython==2.6.1
@@ -54,15 +60,21 @@ httpcore==1.0.5
 httptools==0.6.1
     # via uvicorn
 httpx==0.27.0
-    # via fastapi
+    # via
+    #   fastapi
+    #   starlette
 idna==3.6
     # via
     #   anyio
     #   email-validator
     #   httpx
     #   yarl
+itsdangerous==2.2.0
+    # via starlette
 jinja2==3.1.4
-    # via fastapi
+    # via
+    #   fastapi
+    #   starlette
 mako==1.3.2
     # via alembic
 markdown-it-py==3.0.0
@@ -79,6 +91,8 @@ multidict==6.0.5
     #   yarl
 orjson==3.10.5
     # via fastapi
+pycparser==2.22
+    # via cffi
 pydantic==2.6.4
     # via
     #   -r requirements.in
@@ -95,9 +109,13 @@ python-dotenv==1.0.1
     #   pydantic-settings
     #   uvicorn
 python-multipart==0.0.9
-    # via fastapi
+    # via
+    #   fastapi
+    #   starlette
 pyyaml==6.0.1
-    # via uvicorn
+    # via
+    #   starlette
+    #   uvicorn
 rich==13.7.1
     # via typer
 shellingham==1.5.4

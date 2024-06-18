@@ -14,6 +14,10 @@ class Config(BaseSettings):
     owner_id: int
     events_channel_id: int | None = None
 
+    client_id: str | None = None
+    client_secret: str | None = None
+    session_secret: str = "replace-me"
+
     @property
     def async_db_connection_uri(self) -> str:
         return f"sqlite+aiosqlite:///{self.db_path}"
