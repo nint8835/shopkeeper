@@ -1,18 +1,12 @@
-import { useGetListings } from '../queries/api/shopkeeperComponents';
+import { Outlet } from 'react-router-dom';
 
 export default function RootRoute() {
-    const { data: listings } = useGetListings({});
-
     return (
-        <div className="p-2">
-            <ul>
-                {listings &&
-                    listings.map((listing) => (
-                        <li className="list-inside list-disc" key={listing.id}>
-                            {listing.title}
-                        </li>
-                    ))}
-            </ul>
+        <div>
+            <header className="w-full p-2">
+                <h1 className="text-xl font-semibold">Shopkeeper</h1>
+            </header>
+            <Outlet />
         </div>
     );
 }

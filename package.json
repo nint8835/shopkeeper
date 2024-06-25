@@ -11,6 +11,7 @@
         "gen-openapi": "npx openapi-codegen gen shopkeeper"
     },
     "dependencies": {
+        "@fontsource-variable/inter": "^5.0.18",
         "@tanstack/react-query": "^5.45.0",
         "@tanstack/react-query-devtools": "^5.45.0",
         "react": "^18.2.0",
