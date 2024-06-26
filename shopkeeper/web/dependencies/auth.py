@@ -14,7 +14,7 @@ oauth.register(
     authorize_url="https://discord.com/api/oauth2/authorize",
     client_kwargs={
         "token_endpoint_auth_method": "client_secret_post",
-        "scope": "identify email guilds",
+        "scope": "identify guilds",
     },
 )
 
