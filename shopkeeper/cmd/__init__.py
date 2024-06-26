@@ -19,6 +19,7 @@ def start() -> None:
         host=config.bind_host,
         port=config.bind_port,
         proxy_headers=True,
+        forwarded_allow_ips="*",
     )
 
 
