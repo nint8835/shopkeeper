@@ -14,6 +14,9 @@ class Config(BaseSettings):
     owner_id: int
     events_channel_id: int | None = None
 
+    bind_host: str = "0.0.0.0"
+    bind_port: int = 8000
+
     client_id: str | None = None
     client_secret: str | None = None
     session_secret: str = "replace-me"
