@@ -12,3 +12,4 @@ class ListingSchema(BaseModel):
     price: str | None
     type: ListingType
     status: ListingStatus
+    url: str

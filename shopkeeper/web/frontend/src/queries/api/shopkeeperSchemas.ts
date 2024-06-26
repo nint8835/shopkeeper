@@ -15,6 +15,7 @@ export type ListingSchema = {
     price: string | null;
     type: ListingType;
     status: ListingStatus;
+    url: string;
 };
 
 export type ListingStatus = 'open' | 'pending' | 'closed';

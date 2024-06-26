@@ -52,6 +52,10 @@ class Listing(Base):
     thread_id: Mapped[int]
 
     @property
+    def url(self) -> str:
+        return f"https://discord.com/channels/{config.guild_id}/{config.channel_id}/{self.message_id}"
+
+    @property
     def embed(self) -> discord.Embed:
         embed = (
             discord.Embed(

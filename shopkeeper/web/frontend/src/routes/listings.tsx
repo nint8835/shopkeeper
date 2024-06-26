@@ -9,7 +9,9 @@ export default function ListingsRoute() {
                 {listings &&
                     listings.map((listing) => (
                         <li className="list-inside list-disc" key={listing.id}>
-                            {listing.title}
+                            <a className="cursor-pointer hover:underline" href={listing.url}>
+                                {listing.title}
+                            </a>
                         </li>
                     ))}
             </ul>
