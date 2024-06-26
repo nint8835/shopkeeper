@@ -18,6 +18,7 @@ def start() -> None:
         "shopkeeper.web.app:app",
         host=config.bind_host,
         port=config.bind_port,
+        proxy_headers=True,
     )
 
 
