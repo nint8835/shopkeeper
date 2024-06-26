@@ -1,5 +1,6 @@
 import alembic.config
 import typer
+import uvicorn
 
 from shopkeeper.bot import client, guild
 from shopkeeper.config import config
@@ -12,8 +13,12 @@ app = typer.Typer()
 
 @app.command()
 def start() -> None:
-    """Run the bot."""
-    client.run(config.token)
+    """Run Shopkeeper."""
+    uvicorn.run(
+        "shopkeeper.web.app:app",
+        host=config.bind_host,
+        port=config.bind_port,
+    )
 
 
 @app.command()
