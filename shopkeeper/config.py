@@ -21,6 +21,8 @@ class Config(BaseSettings):
     client_secret: str | None = None
     session_secret: str = "replace-me"
 
+    behind_reverse_proxy: bool = False
+
     @property
     def async_db_connection_uri(self) -> str:
         return f"sqlite+aiosqlite:///{self.db_path}"
