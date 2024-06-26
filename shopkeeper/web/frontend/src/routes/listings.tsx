@@ -18,6 +18,7 @@ function ListingCard({ listing }: { listing: ListingSchema }) {
             <div>
                 <h1 className="text-lg font-medium">{listing.title}</h1>
                 <div>
+                    <span>{listing.type === 'buy' ? 'Looking to buy' : 'For sale'}</span>
                     <DiscordMarkdownField text={listing.price || ''} />
                 </div>
                 <div>
