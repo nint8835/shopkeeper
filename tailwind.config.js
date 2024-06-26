@@ -7,5 +7,5 @@ export default {
             sans: ['Inter Variable', 'sans-serif'],
         },
     },
-    plugins: [],
+    plugins: [require('@tailwindcss/typography')],
 };

@@ -9,14 +9,23 @@ import type * as Fetcher from './shopkeeperFetcher';
 import { shopkeeperFetch } from './shopkeeperFetcher';
 import type * as Schemas from './shopkeeperSchemas';
 
-export type GetListingsError = Fetcher.ErrorWrapper<undefined>;
+export type GetListingsQueryParams = {
+    status?: Schemas.ListingStatus | null;
+};
+
+export type GetListingsError = Fetcher.ErrorWrapper<{
+    status: 422;
+    payload: Schemas.HTTPValidationError;
+}>;
 
 export type GetListingsResponse = Schemas.ListingSchema[];
 
-export type GetListingsVariables = ShopkeeperContext['fetcherOptions'];
+export type GetListingsVariables = {
+    queryParams?: GetListingsQueryParams;
+} & ShopkeeperContext['fetcherOptions'];
 
 export const fetchGetListings = (variables: GetListingsVariables, signal?: AbortSignal) =>
-    shopkeeperFetch<GetListingsResponse, GetListingsError, undefined, {}, {}, {}>({
+    shopkeeperFetch<GetListingsResponse, GetListingsError, undefined, {}, GetListingsQueryParams, {}>({
         url: '/api/listings/',
         method: 'get',
         ...variables,

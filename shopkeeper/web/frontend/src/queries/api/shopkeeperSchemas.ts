@@ -8,6 +8,10 @@ export type DiscordUser = {
     username: string;
 };
 
+export type HTTPValidationError = {
+    detail?: ValidationError[];
+};
+
 export type ListingSchema = {
     id: number;
     title: string;
@@ -21,3 +25,9 @@ export type ListingSchema = {
 export type ListingStatus = 'open' | 'pending' | 'closed';
 
 export type ListingType = 'buy' | 'sell';
+
+export type ValidationError = {
+    loc: (string | number)[];
+    msg: string;
+    type: string;
+};
