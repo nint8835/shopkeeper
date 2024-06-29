@@ -50,4 +50,4 @@ app:
 
     ENTRYPOINT ["python", "-m", "shopkeeper"]
 
-    SAVE IMAGE shopkeeper:latest
+    SAVE IMAGE --push ghcr.io/nint8835/shopkeeper:latest
