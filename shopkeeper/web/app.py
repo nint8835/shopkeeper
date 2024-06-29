@@ -49,9 +49,7 @@ app.add_middleware(SessionMiddleware, secret_key=config.session_secret)
 app.include_router(listings_router, prefix="/api/listings")
 app.include_router(auth_router, prefix="/auth")
 
-app.mount(
-    "/", SPAStaticFiles(directory="shopkeeper/web/frontend/dist", html=True), "frontend"
-)
+app.mount("/", SPAStaticFiles(directory="frontend/dist", html=True), "frontend")
 
 
 __all__ = ["app"]

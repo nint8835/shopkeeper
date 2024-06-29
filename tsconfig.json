@@ -20,6 +20,6 @@
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true
     },
-    "include": ["shopkeeper/web/frontend/src"],
+    "include": ["frontend/src"],
     "references": [{ "path": "./tsconfig.node.json" }]
 }

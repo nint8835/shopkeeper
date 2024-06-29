@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    root: 'shopkeeper/web/frontend',
+    root: 'frontend',
     plugins: [react()],
     server: {
         proxy: {
