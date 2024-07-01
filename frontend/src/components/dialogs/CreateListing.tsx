@@ -21,6 +21,7 @@ import { DialogTitle } from '@radix-ui/react-dialog';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 export default function CreateListingDialog() {
@@ -45,7 +46,10 @@ export default function CreateListingDialog() {
 
     async function handleSubmit() {
         try {
-            await createListing({ body: form.getValues() });
+            const newListing = await createListing({ body: form.getValues() });
+            toast.success('Listing created successfully', {
+                action: { label: 'Open', onClick: () => window.open(newListing.url) },
+            });
             queryClient.invalidateQueries({ queryKey: ['api', 'listings', { status: 'open' }] });
             handleOpenChange(false);
         } catch (e) {

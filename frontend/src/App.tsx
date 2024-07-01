@@ -1,3 +1,4 @@
+import { Toaster } from '@/components/ui/sonner';
 import { queryClient } from '@/lib/query';
 import { fetchGetCurrentUser } from '@/queries/api/shopkeeperComponents';
 import ListingsRoute from '@/routes/Listings';
@@ -31,6 +32,7 @@ function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <RouterProvider router={router} />
+            <Toaster />
             <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
     );
