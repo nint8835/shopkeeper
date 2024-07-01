@@ -1,4 +1,8 @@
-import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { SelectValue } from '@radix-ui/react-select';
+import { SetStateAction, useState } from 'react';
 import Markdown from 'react-markdown';
 import remarkGemoji from 'remark-gemoji';
 import { useGetListings } from '../queries/api/shopkeeperComponents';
@@ -14,28 +18,27 @@ function DiscordMarkdownField({ text }: { text: string }) {
 
 function ListingCard({ listing }: { listing: ListingSchema }) {
     return (
-        <div className="flex flex-col justify-between rounded-md border-2 border-zinc-900 bg-zinc-900 p-2">
-            <div>
-                <h1 className="text-lg font-medium">{listing.title}</h1>
-                <div>
+        <Card className="flex flex-col">
+            <CardHeader>
+                <CardTitle className="w-full overflow-hidden text-ellipsis" title={listing.title}>
+                    {listing.title}
+                </CardTitle>
+                <CardDescription>
                     <span>{listing.type === 'buy' ? 'Looking to buy' : 'For sale'}</span>
-                    <DiscordMarkdownField text={listing.price || ''} />
-                </div>
-                <div>
-                    <DiscordMarkdownField text={listing.description || ''} />
-                </div>
-            </div>
-
-            <div className="flex flex-row-reverse">
-                <a
-                    className="cursor-pointer rounded-md bg-zinc-100 p-2 text-zinc-900 transition-colors hover:bg-zinc-300"
-                    href={listing.url}
-                    target="_blank"
-                >
-                    Open
-                </a>
-            </div>
-        </div>
+                    {listing.price && <span> - {listing.price}</span>}
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1">
+                <DiscordMarkdownField text={listing.description || ''} />
+            </CardContent>
+            <CardFooter className="flex flex-row-reverse">
+                <Button asChild>
+                    <a href={listing.url} target="_blank">
+                        Open
+                    </a>
+                </Button>
+            </CardFooter>
+        </Card>
     );
 }
 
@@ -46,15 +49,16 @@ export default function ListingsRoute() {
 
     return (
         <div className="p-2">
-            <select
-                className="mb-2 rounded-md bg-zinc-900 p-2"
-                value={status}
-                onChange={(e) => setStatus(e.target.value as ListingStatus)}
-            >
-                <option value="open">Open</option>
-                <option value="pending">Pending</option>
-                <option value="closed">Closed</option>
-            </select>
+            <Select value={status} onValueChange={setStatus as React.Dispatch<SetStateAction<string>>}>
+                <SelectTrigger className="mb-2 w-[180px]">
+                    <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="open">Open</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
+                </SelectContent>
+            </Select>
 
             {isFetching ? (
                 <div className="flex w-full flex-row justify-center">
