@@ -1,10 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGetListings } from '@/queries/api/shopkeeperComponents';
 import { ListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
-import { SelectValue } from '@radix-ui/react-select';
-import { SetStateAction, useState } from 'react';
 import Markdown from 'react-markdown';
 import remarkGemoji from 'remark-gemoji';
 
@@ -42,33 +40,39 @@ function ListingCard({ listing }: { listing: ListingSchema }) {
     );
 }
 
-export default function ListingsRoute() {
-    const [status, setStatus] = useState<ListingStatus>('open');
-
+function ListingsTab({ status }: { status: ListingStatus }) {
     const { data: listings, isFetching } = useGetListings({ queryParams: { status } });
 
+    return isFetching ? (
+        <div className="flex w-full flex-row justify-center">
+            <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500"></div>
+        </div>
+    ) : (
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {listings && listings.map((listing) => <ListingCard key={listing.id} listing={listing} />)}
+        </div>
+    );
+}
+
+const LISTING_STATUSES = ['open', 'pending', 'closed'] as const;
+
+export default function ListingsRoute() {
     return (
         <div className="p-2">
-            <Select value={status} onValueChange={setStatus as React.Dispatch<SetStateAction<string>>}>
-                <SelectTrigger className="mb-2 w-[180px]">
-                    <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="open">Open</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                </SelectContent>
-            </Select>
-
-            {isFetching ? (
-                <div className="flex w-full flex-row justify-center">
-                    <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500"></div>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {listings && listings.map((listing) => <ListingCard key={listing.id} listing={listing} />)}
-                </div>
-            )}
+            <Tabs defaultValue="open">
+                <TabsList className="grid w-full grid-cols-3">
+                    {LISTING_STATUSES.map((status) => (
+                        <TabsTrigger key={status} value={status} className="capitalize">
+                            {status}
+                        </TabsTrigger>
+                    ))}
+                </TabsList>
+                {LISTING_STATUSES.map((status) => (
+                    <TabsContent key={status} value={status}>
+                        <ListingsTab status={status} />
+                    </TabsContent>
+                ))}
+            </Tabs>
         </div>
     );
 }
