@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { queryClient } from '@/lib/query';
 import { useCreateListing } from '@/queries/api/shopkeeperComponents';
 import { createListingSchemaSchema } from '@/queries/api/shopkeeperZod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -45,6 +46,7 @@ export default function CreateListingDialog() {
     async function handleSubmit() {
         try {
             await createListing({ body: form.getValues() });
+            queryClient.invalidateQueries({ queryKey: ['api', 'listings', { status: 'open' }] });
             handleOpenChange(false);
         } catch (e) {
             form.setError('root', { message: (e as Error).message || 'An unexpected error occurred' });

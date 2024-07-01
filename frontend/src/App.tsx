@@ -1,11 +1,10 @@
+import { queryClient } from '@/lib/query';
 import { fetchGetCurrentUser } from '@/queries/api/shopkeeperComponents';
 import ListingsRoute from '@/routes/Listings';
 import RootRoute from '@/routes/Root';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider, createBrowserRouter, redirectDocument } from 'react-router-dom';
-
-const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
     {
