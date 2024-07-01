@@ -1,12 +1,10 @@
 import traceback
-from typing import cast
 
 import discord
 
 from shopkeeper.bot import client, guild
-from shopkeeper.config import config
 from shopkeeper.db import async_session
-from shopkeeper.models.listing import Listing, ListingStatus, ListingType
+from shopkeeper.models.listing import Listing, ListingType
 
 
 class CreateListingModal(discord.ui.Modal):
@@ -29,47 +27,18 @@ class CreateListingModal(discord.ui.Modal):
         super().__init__(title=type_titles[listing_type])
 
     async def on_submit(self, interaction: discord.Interaction):
-        new_listing = Listing(
-            type=self.listing_type,
-            title=self.listing_title.value,
-            description=self.listing_description.value or None,
-            price=self.listing_price.value or None,
-            owner_id=interaction.user.id,
-            status=ListingStatus.Open,
-        )
-
-        marketplace_channel = cast(
-            discord.TextChannel, await client.fetch_channel(config.channel_id)
-        )
-
-        thread_message = await marketplace_channel.send(embed=new_listing.embed)
-
-        thread = await marketplace_channel.create_thread(
-            name=new_listing.title,
-            message=thread_message,
-            auto_archive_duration=10080,
-        )
-        new_listing.thread_id = thread.id
-        new_listing.message_id = thread_message.id
-
-        await thread.add_user(discord.Object(interaction.user.id))
-
         async with async_session() as session:
-            async with session.begin():
-                session.add(new_listing)
-                await session.commit()
-
-        if config.events_channel_id is not None:
-            await cast(
-                discord.TextChannel,
-                await client.fetch_channel(config.events_channel_id),
-            ).send(
-                content=f"## Listing **[{new_listing.title}]({thread_message.jump_url})** created",
-                suppress_embeds=True,
+            new_listing = await Listing.create(
+                type=self.listing_type,
+                title=self.listing_title.value,
+                description=self.listing_description.value,
+                price=self.listing_price.value,
+                owner_id=interaction.user.id,
+                session=session,
             )
 
         await interaction.response.send_message(
-            f"Listing created: {thread_message.jump_url}", ephemeral=True
+            f"Listing created: {new_listing.url}", ephemeral=True
         )
 
     async def on_error(

@@ -1,9 +1,10 @@
 from difflib import unified_diff
 from enum import Enum
 from types import EllipsisType
-from typing import Optional, cast
+from typing import Optional, Self, cast
 
 import discord
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
 import shopkeeper.bot as bot
@@ -72,6 +73,56 @@ class Listing(Base):
             embed.add_field(name="Price", value=self.price, inline=True)
 
         return embed
+
+    @classmethod
+    async def create(
+        cls,
+        type: ListingType,
+        title: str,
+        description: str,
+        price: str,
+        owner_id: int,
+        session: AsyncSession,
+    ) -> Self:
+        new_listing = cls(
+            type=type,
+            title=title,
+            description=description or None,
+            price=price or None,
+            owner_id=owner_id,
+            status=ListingStatus.Open,
+        )
+
+        marketplace_channel = cast(
+            discord.TextChannel, await bot.client.fetch_channel(config.channel_id)
+        )
+
+        thread_message = await marketplace_channel.send(embed=new_listing.embed)
+
+        thread = await marketplace_channel.create_thread(
+            name=new_listing.title,
+            message=thread_message,
+            auto_archive_duration=10080,
+        )
+        new_listing.thread_id = thread.id
+        new_listing.message_id = thread_message.id
+
+        await thread.add_user(discord.Object(owner_id))
+
+        async with session.begin():
+            session.add(new_listing)
+            await session.commit()
+
+        if config.events_channel_id is not None:
+            await cast(
+                discord.TextChannel,
+                await bot.client.fetch_channel(config.events_channel_id),
+            ).send(
+                content=f"## Listing **[{new_listing.title}]({thread_message.jump_url})** created",
+                suppress_embeds=True,
+            )
+
+        return new_listing
 
     @classmethod
     async def edit(

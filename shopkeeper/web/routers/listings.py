@@ -33,7 +33,16 @@ async def create_listing(
     db: AsyncSession = Depends(get_db),
     user: DiscordUser = Depends(require_discord_user),
 ) -> Listing:
-    return (await db.execute(select(Listing).limit(1))).scalar_one()
+    new_listing = await Listing.create(
+        type=listing.type,
+        title=listing.title,
+        description=listing.description,
+        price=listing.price,
+        owner_id=int(user.id),
+        session=db,
+    )
+
+    return new_listing
 
 
 __all__ = ["listings_router"]
