@@ -1,6 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, RootFormMessage } from '@/components/ui/form';
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+    RootFormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -100,6 +109,9 @@ export default function CreateListingDialog() {
                                     <FormControl>
                                         <Textarea {...field} />
                                     </FormControl>
+                                    <FormDescription>
+                                        Supports Discord-flavoured Markdown. Leave blank for no description.
+                                    </FormDescription>
                                 </FormItem>
                             )}
                         />
@@ -112,6 +124,7 @@ export default function CreateListingDialog() {
                                     <FormControl>
                                         <Input {...field} />
                                     </FormControl>
+                                    <FormDescription>Leave blank for no price.</FormDescription>
                                 </FormItem>
                             )}
                         />
