@@ -8,10 +8,14 @@
         "build": "tsc && vite build",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview",
-        "gen-openapi": "npx openapi-codegen gen shopkeeper"
+        "gen-openapi": "npx openapi-codegen gen shopkeeper && npx ts-to-zod frontend/src/queries/api/shopkeeperSchemas.ts frontend/src/queries/api/shopkeeperZod.ts"
     },
     "dependencies": {
         "@fontsource-variable/inter": "^5.0.18",
+        "@hookform/resolvers": "^3.6.0",
+        "@radix-ui/react-dialog": "^1.1.1",
+        "@radix-ui/react-label": "^2.1.0",
+        "@radix-ui/react-select": "^2.1.1",
         "@radix-ui/react-slot": "^1.1.0",
         "@radix-ui/react-tabs": "^1.1.0",
         "@tanstack/react-query": "^5.45.0",
@@ -21,11 +25,13 @@
         "lucide-react": "^0.399.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
+        "react-hook-form": "^7.52.0",
         "react-markdown": "^9.0.1",
         "react-router-dom": "^6.23.1",
         "remark-gemoji": "^8.0.0",
         "tailwind-merge": "^2.3.0",
-        "tailwindcss-animate": "^1.0.7"
+        "tailwindcss-animate": "^1.0.7",
+        "zod": "^3.23.8"
     },
     "devDependencies": {
         "@openapi-codegen/cli": "^2.0.2",
@@ -46,6 +52,7 @@
         "prettier": "^3.3.2",
         "prettier-plugin-tailwindcss": "^0.6.4",
         "tailwindcss": "^3.4.4",
+        "ts-to-zod": "^3.8.7",
         "typescript": "^5.2.2",
         "vite": "^5.2.0"
     }

@@ -3,6 +3,22 @@
  *
  * @version 0.1.0
  */
+export type CreateListingSchema = {
+    /**
+     * @minLength 1
+     */
+    title: string;
+    /**
+     * @minLength 0
+     */
+    description: string;
+    /**
+     * @minLength 0
+     */
+    price: string;
+    type: ListingType;
+};
+
 export type DiscordUser = {
     id: string;
     username: string;

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from shopkeeper.models.listing import ListingStatus, ListingType
 
@@ -13,3 +13,10 @@ class ListingSchema(BaseModel):
     type: ListingType
     status: ListingStatus
     url: str
+
+
+class CreateListingSchema(BaseModel):
+    title: str = Field(min_length=1)
+    description: str = Field(min_length=0)
+    price: str = Field(min_length=0)
+    type: ListingType
