@@ -1,11 +1,11 @@
+import { Toaster } from '@/components/ui/sonner';
+import { queryClient } from '@/lib/query';
 import { fetchGetCurrentUser } from '@/queries/api/shopkeeperComponents';
 import ListingsRoute from '@/routes/Listings';
 import RootRoute from '@/routes/Root';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider, createBrowserRouter, redirectDocument } from 'react-router-dom';
-
-const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
     {
@@ -32,6 +32,7 @@ function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <RouterProvider router={router} />
+            <Toaster />
             <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
     );
