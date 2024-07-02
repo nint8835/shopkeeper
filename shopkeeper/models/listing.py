@@ -1,15 +1,16 @@
 from difflib import unified_diff
 from enum import Enum
 from types import EllipsisType
-from typing import Optional, Self, cast
+from typing import Optional, cast
 
 import discord
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
 import shopkeeper.bot as bot
 from shopkeeper.config import config
-from shopkeeper.db import Base, async_session
+from shopkeeper.db import Base
 
 
 class ListingType(Enum):
@@ -83,8 +84,8 @@ class Listing(Base):
         price: str,
         owner_id: int,
         session: AsyncSession,
-    ) -> Self:
-        new_listing = cls(
+    ) -> "Listing":
+        new_listing = Listing(
             type=type,
             title=title,
             description=description or None,
@@ -127,99 +128,89 @@ class Listing(Base):
     @classmethod
     async def edit(
         cls,
-        interaction: discord.Interaction,
         listing: int,
+        user_id: int,
+        session: AsyncSession,
         *,
         title: str | EllipsisType = ...,
         description: str | None | EllipsisType = ...,
         price: str | None | EllipsisType = ...,
         status: ListingStatus | EllipsisType = ...,
-    ) -> None:
-        async with async_session() as session:
-            async with session.begin():
-                listing_instance = await session.get(Listing, listing)
+    ) -> "Listing":
+        async with session.begin():
+            listing_instance = await session.get(Listing, listing)
 
-                if listing_instance is None:
-                    return await interaction.response.send_message(
-                        "Listing not found", ephemeral=True
+            if listing_instance is None:
+                raise HTTPException(status_code=404, detail="Listing not found")
+
+            if listing_instance.owner_id != user_id and user_id != config.owner_id:
+                raise HTTPException(
+                    status_code=403, detail="You do not own this listing"
+                )
+
+            if listing_instance.status == ListingStatus.Closed:
+                raise HTTPException(status_code=400, detail="Listing is closed")
+
+            channel = cast(
+                discord.TextChannel, await bot.client.fetch_channel(config.channel_id)
+            )
+            message = await channel.fetch_message(listing_instance.message_id)
+            thread = cast(
+                discord.Thread,
+                await bot.client.fetch_channel(listing_instance.thread_id),
+            )
+
+            edited_message_sections: list[str] = []
+
+            if title is not ...:
+                if listing_instance.title != title:
+                    edited_message_sections.append(
+                        f"Title changed from {listing_instance.title} to {title}"
+                    )
+                    await thread.edit(name=title)
+
+                listing_instance.title = title
+
+            if description is not ...:
+                if listing_instance.description != description:
+                    diff = unified_diff(
+                        stringify_diff_field(
+                            listing_instance.description, ""
+                        ).splitlines(),
+                        stringify_diff_field(description, "").splitlines(),
+                        lineterm="",
+                        fromfile="Old description",
+                        tofile="New description",
                     )
 
-                if (
-                    listing_instance.owner_id != interaction.user.id
-                    and interaction.user.id != config.owner_id
-                ):
-                    return await interaction.response.send_message(
-                        "You do not own this listing", ephemeral=True
+                    edited_message_sections.append(
+                        f"Description changed:\n```diff\n{'\n'.join(diff)}\n```"
                     )
 
-                if listing_instance.status == ListingStatus.Closed:
-                    return await interaction.response.send_message(
-                        "Listing is closed", ephemeral=True
+                listing_instance.description = description
+            if price is not ...:
+                if listing_instance.price != price:
+                    edited_message_sections.append(
+                        f"Price changed from {stringify_diff_field(listing_instance.price)} to {stringify_diff_field(price)}"
                     )
 
-                edited_message_sections: list[str] = []
+                listing_instance.price = price
+            if status is not ...:
+                if listing_instance.status != status:
+                    edited_message_sections.append(
+                        f"Status changed from {listing_instance.status.name} to {status.name}"
+                    )
+                    if status == ListingStatus.Closed:
+                        await thread.edit(locked=True, archived=True)
 
-                if title is not ...:
-                    if listing_instance.title != title:
-                        edited_message_sections.append(
-                            f"Title changed from {listing_instance.title} to {title}"
-                        )
+                listing_instance.status = status
 
-                    listing_instance.title = title
+            await session.commit()
 
-                if description is not ...:
-                    if listing_instance.description != description:
-                        diff = unified_diff(
-                            stringify_diff_field(
-                                listing_instance.description, ""
-                            ).splitlines(),
-                            stringify_diff_field(description, "").splitlines(),
-                            lineterm="",
-                            fromfile="Old description",
-                            tofile="New description",
-                        )
-
-                        edited_message_sections.append(
-                            f"Description changed:\n```diff\n{'\n'.join(diff)}\n```"
-                        )
-
-                    listing_instance.description = description
-                if price is not ...:
-                    if listing_instance.price != price:
-                        edited_message_sections.append(
-                            f"Price changed from {stringify_diff_field(listing_instance.price)} to {stringify_diff_field(price)}"
-                        )
-
-                    listing_instance.price = price
-                if status is not ...:
-                    if listing_instance.status != status:
-                        edited_message_sections.append(
-                            f"Status changed from {listing_instance.status.name} to {status.name}"
-                        )
-
-                    listing_instance.status = status
-
-                await session.commit()
-
-        channel = cast(
-            discord.TextChannel, await bot.client.fetch_channel(config.channel_id)
-        )
-        message = await channel.fetch_message(listing_instance.message_id)
-        thread = cast(
-            discord.Thread,
-            await bot.client.fetch_channel(listing_instance.thread_id),
-        )
-
-        if any(value is not ... for value in (title, description, status)):
+        if edited_message_sections:
             await message.edit(embed=listing_instance.embed)
 
-        if title is not ...:
-            await thread.edit(name=title)
-
-        if status == ListingStatus.Closed:
-            await thread.edit(locked=True, archived=True)
-
-        if config.events_channel_id is not None:
+        if config.events_channel_id is not None and edited_message_sections:
             await cast(
                 discord.TextChannel,
                 await bot.client.fetch_channel(config.events_channel_id),
@@ -228,4 +219,4 @@ class Listing(Base):
                 suppress_embeds=True,
             )
 
-        await interaction.response.send_message("Listing updated", ephemeral=True)
+        return listing_instance

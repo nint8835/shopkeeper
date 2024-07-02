@@ -55,7 +55,7 @@ export default function EditListingDialog({ listing }: { listing: ListingSchema 
             toast.success('Listing edited successfully', {
                 action: { label: 'Open', onClick: () => window.open(newListing.url) },
             });
-            queryClient.invalidateQueries({ queryKey: ['api', 'listings', { status: 'open' }] });
+            queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
             handleOpenChange(false);
         } catch (e) {
             form.setError('root', { message: (e as Error).message || 'An unexpected error occurred' });
@@ -65,7 +65,7 @@ export default function EditListingDialog({ listing }: { listing: ListingSchema 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="outline">Edit</Button>
+                <Button variant="secondary">Edit</Button>
             </DialogTrigger>
             <DialogContent>
                 <Form {...form}>
