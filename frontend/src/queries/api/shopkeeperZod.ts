@@ -6,6 +6,7 @@ export const listingTypeSchema = z.union([z.literal('buy'), z.literal('sell')]);
 export const discordUserSchema = z.object({
     id: z.string(),
     username: z.string(),
+    is_owner: z.boolean(),
 });
 
 export const validationErrorSchema = z.object({

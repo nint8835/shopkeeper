@@ -2,7 +2,7 @@ from authlib.integrations.starlette_client import OAuth
 from fastapi import HTTPException, Request
 
 from shopkeeper.config import config
-from shopkeeper.web.schemas.discord_user import DiscordUser
+from shopkeeper.web.schemas.discord_user import DiscordUser, SessionUser
 
 oauth = OAuth()
 oauth.register(
@@ -23,7 +23,11 @@ def get_discord_user(request: Request) -> DiscordUser | None:
     if "user" not in request.session:
         return None
 
-    return DiscordUser(**request.session["user"])
+    session_user = SessionUser(**request.session["user"])
+
+    return DiscordUser(
+        **session_user.model_dump(), is_owner=session_user.id == str(config.owner_id)
+    )
 
 
 def require_discord_user(request: Request) -> DiscordUser:

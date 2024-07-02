@@ -22,6 +22,7 @@ export type CreateListingSchema = {
 export type DiscordUser = {
     id: string;
     username: string;
+    is_owner: boolean;
 };
 
 export type HTTPValidationError = {

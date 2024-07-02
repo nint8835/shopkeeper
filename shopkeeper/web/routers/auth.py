@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 
 from shopkeeper.config import config
 from shopkeeper.web.dependencies.auth import get_discord_user, oauth
-from shopkeeper.web.schemas.discord_user import DiscordUser
+from shopkeeper.web.schemas.discord_user import DiscordUser, SessionUser
 
 auth_router = APIRouter(tags=["Auth"])
 
@@ -28,7 +28,7 @@ async def oauth_callback(request: Request) -> Response:
 
     user_resp = await oauth.discord.get("users/@me", token=token)
     user = user_resp.json()
-    request.session["user"] = DiscordUser(**user).model_dump()
+    request.session["user"] = SessionUser(**user).model_dump()
     return RedirectResponse(url="/")
 
 
