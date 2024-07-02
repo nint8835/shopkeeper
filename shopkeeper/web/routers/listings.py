@@ -23,6 +23,7 @@ listings_router = APIRouter(
 async def get_listings(
     db: AsyncSession = Depends(get_db), status: ListingStatus | None = None
 ) -> Any:
+    """Retrieve a list of listings."""
     listings_query = select(Listing)
 
     if status is not None:
@@ -37,6 +38,7 @@ async def create_listing(
     db: AsyncSession = Depends(get_db),
     user: DiscordUser = Depends(require_discord_user),
 ) -> Listing:
+    """Create a new listing."""
     new_listing = await Listing.create(
         type=listing.type,
         title=listing.title,
@@ -56,6 +58,7 @@ async def edit_listing(
     db: AsyncSession = Depends(get_db),
     user: DiscordUser = Depends(require_discord_user),
 ) -> Listing:
+    """Edit an existing listing."""
     return await Listing.edit(
         listing=listing_id,
         user_id=int(user.id),
