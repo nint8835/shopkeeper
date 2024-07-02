@@ -25,6 +25,7 @@ export const listingSchemaSchema = z.object({
     type: listingTypeSchema,
     status: listingStatusSchema,
     url: z.string(),
+    owner_id: z.string(),
 });
 
 export const createListingSchemaSchema = z.object({

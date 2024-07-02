@@ -9,7 +9,7 @@ class Config(BaseSettings):
     db_path: str = "shopkeeper.sqlite"
     db_log_queries: bool = False
 
-    guild_id: str
+    guild_id: int
     channel_id: int
     owner_id: int
     events_channel_id: int | None = None

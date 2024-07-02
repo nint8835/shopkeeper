@@ -39,7 +39,9 @@ function ListingCard({ listing }: { listing: ListingSchema }) {
                         Open
                     </a>
                 </Button>
-                {listing.status !== 'closed' && user.is_owner && <EditListingDialog listing={listing} />}
+                {listing.status !== 'closed' && (user.is_owner || user.id === listing.owner_id) && (
+                    <EditListingDialog listing={listing} />
+                )}
             </CardFooter>
         </Card>
     );

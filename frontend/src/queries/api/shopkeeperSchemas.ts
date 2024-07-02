@@ -53,6 +53,7 @@ export type ListingSchema = {
     type: ListingType;
     status: ListingStatus;
     url: string;
+    owner_id: string;
 };
 
 export type ListingStatus = 'open' | 'pending' | 'closed';

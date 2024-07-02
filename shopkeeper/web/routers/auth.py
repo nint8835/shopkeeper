@@ -23,7 +23,7 @@ async def oauth_callback(request: Request) -> Response:
     guilds_resp = await oauth.discord.get("users/@me/guilds", token=token)
     guilds = guilds_resp.json()
 
-    if not any(guild["id"] == config.guild_id for guild in guilds):
+    if not any(guild["id"] == str(config.guild_id) for guild in guilds):
         raise HTTPException(403, "You are not a member of the required Discord server.")
 
     user_resp = await oauth.discord.get("users/@me", token=token)
