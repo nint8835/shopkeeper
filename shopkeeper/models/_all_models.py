@@ -4,3 +4,4 @@
 # Should not be imported outside of shopkeeper.migrations.env
 
 from .listing import Listing  # type: ignore
+from .listing_image import ListingImage  # type: ignore

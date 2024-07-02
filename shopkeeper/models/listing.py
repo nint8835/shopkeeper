@@ -1,16 +1,19 @@
 from difflib import unified_diff
 from enum import Enum
 from types import EllipsisType
-from typing import Optional, cast
+from typing import TYPE_CHECKING, Optional, cast
 
 import discord
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 import shopkeeper.bot as bot
 from shopkeeper.config import config
 from shopkeeper.db import Base
+
+if TYPE_CHECKING:
+    from .listing_image import ListingImage
 
 
 class ListingType(Enum):
@@ -52,6 +55,8 @@ class Listing(Base):
     owner_id: Mapped[int]
     message_id: Mapped[int]
     thread_id: Mapped[int]
+
+    images: Mapped[list["ListingImage"]] = relationship(back_populates="listing")
 
     @property
     def url(self) -> str:
