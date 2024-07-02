@@ -35,7 +35,7 @@ frontend:
     COPY --chown=node:node frontend frontend
     RUN npm run build
 
-    SAVE ARTIFACT frontend/dist
+    SAVE ARTIFACT --keep-ts frontend/dist
 
 app:
     FROM cgr.dev/chainguard/python:latest
@@ -45,7 +45,7 @@ app:
     ENV PATH="/shopkeeper/venv/bin:$PATH"
 
     COPY +python-deps/venv /shopkeeper/venv
-    COPY +frontend/dist /shopkeeper/frontend/dist
+    COPY --keep-ts +frontend/dist /shopkeeper/frontend/dist
     COPY . .
 
     ENTRYPOINT ["python", "-m", "shopkeeper"]
