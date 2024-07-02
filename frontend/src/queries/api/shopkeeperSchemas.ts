@@ -25,6 +25,22 @@ export type DiscordUser = {
     is_owner: boolean;
 };
 
+export type EditListingSchema = {
+    /**
+     * @minLength 1
+     */
+    title: string;
+    /**
+     * @minLength 0
+     */
+    description: string;
+    /**
+     * @minLength 0
+     */
+    price: string;
+    status: ListingStatus;
+};
+
 export type HTTPValidationError = {
     detail?: ValidationError[];
 };

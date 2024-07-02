@@ -82,6 +82,41 @@ export const useCreateListing = (
     });
 };
 
+export type EditListingPathParams = {
+    listingId: number;
+};
+
+export type EditListingError = Fetcher.ErrorWrapper<{
+    status: 422;
+    payload: Schemas.HTTPValidationError;
+}>;
+
+export type EditListingVariables = {
+    body: Schemas.EditListingSchema;
+    pathParams: EditListingPathParams;
+} & ShopkeeperContext['fetcherOptions'];
+
+export const fetchEditListing = (variables: EditListingVariables, signal?: AbortSignal) =>
+    shopkeeperFetch<Schemas.ListingSchema, EditListingError, Schemas.EditListingSchema, {}, {}, EditListingPathParams>({
+        url: '/api/listings/{listingId}',
+        method: 'patch',
+        ...variables,
+        signal,
+    });
+
+export const useEditListing = (
+    options?: Omit<
+        reactQuery.UseMutationOptions<Schemas.ListingSchema, EditListingError, EditListingVariables>,
+        'mutationFn'
+    >,
+) => {
+    const { fetcherOptions } = useShopkeeperContext();
+    return reactQuery.useMutation<Schemas.ListingSchema, EditListingError, EditListingVariables>({
+        mutationFn: (variables: EditListingVariables) => fetchEditListing({ ...fetcherOptions, ...variables }),
+        ...options,
+    });
+};
+
 export type GetCurrentUserError = Fetcher.ErrorWrapper<undefined>;
 
 export type GetCurrentUserVariables = ShopkeeperContext['fetcherOptions'];

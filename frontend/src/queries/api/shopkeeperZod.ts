@@ -9,23 +9,12 @@ export const discordUserSchema = z.object({
     is_owner: z.boolean(),
 });
 
+export const listingStatusSchema = z.union([z.literal('open'), z.literal('pending'), z.literal('closed')]);
+
 export const validationErrorSchema = z.object({
     loc: z.array(z.union([z.string(), z.number()])),
     msg: z.string(),
     type: z.string(),
-});
-
-export const listingStatusSchema = z.union([z.literal('open'), z.literal('pending'), z.literal('closed')]);
-
-export const createListingSchemaSchema = z.object({
-    title: z.string().min(1),
-    description: z.string().min(0),
-    price: z.string().min(0),
-    type: listingTypeSchema,
-});
-
-export const hTTPValidationErrorSchema = z.object({
-    detail: z.array(validationErrorSchema).optional(),
 });
 
 export const listingSchemaSchema = z.object({
@@ -36,4 +25,22 @@ export const listingSchemaSchema = z.object({
     type: listingTypeSchema,
     status: listingStatusSchema,
     url: z.string(),
+});
+
+export const createListingSchemaSchema = z.object({
+    title: z.string().min(1),
+    description: z.string().min(0),
+    price: z.string().min(0),
+    type: listingTypeSchema,
+});
+
+export const editListingSchemaSchema = z.object({
+    title: z.string().min(1),
+    description: z.string().min(0),
+    price: z.string().min(0),
+    status: listingStatusSchema,
+});
+
+export const hTTPValidationErrorSchema = z.object({
+    detail: z.array(validationErrorSchema).optional(),
 });

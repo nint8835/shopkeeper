@@ -20,3 +20,10 @@ class CreateListingSchema(BaseModel):
     description: str = Field(min_length=0)
     price: str = Field(min_length=0)
     type: ListingType
+
+
+class EditListingSchema(BaseModel):
+    title: str = Field(min_length=1)
+    description: str = Field(min_length=0)
+    price: str = Field(min_length=0)
+    status: ListingStatus

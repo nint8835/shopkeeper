@@ -8,7 +8,11 @@ from shopkeeper.models.listing import Listing, ListingStatus
 from shopkeeper.web.dependencies.auth import require_discord_user
 from shopkeeper.web.dependencies.database import get_db
 from shopkeeper.web.schemas.discord_user import DiscordUser
-from shopkeeper.web.schemas.listings import CreateListingSchema, ListingSchema
+from shopkeeper.web.schemas.listings import (
+    CreateListingSchema,
+    EditListingSchema,
+    ListingSchema,
+)
 
 listings_router = APIRouter(
     tags=["Listings"], dependencies=[Depends(require_discord_user)]
@@ -43,6 +47,16 @@ async def create_listing(
     )
 
     return new_listing
+
+
+@listings_router.patch("/{listing_id}", response_model=ListingSchema)
+async def edit_listing(
+    listing_id: int,
+    listing: EditListingSchema,
+    db: AsyncSession = Depends(get_db),
+    user: DiscordUser = Depends(require_discord_user),
+) -> Listing:
+    return (await db.execute(select(Listing).limit(1))).scalar_one()
 
 
 __all__ = ["listings_router"]
