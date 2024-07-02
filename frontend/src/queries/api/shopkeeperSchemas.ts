@@ -45,6 +45,11 @@ export type HTTPValidationError = {
     detail?: ValidationError[];
 };
 
+export type ListingImageSchema = {
+    id: number;
+    url: string;
+};
+
 export type ListingSchema = {
     id: number;
     title: string;
@@ -54,6 +59,7 @@ export type ListingSchema = {
     status: ListingStatus;
     url: string;
     owner_id: string;
+    images: ListingImageSchema[];
 };
 
 export type ListingStatus = 'open' | 'pending' | 'closed';

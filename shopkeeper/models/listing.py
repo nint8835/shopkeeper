@@ -56,7 +56,9 @@ class Listing(Base):
     message_id: Mapped[int]
     thread_id: Mapped[int]
 
-    images: Mapped[list["ListingImage"]] = relationship(back_populates="listing")
+    images: Mapped[list["ListingImage"]] = relationship(
+        back_populates="listing", lazy="joined"
+    )
 
     @property
     def url(self) -> str:

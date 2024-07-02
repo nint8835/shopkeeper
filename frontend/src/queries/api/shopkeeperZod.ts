@@ -17,6 +17,11 @@ export const validationErrorSchema = z.object({
     type: z.string(),
 });
 
+export const listingImageSchemaSchema = z.object({
+    id: z.number(),
+    url: z.string(),
+});
+
 export const listingSchemaSchema = z.object({
     id: z.number(),
     title: z.string(),
@@ -26,6 +31,7 @@ export const listingSchemaSchema = z.object({
     status: listingStatusSchema,
     url: z.string(),
     owner_id: z.string(),
+    images: z.array(listingImageSchemaSchema),
 });
 
 export const createListingSchemaSchema = z.object({

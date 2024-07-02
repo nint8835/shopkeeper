@@ -29,7 +29,7 @@ async def get_listings(
     if status is not None:
         listings_query = listings_query.filter_by(status=status)
 
-    return (await db.execute(listings_query)).scalars().all()
+    return (await db.execute(listings_query)).unique().scalars().all()
 
 
 @listings_router.post("/", response_model=ListingSchema)

@@ -25,6 +25,11 @@ class ListingImage(Base):
     listing_id: Mapped[int] = mapped_column(ForeignKey("listings.id"))
     listing: Mapped["Listing"] = relationship(back_populates="images")
 
+    @property
+    def url(self) -> str:
+        # TODO: See if I can make this less fragile
+        return f"/images/{self.id}"
+
     @classmethod
     async def from_attachment(
         cls, *, listing_id: int, attachment: discord.Attachment, session: AsyncSession
