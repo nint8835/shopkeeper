@@ -1,6 +1,8 @@
+import EditListingDialog from '@/components/dialogs/EditListing';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useStore } from '@/lib/state';
 import { useGetListings } from '@/queries/api/shopkeeperComponents';
 import { ListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
 import Markdown from 'react-markdown';
@@ -15,6 +17,8 @@ function DiscordMarkdownField({ text }: { text: string }) {
 }
 
 function ListingCard({ listing }: { listing: ListingSchema }) {
+    const { user } = useStore();
+
     return (
         <Card className="flex flex-col">
             <CardHeader>
@@ -29,12 +33,15 @@ function ListingCard({ listing }: { listing: ListingSchema }) {
             <CardContent className="flex-1">
                 <DiscordMarkdownField text={listing.description || ''} />
             </CardContent>
-            <CardFooter className="flex flex-row-reverse">
+            <CardFooter className="flex flex-row-reverse justify-between">
                 <Button asChild>
                     <a href={listing.url} target="_blank">
                         Open
                     </a>
                 </Button>
+                {listing.status !== 'closed' && (user.is_owner || user.id === listing.owner_id) && (
+                    <EditListingDialog listing={listing} />
+                )}
             </CardFooter>
         </Card>
     );

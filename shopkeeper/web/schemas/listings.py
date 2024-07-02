@@ -4,7 +4,7 @@ from shopkeeper.models.listing import ListingStatus, ListingType
 
 
 class ListingSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, coerce_numbers_to_str=True)
 
     id: int
     title: str
@@ -13,6 +13,7 @@ class ListingSchema(BaseModel):
     type: ListingType
     status: ListingStatus
     url: str
+    owner_id: str
 
 
 class CreateListingSchema(BaseModel):
@@ -20,3 +21,10 @@ class CreateListingSchema(BaseModel):
     description: str = Field(min_length=0)
     price: str = Field(min_length=0)
     type: ListingType
+
+
+class EditListingSchema(BaseModel):
+    title: str = Field(min_length=1)
+    description: str = Field(min_length=0)
+    price: str = Field(min_length=0)
+    status: ListingStatus

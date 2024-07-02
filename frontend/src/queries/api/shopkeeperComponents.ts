@@ -24,6 +24,9 @@ export type GetListingsVariables = {
     queryParams?: GetListingsQueryParams;
 } & ShopkeeperContext['fetcherOptions'];
 
+/**
+ * Retrieve a list of listings.
+ */
 export const fetchGetListings = (variables: GetListingsVariables, signal?: AbortSignal) =>
     shopkeeperFetch<GetListingsResponse, GetListingsError, undefined, {}, GetListingsQueryParams, {}>({
         url: '/api/listings/',
@@ -32,6 +35,9 @@ export const fetchGetListings = (variables: GetListingsVariables, signal?: Abort
         signal,
     });
 
+/**
+ * Retrieve a list of listings.
+ */
 export const useGetListings = <TData = GetListingsResponse>(
     variables: GetListingsVariables,
     options?: Omit<
@@ -61,6 +67,9 @@ export type CreateListingVariables = {
     body: Schemas.CreateListingSchema;
 } & ShopkeeperContext['fetcherOptions'];
 
+/**
+ * Create a new listing.
+ */
 export const fetchCreateListing = (variables: CreateListingVariables, signal?: AbortSignal) =>
     shopkeeperFetch<Schemas.ListingSchema, CreateListingError, Schemas.CreateListingSchema, {}, {}, {}>({
         url: '/api/listings/',
@@ -69,6 +78,9 @@ export const fetchCreateListing = (variables: CreateListingVariables, signal?: A
         signal,
     });
 
+/**
+ * Create a new listing.
+ */
 export const useCreateListing = (
     options?: Omit<
         reactQuery.UseMutationOptions<Schemas.ListingSchema, CreateListingError, CreateListingVariables>,
@@ -82,10 +94,54 @@ export const useCreateListing = (
     });
 };
 
+export type EditListingPathParams = {
+    listingId: number;
+};
+
+export type EditListingError = Fetcher.ErrorWrapper<{
+    status: 422;
+    payload: Schemas.HTTPValidationError;
+}>;
+
+export type EditListingVariables = {
+    body: Schemas.EditListingSchema;
+    pathParams: EditListingPathParams;
+} & ShopkeeperContext['fetcherOptions'];
+
+/**
+ * Edit an existing listing.
+ */
+export const fetchEditListing = (variables: EditListingVariables, signal?: AbortSignal) =>
+    shopkeeperFetch<Schemas.ListingSchema, EditListingError, Schemas.EditListingSchema, {}, {}, EditListingPathParams>({
+        url: '/api/listings/{listingId}',
+        method: 'patch',
+        ...variables,
+        signal,
+    });
+
+/**
+ * Edit an existing listing.
+ */
+export const useEditListing = (
+    options?: Omit<
+        reactQuery.UseMutationOptions<Schemas.ListingSchema, EditListingError, EditListingVariables>,
+        'mutationFn'
+    >,
+) => {
+    const { fetcherOptions } = useShopkeeperContext();
+    return reactQuery.useMutation<Schemas.ListingSchema, EditListingError, EditListingVariables>({
+        mutationFn: (variables: EditListingVariables) => fetchEditListing({ ...fetcherOptions, ...variables }),
+        ...options,
+    });
+};
+
 export type GetCurrentUserError = Fetcher.ErrorWrapper<undefined>;
 
 export type GetCurrentUserVariables = ShopkeeperContext['fetcherOptions'];
 
+/**
+ * Retrieve the details of the current user.
+ */
 export const fetchGetCurrentUser = (variables: GetCurrentUserVariables, signal?: AbortSignal) =>
     shopkeeperFetch<Schemas.DiscordUser | null, GetCurrentUserError, undefined, {}, {}, {}>({
         url: '/auth/me',
@@ -94,6 +150,9 @@ export const fetchGetCurrentUser = (variables: GetCurrentUserVariables, signal?:
         signal,
     });
 
+/**
+ * Retrieve the details of the current user.
+ */
 export const useGetCurrentUser = <TData = Schemas.DiscordUser | null>(
     variables: GetCurrentUserVariables,
     options?: Omit<

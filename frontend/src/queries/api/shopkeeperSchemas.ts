@@ -22,6 +22,23 @@ export type CreateListingSchema = {
 export type DiscordUser = {
     id: string;
     username: string;
+    is_owner: boolean;
+};
+
+export type EditListingSchema = {
+    /**
+     * @minLength 1
+     */
+    title: string;
+    /**
+     * @minLength 0
+     */
+    description: string;
+    /**
+     * @minLength 0
+     */
+    price: string;
+    status: ListingStatus;
 };
 
 export type HTTPValidationError = {
@@ -36,6 +53,7 @@ export type ListingSchema = {
     type: ListingType;
     status: ListingStatus;
     url: string;
+    owner_id: string;
 };
 
 export type ListingStatus = 'open' | 'pending' | 'closed';

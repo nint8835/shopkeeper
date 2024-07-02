@@ -2,6 +2,7 @@ import traceback
 
 import discord
 from discord import app_commands
+from fastapi import HTTPException
 from sqlalchemy import select
 
 from shopkeeper.bot import client, guild
@@ -28,13 +29,19 @@ class EditListingInfoModal(discord.ui.Modal):
         self.listing_price.default = listing.price or ""
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
-        await Listing.edit(
-            interaction,
-            self.listing.id,
-            title=self.listing_title.value,
-            description=self.listing_description.value or None,
-            price=self.listing_price.value or None,
-        )
+        try:
+            async with async_session() as session:
+                await Listing.edit(
+                    self.listing.id,
+                    interaction.user.id,
+                    session,
+                    title=self.listing_title.value,
+                    description=self.listing_description.value or None,
+                    price=self.listing_price.value or None,
+                )
+            await interaction.response.send_message("Listing updated", ephemeral=True)
+        except HTTPException as e:
+            await interaction.response.send_message(e.detail, ephemeral=True)
 
     async def on_error(
         self, interaction: discord.Interaction, error: Exception
@@ -84,11 +91,17 @@ class EditListing(app_commands.Group):
         self, interaction: discord.Interaction, listing: int, status: ListingStatus
     ) -> None:
         """Edit the status of a listing."""
-        await Listing.edit(
-            interaction,
-            listing,
-            status=status,
-        )
+        try:
+            async with async_session() as session:
+                await Listing.edit(
+                    listing,
+                    interaction.user.id,
+                    session,
+                    status=status,
+                )
+            await interaction.response.send_message("Listing updated", ephemeral=True)
+        except HTTPException as e:
+            await interaction.response.send_message(e.detail, ephemeral=True)
 
     @status.autocomplete("listing")
     async def status_listing_autocomplete(
