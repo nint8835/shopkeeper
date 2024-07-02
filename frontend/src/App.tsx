@@ -6,6 +6,7 @@ import RootRoute from '@/routes/Root';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider, createBrowserRouter, redirectDocument } from 'react-router-dom';
+import { useStore } from './lib/state';
 
 const router = createBrowserRouter([
     {
@@ -16,6 +17,8 @@ const router = createBrowserRouter([
             if (!currentUser) {
                 return redirectDocument('/auth/login');
             }
+
+            useStore.getState().setUser(currentUser);
 
             return currentUser;
         },
