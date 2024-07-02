@@ -1,6 +1,7 @@
 import EditListingDialog from '@/components/dialogs/EditListing';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useStore } from '@/lib/state';
 import { useGetListings } from '@/queries/api/shopkeeperComponents';
@@ -30,7 +31,24 @@ function ListingCard({ listing }: { listing: ListingSchema }) {
                     {listing.price && <span> - {listing.price}</span>}
                 </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1">
+            <CardContent className="flex-1 space-y-2">
+                {listing.images.length > 0 && (
+                    <Carousel>
+                        <CarouselContent>
+                            {listing.images.map((image) => (
+                                <CarouselItem key={image.id}>
+                                    <img loading="lazy" src={image.url} />
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                        {listing.images.length > 1 && (
+                            <>
+                                <CarouselPrevious className="left-0" />
+                                <CarouselNext className="right-0" />
+                            </>
+                        )}
+                    </Carousel>
+                )}
                 <DiscordMarkdownField text={listing.description || ''} />
             </CardContent>
             <CardFooter className="flex flex-row-reverse justify-between">
