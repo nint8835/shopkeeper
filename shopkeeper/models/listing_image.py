@@ -1,12 +1,19 @@
+import uuid
+from pathlib import Path
 from typing import TYPE_CHECKING
 
+import discord
 from sqlalchemy import ForeignKey
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from shopkeeper.config import config
 from shopkeeper.db import Base
 
 if TYPE_CHECKING:
     from .listing import Listing
+
+PERMITTED_FILE_TYPES = [".png", ".jpg", ".jpeg"]
 
 
 class ListingImage(Base):
@@ -17,3 +24,25 @@ class ListingImage(Base):
 
     listing_id: Mapped[int] = mapped_column(ForeignKey("listings.id"))
     listing: Mapped["Listing"] = relationship(back_populates="images")
+
+    @classmethod
+    async def from_attachment(
+        cls, *, listing_id: int, attachment: discord.Attachment, session: AsyncSession
+    ) -> "ListingImage | None":
+        attachment_extension = Path(attachment.filename).suffix
+
+        if attachment_extension not in PERMITTED_FILE_TYPES:
+            return None
+
+        listing_image_prefix = config.image_path / str(listing_id)
+        listing_image_prefix.mkdir(parents=True, exist_ok=True)
+
+        path = listing_image_prefix / (str(uuid.uuid4()) + attachment_extension)
+
+        with open(path, "wb") as f:
+            await attachment.save(f)
+
+        instance = ListingImage(listing_id=listing_id, path=str(path))
+        session.add(instance)
+
+        return instance

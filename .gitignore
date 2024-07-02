@@ -184,3 +184,5 @@ dist-ssr
 *.sw?
 
 shopkeeper.sqlite
+images/*
+!images/.gitkeep
