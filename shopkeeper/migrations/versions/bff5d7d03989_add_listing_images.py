@@ -54,12 +54,13 @@ class ListingImage(Base):
         listing_image_prefix = config.image_path / str(listing_id)
         listing_image_prefix.mkdir(parents=True, exist_ok=True)
 
-        path = listing_image_prefix / (str(uuid.uuid4()) + attachment_extension)
+        image_path = Path(str(listing_id)) / (str(uuid.uuid4()) + attachment_extension)
+        file_path = config.image_path / image_path
 
-        with open(path, "wb") as f:
+        with open(file_path, "wb") as f:
             await attachment.save(f)
 
-        instance = ListingImage(listing_id=listing_id, path=str(path))
+        instance = ListingImage(listing_id=listing_id, path=str(image_path))
         session.add(instance)
 
         return instance
@@ -97,6 +98,8 @@ async def backfill_images() -> None:
                     attachment=attachment,
                     session=session,
                 )
+
+    session.commit()
 
 
 def upgrade() -> None:
