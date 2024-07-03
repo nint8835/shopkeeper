@@ -20,6 +20,8 @@ class ListingSchema(BaseModel):
     url: str
     owner_id: str
 
+
+class FullListingSchema(ListingSchema):
     images: list[ListingImageSchema]
 
 

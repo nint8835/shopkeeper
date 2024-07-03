@@ -5,7 +5,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useStore } from '@/lib/state';
 import { useGetListings } from '@/queries/api/shopkeeperComponents';
-import { ListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
+import { FullListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
 import Markdown from 'react-markdown';
 import remarkGemoji from 'remark-gemoji';
 
@@ -17,7 +17,7 @@ function DiscordMarkdownField({ text }: { text: string }) {
     );
 }
 
-function ListingCard({ listing }: { listing: ListingSchema }) {
+function ListingCard({ listing }: { listing: FullListingSchema }) {
     const { user } = useStore();
 
     return (

@@ -57,7 +57,7 @@ class Listing(Base):
     thread_id: Mapped[int]
 
     images: Mapped[list["ListingImage"]] = relationship(
-        back_populates="listing", lazy="joined"
+        back_populates="listing", lazy="raise"
     )
 
     @property

@@ -41,6 +41,18 @@ export type EditListingSchema = {
     status: ListingStatus;
 };
 
+export type FullListingSchema = {
+    id: number;
+    title: string;
+    description: string | null;
+    price: string | null;
+    type: ListingType;
+    status: ListingStatus;
+    url: string;
+    owner_id: string;
+    images: ListingImageSchema[];
+};
+
 export type HTTPValidationError = {
     detail?: ValidationError[];
 };
@@ -59,7 +71,6 @@ export type ListingSchema = {
     status: ListingStatus;
     url: string;
     owner_id: string;
-    images: ListingImageSchema[];
 };
 
 export type ListingStatus = 'open' | 'pending' | 'closed';

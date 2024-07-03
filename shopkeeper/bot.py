@@ -33,6 +33,7 @@ class ShopkeeperBot(discord.Client):
 
                 await after.edit(archived=False)
 
+    # TODO: Stop swallowing exceptions occurring here
     async def on_message(self, message: discord.Message):
         if not message.attachments:
             return

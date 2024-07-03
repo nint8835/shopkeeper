@@ -3,6 +3,7 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from shopkeeper.models.listing import Listing, ListingStatus
 from shopkeeper.web.dependencies.auth import require_discord_user
@@ -11,6 +12,7 @@ from shopkeeper.web.schemas.discord_user import DiscordUser
 from shopkeeper.web.schemas.listings import (
     CreateListingSchema,
     EditListingSchema,
+    FullListingSchema,
     ListingSchema,
 )
 
@@ -19,12 +21,12 @@ listings_router = APIRouter(
 )
 
 
-@listings_router.get("/", response_model=list[ListingSchema])
+@listings_router.get("/", response_model=list[FullListingSchema])
 async def get_listings(
     db: AsyncSession = Depends(get_db), status: ListingStatus | None = None
 ) -> Any:
     """Retrieve a list of listings."""
-    listings_query = select(Listing)
+    listings_query = select(Listing).options(joinedload(Listing.images))
 
     if status is not None:
         listings_query = listings_query.filter_by(status=status)

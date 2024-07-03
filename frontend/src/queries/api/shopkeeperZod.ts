@@ -11,15 +11,15 @@ export const discordUserSchema = z.object({
 
 export const listingStatusSchema = z.union([z.literal('open'), z.literal('pending'), z.literal('closed')]);
 
+export const listingImageSchemaSchema = z.object({
+    id: z.number(),
+    url: z.string(),
+});
+
 export const validationErrorSchema = z.object({
     loc: z.array(z.union([z.string(), z.number()])),
     msg: z.string(),
     type: z.string(),
-});
-
-export const listingImageSchemaSchema = z.object({
-    id: z.number(),
-    url: z.string(),
 });
 
 export const listingSchemaSchema = z.object({
@@ -31,7 +31,6 @@ export const listingSchemaSchema = z.object({
     status: listingStatusSchema,
     url: z.string(),
     owner_id: z.string(),
-    images: z.array(listingImageSchemaSchema),
 });
 
 export const createListingSchemaSchema = z.object({
@@ -46,6 +45,18 @@ export const editListingSchemaSchema = z.object({
     description: z.string().min(0),
     price: z.string().min(0),
     status: listingStatusSchema,
+});
+
+export const fullListingSchemaSchema = z.object({
+    id: z.number(),
+    title: z.string(),
+    description: z.string().nullable(),
+    price: z.string().nullable(),
+    type: listingTypeSchema,
+    status: listingStatusSchema,
+    url: z.string(),
+    owner_id: z.string(),
+    images: z.array(listingImageSchemaSchema),
 });
 
 export const hTTPValidationErrorSchema = z.object({
