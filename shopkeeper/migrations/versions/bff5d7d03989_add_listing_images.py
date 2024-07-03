@@ -88,6 +88,8 @@ async def backfill_images() -> None:
     for listing in listings:
         channel = cast(discord.Thread, await bot.fetch_channel(listing.thread_id))
 
+        print("Backfilling images for listing", listing.id)
+
         async for message in channel.history(limit=None):
             if message.author.id != listing.owner_id:
                 continue
