@@ -46,7 +46,7 @@ class ListingImage(Base):
     async def from_attachment(
         cls, *, listing_id: int, attachment: discord.Attachment, session: Session
     ) -> "ListingImage | None":
-        attachment_extension = Path(attachment.filename).suffix
+        attachment_extension = Path(attachment.filename).suffix.lower()
 
         if attachment_extension not in [".png", ".jpg", ".jpeg"]:
             return None
