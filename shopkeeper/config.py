@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -8,6 +10,8 @@ class Config(BaseSettings):
 
     db_path: str = "shopkeeper.sqlite"
     db_log_queries: bool = False
+
+    image_path: Path = Path("images")
 
     guild_id: int
     channel_id: int

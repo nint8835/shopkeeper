@@ -11,7 +11,7 @@ from starlette.types import Scope
 
 from shopkeeper.bot import client
 from shopkeeper.config import config
-from shopkeeper.web.routers import auth_router, listings_router
+from shopkeeper.web.routers import auth_router, listing_images_router, listings_router
 
 
 @asynccontextmanager
@@ -48,6 +48,7 @@ app.add_middleware(SessionMiddleware, secret_key=config.session_secret)
 
 app.include_router(listings_router, prefix="/api/listings")
 app.include_router(auth_router, prefix="/auth")
+app.include_router(listing_images_router, prefix="/images")
 
 app.mount("/", SPAStaticFiles(directory="frontend/dist", html=True), "frontend")
 

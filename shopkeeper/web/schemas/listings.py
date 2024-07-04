@@ -3,6 +3,11 @@ from pydantic import BaseModel, ConfigDict, Field
 from shopkeeper.models.listing import ListingStatus, ListingType
 
 
+class ListingImageSchema(BaseModel):
+    id: int
+    url: str
+
+
 class ListingSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True, coerce_numbers_to_str=True)
 
@@ -14,6 +19,10 @@ class ListingSchema(BaseModel):
     status: ListingStatus
     url: str
     owner_id: str
+
+
+class FullListingSchema(ListingSchema):
+    images: list[ListingImageSchema]
 
 
 class CreateListingSchema(BaseModel):

@@ -1,10 +1,12 @@
 import EditListingDialog from '@/components/dialogs/EditListing';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useStore } from '@/lib/state';
 import { useGetListings } from '@/queries/api/shopkeeperComponents';
-import { ListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
+import { FullListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
 import Markdown from 'react-markdown';
 import remarkGemoji from 'remark-gemoji';
 
@@ -16,7 +18,7 @@ function DiscordMarkdownField({ text }: { text: string }) {
     );
 }
 
-function ListingCard({ listing }: { listing: ListingSchema }) {
+function ListingCard({ listing }: { listing: FullListingSchema }) {
     const { user } = useStore();
 
     return (
@@ -30,7 +32,31 @@ function ListingCard({ listing }: { listing: ListingSchema }) {
                     {listing.price && <span> - {listing.price}</span>}
                 </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1">
+            <CardContent className="flex-1 space-y-2">
+                {listing.images.length > 0 && (
+                    <Carousel>
+                        <CarouselContent>
+                            {listing.images.map((image) => (
+                                <CarouselItem key={image.id}>
+                                    <Dialog>
+                                        <DialogTrigger>
+                                            <img loading="lazy" src={image.url} />
+                                        </DialogTrigger>
+                                        <DialogContent className="flex max-h-screen max-w-none items-center justify-center">
+                                            <img className="max-h-screen p-4" loading="lazy" src={image.url} />
+                                        </DialogContent>
+                                    </Dialog>
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                        {listing.images.length > 1 && (
+                            <>
+                                <CarouselPrevious className="-left-4" />
+                                <CarouselNext className="-right-4" />
+                            </>
+                        )}
+                    </Carousel>
+                )}
                 <DiscordMarkdownField text={listing.description || ''} />
             </CardContent>
             <CardFooter className="flex flex-row-reverse justify-between">

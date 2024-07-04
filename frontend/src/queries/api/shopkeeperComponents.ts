@@ -18,7 +18,7 @@ export type GetListingsError = Fetcher.ErrorWrapper<{
     payload: Schemas.HTTPValidationError;
 }>;
 
-export type GetListingsResponse = Schemas.ListingSchema[];
+export type GetListingsResponse = Schemas.FullListingSchema[];
 
 export type GetListingsVariables = {
     queryParams?: GetListingsQueryParams;
