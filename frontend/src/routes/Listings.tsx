@@ -42,7 +42,7 @@ function ListingCard({ listing }: { listing: FullListingSchema }) {
                                         <DialogTrigger>
                                             <img loading="lazy" src={image.url} />
                                         </DialogTrigger>
-                                        <DialogContent className="flex max-h-screen max-w-none items-center justify-center p-4">
+                                        <DialogContent className="flex max-h-screen max-w-none items-center justify-center">
                                             <img className="max-h-screen p-4" loading="lazy" src={image.url} />
                                         </DialogContent>
                                     </Dialog>
