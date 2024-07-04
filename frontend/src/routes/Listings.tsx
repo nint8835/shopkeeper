@@ -2,6 +2,7 @@ import EditListingDialog from '@/components/dialogs/EditListing';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useStore } from '@/lib/state';
 import { useGetListings } from '@/queries/api/shopkeeperComponents';
@@ -37,14 +38,21 @@ function ListingCard({ listing }: { listing: FullListingSchema }) {
                         <CarouselContent>
                             {listing.images.map((image) => (
                                 <CarouselItem key={image.id}>
-                                    <img loading="lazy" src={image.url} />
+                                    <Dialog>
+                                        <DialogTrigger>
+                                            <img loading="lazy" src={image.url} />
+                                        </DialogTrigger>
+                                        <DialogContent className="flex max-h-screen max-w-none items-center justify-center p-4">
+                                            <img className="max-h-screen p-4" loading="lazy" src={image.url} />
+                                        </DialogContent>
+                                    </Dialog>
                                 </CarouselItem>
                             ))}
                         </CarouselContent>
                         {listing.images.length > 1 && (
                             <>
-                                <CarouselPrevious className="left-0" />
-                                <CarouselNext className="right-0" />
+                                <CarouselPrevious className="-left-4" />
+                                <CarouselNext className="-right-4" />
                             </>
                         )}
                     </Carousel>
