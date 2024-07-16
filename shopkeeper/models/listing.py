@@ -168,6 +168,7 @@ class Listing(Base):
             )
 
             edited_message_sections: list[str] = []
+            should_close_thread = False
 
             if title is not ...:
                 if listing_instance.title != title:
@@ -208,7 +209,7 @@ class Listing(Base):
                         f"Status changed from {listing_instance.status.name} to {status.name}"
                     )
                     if status == ListingStatus.Closed:
-                        await thread.edit(locked=True, archived=True)
+                        should_close_thread = True
 
                 listing_instance.status = status
 
@@ -216,6 +217,9 @@ class Listing(Base):
 
         if edited_message_sections:
             await message.edit(embed=listing_instance.embed)
+
+        if should_close_thread:
+            await thread.edit(archived=True, locked=True)
 
         if config.events_channel_id is not None and edited_message_sections:
             await cast(
