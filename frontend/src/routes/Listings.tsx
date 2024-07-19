@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useStore } from '@/lib/state';
 import { useGetListings } from '@/queries/api/shopkeeperComponents';
 import { FullListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
+import { keepPreviousData } from '@tanstack/react-query';
 import Markdown from 'react-markdown';
 import remarkGemoji from 'remark-gemoji';
 
@@ -74,9 +75,12 @@ function ListingCard({ listing }: { listing: FullListingSchema }) {
 }
 
 function ListingsTab({ status }: { status: ListingStatus }) {
-    const { data: listings, isFetching } = useGetListings({ queryParams: { status } });
+    const { data: listings, isFetching } = useGetListings(
+        { queryParams: { status } },
+        { placeholderData: keepPreviousData },
+    );
 
-    return isFetching ? (
+    return isFetching && !listings ? (
         <div className="flex w-full flex-row justify-center">
             <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500"></div>
         </div>
