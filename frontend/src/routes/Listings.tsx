@@ -1,3 +1,4 @@
+import CreateListingDialog from '@/components/dialogs/CreateListing';
 import EditListingDialog from '@/components/dialogs/EditListing';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import { useStore } from '@/lib/state';
 import { useGetListings } from '@/queries/api/shopkeeperComponents';
 import { FullListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
+import { useState } from 'react';
 import Markdown from 'react-markdown';
 import remarkGemoji from 'remark-gemoji';
 
@@ -74,9 +76,13 @@ function ListingCard({ listing }: { listing: FullListingSchema }) {
     );
 }
 
-function ListingsTab({ status }: { status: ListingStatus }) {
+function ListingsTab({ status, onlyMine }: { status: ListingStatus; onlyMine: boolean }) {
+    const {
+        user: { id: currentUserId },
+    } = useStore();
+
     const { data: listings, isFetching } = useGetListings(
-        { queryParams: { status } },
+        { queryParams: { status, ...(onlyMine ? { owner: currentUserId } : {}) } },
         { placeholderData: keepPreviousData },
     );
 
@@ -94,22 +100,35 @@ function ListingsTab({ status }: { status: ListingStatus }) {
 const LISTING_STATUSES = ['open', 'pending', 'closed'] as const;
 
 export default function ListingsRoute() {
+    const [onlyMine, setOnlyMine] = useState(false);
+
     return (
-        <div className="p-2">
-            <Tabs defaultValue="open">
-                <TabsList className="grid w-full grid-cols-3">
+        <div>
+            <header className="flex w-full flex-col items-center justify-between space-y-2 p-2 md:flex-row">
+                <h1 className="content-center text-xl font-semibold">Shopkeeper</h1>
+                <div className="flex space-x-2">
+                    <Button variant="secondary" onClick={() => setOnlyMine(!onlyMine)}>
+                        {onlyMine ? 'Show all listings' : 'Show only my listings'}
+                    </Button>
+                    <CreateListingDialog />
+                </div>
+            </header>
+            <div className="p-2">
+                <Tabs defaultValue="open">
+                    <TabsList className="grid w-full grid-cols-3">
+                        {LISTING_STATUSES.map((status) => (
+                            <TabsTrigger key={status} value={status} className="capitalize">
+                                {status}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
                     {LISTING_STATUSES.map((status) => (
-                        <TabsTrigger key={status} value={status} className="capitalize">
-                            {status}
-                        </TabsTrigger>
+                        <TabsContent key={status} value={status}>
+                            <ListingsTab status={status} onlyMine={onlyMine} />
+                        </TabsContent>
                     ))}
-                </TabsList>
-                {LISTING_STATUSES.map((status) => (
-                    <TabsContent key={status} value={status}>
-                        <ListingsTab status={status} />
-                    </TabsContent>
-                ))}
-            </Tabs>
+                </Tabs>
+            </div>
         </div>
     );
 }

@@ -23,13 +23,18 @@ listings_router = APIRouter(
 
 @listings_router.get("/", response_model=list[FullListingSchema])
 async def get_listings(
-    db: AsyncSession = Depends(get_db), status: ListingStatus | None = None
+    db: AsyncSession = Depends(get_db),
+    status: ListingStatus | None = None,
+    owner: str | None = None,
 ) -> Any:
     """Retrieve a list of listings."""
     listings_query = select(Listing).options(joinedload(Listing.images))
 
     if status is not None:
         listings_query = listings_query.filter_by(status=status)
+
+    if owner is not None:
+        listings_query = listings_query.filter_by(owner_id=int(owner))
 
     return (await db.execute(listings_query)).unique().scalars().all()
 

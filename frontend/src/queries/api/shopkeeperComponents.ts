@@ -11,6 +11,7 @@ import type * as Schemas from './shopkeeperSchemas';
 
 export type GetListingsQueryParams = {
     status?: Schemas.ListingStatus | null;
+    owner?: string | null;
 };
 
 export type GetListingsError = Fetcher.ErrorWrapper<{
