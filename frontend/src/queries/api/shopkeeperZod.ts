@@ -34,6 +34,11 @@ export const listingSchemaSchema = z.object({
     owner_id: z.string(),
 });
 
+export const searchListingsSchemaSchema = z.object({
+    statuses: z.array(listingStatusSchema).optional().nullable(),
+    owners: z.array(z.string()).optional().nullable(),
+});
+
 export const createListingSchemaSchema = z.object({
     title: z.string().min(1),
     description: z.string().min(0),

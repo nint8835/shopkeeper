@@ -9,11 +9,6 @@ import type * as Fetcher from './shopkeeperFetcher';
 import { shopkeeperFetch } from './shopkeeperFetcher';
 import type * as Schemas from './shopkeeperSchemas';
 
-export type GetListingsQueryParams = {
-    status?: Schemas.ListingStatus | null;
-    owner?: string | null;
-};
-
 export type GetListingsError = Fetcher.ErrorWrapper<{
     status: 422;
     payload: Schemas.HTTPValidationError;
@@ -22,16 +17,16 @@ export type GetListingsError = Fetcher.ErrorWrapper<{
 export type GetListingsResponse = Schemas.FullListingSchema[];
 
 export type GetListingsVariables = {
-    queryParams?: GetListingsQueryParams;
+    body?: Schemas.SearchListingsSchema;
 } & ShopkeeperContext['fetcherOptions'];
 
 /**
  * Retrieve a list of listings.
  */
 export const fetchGetListings = (variables: GetListingsVariables, signal?: AbortSignal) =>
-    shopkeeperFetch<GetListingsResponse, GetListingsError, undefined, {}, GetListingsQueryParams, {}>({
-        url: '/api/listings/',
-        method: 'get',
+    shopkeeperFetch<GetListingsResponse, GetListingsError, Schemas.SearchListingsSchema, {}, {}, {}>({
+        url: '/api/listings/search',
+        method: 'post',
         ...variables,
         signal,
     });
@@ -49,7 +44,7 @@ export const useGetListings = <TData = GetListingsResponse>(
     const { fetcherOptions, queryOptions, queryKeyFn } = useShopkeeperContext(options);
     return reactQuery.useQuery<GetListingsResponse, GetListingsError, TData>({
         queryKey: queryKeyFn({
-            path: '/api/listings/',
+            path: '/api/listings/search',
             operationId: 'getListings',
             variables,
         }),
@@ -176,7 +171,7 @@ export const useGetCurrentUser = <TData = Schemas.DiscordUser | null>(
 
 export type QueryOperation =
     | {
-          path: '/api/listings/';
+          path: '/api/listings/search';
           operationId: 'getListings';
           variables: GetListingsVariables;
       }

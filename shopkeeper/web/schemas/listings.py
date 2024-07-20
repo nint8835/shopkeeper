@@ -26,6 +26,11 @@ class FullListingSchema(ListingSchema):
     images: list[ListingImageSchema]
 
 
+class SearchListingsSchema(BaseModel):
+    statuses: list[ListingStatus] | None = None
+    owners: list[str] | None = None
+
+
 class CreateListingSchema(BaseModel):
     title: str = Field(min_length=1)
     description: str = Field(min_length=0)

@@ -84,7 +84,7 @@ function ListingsTab({ status, onlyMine }: { status: ListingStatus; onlyMine: bo
     } = useStore();
 
     const { data: listings, isFetching } = useGetListings(
-        { queryParams: { status, ...(onlyMine ? { owner: currentUserId } : {}) } },
+        { body: { statuses: [status], owners: onlyMine ? [currentUserId] : null } },
         { placeholderData: keepPreviousData },
     );
 

@@ -78,6 +78,11 @@ export type ListingStatus = 'open' | 'pending' | 'closed';
 
 export type ListingType = 'buy' | 'sell';
 
+export type SearchListingsSchema = {
+    statuses?: ListingStatus[] | null;
+    owners?: string[] | null;
+};
+
 export type ValidationError = {
     loc: (string | number)[];
     msg: string;

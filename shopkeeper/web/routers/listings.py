@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from shopkeeper.models.listing import Listing, ListingStatus
+from shopkeeper.models.listing import Listing
 from shopkeeper.web.dependencies.auth import require_discord_user
 from shopkeeper.web.dependencies.database import get_db
 from shopkeeper.web.schemas.discord_user import DiscordUser
@@ -14,6 +14,7 @@ from shopkeeper.web.schemas.listings import (
     EditListingSchema,
     FullListingSchema,
     ListingSchema,
+    SearchListingsSchema,
 )
 
 listings_router = APIRouter(
@@ -21,20 +22,21 @@ listings_router = APIRouter(
 )
 
 
-@listings_router.get("/", response_model=list[FullListingSchema])
+@listings_router.post("/search", response_model=list[FullListingSchema])
 async def get_listings(
+    filters: SearchListingsSchema,
     db: AsyncSession = Depends(get_db),
-    status: ListingStatus | None = None,
-    owner: str | None = None,
 ) -> Any:
     """Retrieve a list of listings."""
     listings_query = select(Listing).options(joinedload(Listing.images))
 
-    if status is not None:
-        listings_query = listings_query.filter_by(status=status)
+    if filters.statuses is not None:
+        listings_query = listings_query.filter(Listing.status.in_(filters.statuses))
 
-    if owner is not None:
-        listings_query = listings_query.filter_by(owner_id=int(owner))
+    if filters.owners is not None:
+        listings_query = listings_query.filter(
+            Listing.owner_id.in_([int(owner) for owner in filters.owners])
+        )
 
     return (await db.execute(listings_query)).unique().scalars().all()
 
