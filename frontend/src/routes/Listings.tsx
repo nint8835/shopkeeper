@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useStore } from '@/lib/state';
+import { cn } from '@/lib/utils';
 import { useGetListings } from '@/queries/api/shopkeeperComponents';
 import { FullListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
@@ -25,7 +26,13 @@ function ListingCard({ listing }: { listing: FullListingSchema }) {
     const { user } = useStore();
 
     return (
-        <Card className="flex flex-col">
+        <Card
+            className={cn(
+                'flex flex-col',
+                listing.status !== 'open' && 'border-l-4',
+                { open: '', pending: 'border-l-yellow-400', closed: 'border-l-red-400' }[listing.status],
+            )}
+        >
             <CardHeader>
                 <CardTitle className="w-full overflow-hidden text-ellipsis" title={listing.title}>
                     {listing.title}
