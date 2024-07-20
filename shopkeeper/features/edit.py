@@ -25,8 +25,8 @@ class EditListingInfoModal(discord.ui.Modal):
         self.listing = listing
 
         self.listing_title.default = listing.title
-        self.listing_description.default = listing.description or ""
-        self.listing_price.default = listing.price or ""
+        self.listing_description.default = listing.description
+        self.listing_price.default = listing.price
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         try:
@@ -36,8 +36,8 @@ class EditListingInfoModal(discord.ui.Modal):
                     interaction.user.id,
                     session,
                     title=self.listing_title.value,
-                    description=self.listing_description.value or None,
-                    price=self.listing_price.value or None,
+                    description=self.listing_description.value,
+                    price=self.listing_price.value,
                 )
             await interaction.response.send_message("Listing updated", ephemeral=True)
         except HTTPException as e:

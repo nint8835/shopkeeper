@@ -26,8 +26,8 @@ export const validationErrorSchema = z.object({
 export const listingSchemaSchema = z.object({
     id: z.number(),
     title: z.string(),
-    description: z.string().nullable(),
-    price: z.string().nullable(),
+    description: z.string(),
+    price: z.string(),
     type: listingTypeSchema,
     status: listingStatusSchema,
     url: z.string(),
@@ -56,8 +56,8 @@ export const editListingSchemaSchema = z.object({
 export const fullListingSchemaSchema = z.object({
     id: z.number(),
     title: z.string(),
-    description: z.string().nullable(),
-    price: z.string().nullable(),
+    description: z.string(),
+    price: z.string(),
     type: listingTypeSchema,
     status: listingStatusSchema,
     url: z.string(),

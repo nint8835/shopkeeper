@@ -14,8 +14,8 @@ class ListingSchema(BaseModel):
 
     id: int
     title: str
-    description: str | None
-    price: str | None
+    description: str
+    price: str
     type: ListingType
     status: ListingStatus
     url: str

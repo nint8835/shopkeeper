@@ -1,7 +1,7 @@
 from difflib import unified_diff
 from enum import Enum
 from types import EllipsisType
-from typing import TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING, cast
 
 import discord
 from fastapi import HTTPException
@@ -47,8 +47,8 @@ class Listing(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     title: Mapped[str]
-    description: Mapped[Optional[str]]
-    price: Mapped[Optional[str]]
+    description: Mapped[str]
+    price: Mapped[str]
     type: Mapped[ListingType]
     status: Mapped[ListingStatus]
 
@@ -77,7 +77,7 @@ class Listing(Base):
             .add_field(name="Owner", value=f"<@{self.owner_id}>", inline=True)
         )
 
-        if self.price is not None:
+        if self.price:
             embed.add_field(name="Price", value=self.price, inline=True)
 
         return embed
@@ -95,8 +95,8 @@ class Listing(Base):
         new_listing = Listing(
             type=type,
             title=title,
-            description=description or None,
-            price=price or None,
+            description=description,
+            price=price,
             owner_id=owner_id,
             status=ListingStatus.Open,
         )
@@ -140,8 +140,8 @@ class Listing(Base):
         session: AsyncSession,
         *,
         title: str | EllipsisType = ...,
-        description: str | None | EllipsisType = ...,
-        price: str | None | EllipsisType = ...,
+        description: str | EllipsisType = ...,
+        price: str | EllipsisType = ...,
         status: ListingStatus | EllipsisType = ...,
     ) -> "Listing":
         async with session.begin():

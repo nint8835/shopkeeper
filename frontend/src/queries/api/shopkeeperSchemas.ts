@@ -44,8 +44,8 @@ export type EditListingSchema = {
 export type FullListingSchema = {
     id: number;
     title: string;
-    description: string | null;
-    price: string | null;
+    description: string;
+    price: string;
     type: ListingType;
     status: ListingStatus;
     url: string;
@@ -66,8 +66,8 @@ export type ListingImageSchema = {
 export type ListingSchema = {
     id: number;
     title: string;
-    description: string | null;
-    price: string | null;
+    description: string;
+    price: string;
     type: ListingType;
     status: ListingStatus;
     url: string;
