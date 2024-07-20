@@ -6,6 +6,7 @@ from shopkeeper.models.listing import ListingStatus, ListingType
 class ListingImageSchema(BaseModel):
     id: int
     url: str
+    thumbnail_url: str
 
 
 class ListingSchema(BaseModel):

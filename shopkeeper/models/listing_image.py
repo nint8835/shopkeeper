@@ -30,6 +30,10 @@ class ListingImage(Base):
         # TODO: See if I can make this less fragile
         return f"/images/{self.id}"
 
+    @property
+    def thumbnail_url(self) -> str:
+        return f"/images/{self.id}/thumbnail"
+
     @classmethod
     async def from_attachment(
         cls, *, listing_id: int, attachment: discord.Attachment, session: AsyncSession

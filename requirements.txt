@@ -91,6 +91,8 @@ multidict==6.0.5
     #   yarl
 orjson==3.10.5
     # via fastapi
+pillow==10.4.0
+    # via -r requirements.in
 pycparser==2.22
     # via cffi
 pydantic==2.6.4

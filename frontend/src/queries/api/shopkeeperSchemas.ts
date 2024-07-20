@@ -60,6 +60,7 @@ export type HTTPValidationError = {
 export type ListingImageSchema = {
     id: number;
     url: string;
+    thumbnail_url: string;
 };
 
 export type ListingSchema = {

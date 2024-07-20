@@ -42,8 +42,8 @@ function ListingCard({ listing }: { listing: FullListingSchema }) {
                             {listing.images.map((image) => (
                                 <CarouselItem key={image.id}>
                                     <Dialog>
-                                        <DialogTrigger>
-                                            <img loading="lazy" src={image.url} />
+                                        <DialogTrigger asChild>
+                                            <img className="w-full" loading="lazy" src={image.thumbnail_url} />
                                         </DialogTrigger>
                                         <DialogContent className="flex max-h-screen max-w-none items-center justify-center">
                                             <img className="max-h-screen p-4" loading="lazy" src={image.url} />
