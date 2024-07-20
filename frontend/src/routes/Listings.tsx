@@ -1,10 +1,10 @@
 import CreateListingDialog from '@/components/dialogs/CreateListing';
 import EditListingDialog from '@/components/dialogs/EditListing';
+import ListingFiltersDialog from '@/components/dialogs/Filters';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useStore } from '@/lib/state';
 import { useGetListings } from '@/queries/api/shopkeeperComponents';
 import { FullListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
@@ -78,58 +78,60 @@ function ListingCard({ listing }: { listing: FullListingSchema }) {
     );
 }
 
-function ListingsTab({ status, onlyMine }: { status: ListingStatus; onlyMine: boolean }) {
+export default function ListingsRoute() {
+    const [onlyMine, setOnlyMine] = useState(false);
+    const [selectedStatuses, setSelectedStatuses] = useState<Record<ListingStatus, boolean>>({
+        open: true,
+        pending: true,
+        closed: false,
+    });
+
     const {
         user: { id: currentUserId },
     } = useStore();
 
     const { data: listings, isFetching } = useGetListings(
-        { body: { statuses: [status], owners: onlyMine ? [currentUserId] : null } },
+        {
+            body: {
+                statuses: Object.entries(selectedStatuses)
+                    .filter(([_, enabled]) => enabled)
+                    .map(([status, _]) => status as ListingStatus),
+                owners: onlyMine ? [currentUserId] : null,
+            },
+        },
         { placeholderData: keepPreviousData },
     );
-
-    return isFetching && !listings ? (
-        <div className="flex w-full flex-row justify-center">
-            <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500"></div>
-        </div>
-    ) : (
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {listings && listings.map((listing) => <ListingCard key={listing.id} listing={listing} />)}
-        </div>
-    );
-}
-
-const LISTING_STATUSES = ['open', 'pending', 'closed'] as const;
-
-export default function ListingsRoute() {
-    const [onlyMine, setOnlyMine] = useState(false);
 
     return (
         <div>
             <header className="flex w-full flex-col items-center justify-between space-y-2 p-2 md:flex-row">
                 <h1 className="content-center text-xl font-semibold">Shopkeeper</h1>
                 <div className="flex space-x-2">
-                    <Button variant="secondary" onClick={() => setOnlyMine(!onlyMine)}>
-                        {onlyMine ? 'Show all listings' : 'Show only my listings'}
-                    </Button>
+                    <ListingFiltersDialog
+                        selectedStatuses={selectedStatuses}
+                        setSelectedStatuses={setSelectedStatuses}
+                        onlyMine={onlyMine}
+                        setOnlyMine={setOnlyMine}
+                    />
                     <CreateListingDialog />
                 </div>
             </header>
             <div className="p-2">
-                <Tabs defaultValue="open">
-                    <TabsList className="grid w-full grid-cols-3">
-                        {LISTING_STATUSES.map((status) => (
-                            <TabsTrigger key={status} value={status} className="capitalize">
-                                {status}
-                            </TabsTrigger>
+                {isFetching && !listings ? (
+                    <div className="flex w-full flex-row justify-center">
+                        <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500"></div>
+                    </div>
+                ) : listings && listings.length !== 0 ? (
+                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {listings.map((listing) => (
+                            <ListingCard key={listing.id} listing={listing} />
                         ))}
-                    </TabsList>
-                    {LISTING_STATUSES.map((status) => (
-                        <TabsContent key={status} value={status}>
-                            <ListingsTab status={status} onlyMine={onlyMine} />
-                        </TabsContent>
-                    ))}
-                </Tabs>
+                    </div>
+                ) : (
+                    <div className="flex justify-center italic text-muted-foreground">
+                        No listings found - try checking your filters?
+                    </div>
+                )}
             </div>
         </div>
     );
