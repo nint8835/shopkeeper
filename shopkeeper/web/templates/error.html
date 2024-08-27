@@ -34,16 +34,6 @@
                 justify-content: center;
             }
 
-            pre {
-                font-family:
-                    Menlo,
-                    Consolas,
-                    Monaco,
-                    Liberation Mono,
-                    Lucida Console,
-                    monospace;
-            }
-
             a {
                 color: #0ea5e9;
                 transition: color 0.2s;
@@ -67,6 +57,16 @@
                 padding: 1rem;
                 background-color: hsl(0 0% 10%);
                 border-radius: 0.5rem;
+                margin-bottom: 0.5rem;
+                text-align: left;
+
+                font-family:
+                    Menlo,
+                    Consolas,
+                    Monaco,
+                    Liberation Mono,
+                    Lucida Console,
+                    monospace;
             }
         </style>
     </head>
@@ -74,7 +74,7 @@
         <div class="error-container">
             <h1>An error occurred.</h1>
             <div>
-                <pre class="error-message">{{ detail }}</pre>
+                <div class="error-message">{{ detail }}</div>
                 <div>Maybe try <a href="/">going home</a> and attempt that again?</div>
             </div>
         </div>
