@@ -1,17 +1,21 @@
 import asyncio
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import Response
 from starlette.staticfiles import StaticFiles
+from starlette.templating import Jinja2Templates
 from starlette.types import Scope
 
 from shopkeeper.bot import client
 from shopkeeper.config import config
 from shopkeeper.web.routers import auth_router, listing_images_router, listings_router
+
+templates = Jinja2Templates(directory="shopkeeper/web/templates")
 
 
 @asynccontextmanager
@@ -43,6 +47,21 @@ app = FastAPI(
     lifespan=lifespan,
     generate_unique_id_function=generate_unique_id,
 )
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> Response:
+    accept = request.headers.get("accept", "")
+    if "text/html" not in accept:
+        return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="error.html",
+        context={"detail": exc.detail},
+        status_code=exc.status_code,
+    )
+
 
 app.add_middleware(SessionMiddleware, secret_key=config.session_secret)
 

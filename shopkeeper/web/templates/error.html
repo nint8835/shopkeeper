@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Error - Shopkeeper</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <style>
+            html {
+                display: grid;
+                min-height: 100%;
+            }
+
+            body {
+                font-family:
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    avenir next,
+                    avenir,
+                    segoe ui,
+                    helvetica neue,
+                    helvetica,
+                    Cantarell,
+                    Ubuntu,
+                    roboto,
+                    noto,
+                    arial,
+                    sans-serif;
+
+                background-color: hsl(240 10% 3.9%);
+                color: hsl(0 0% 98%);
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            a {
+                color: #0ea5e9;
+                transition: color 0.2s;
+                text-decoration: none;
+            }
+
+            a:hover,
+            a:hover:visited {
+                color: #7dd3fc;
+            }
+
+            a:visited {
+                color: #0ea5e9;
+            }
+
+            .error-container {
+                text-align: center;
+            }
+
+            .error-message {
+                padding: 1rem;
+                background-color: hsl(0 0% 10%);
+                border-radius: 0.5rem;
+                margin-bottom: 0.5rem;
+                text-align: left;
+
+                font-family:
+                    Menlo,
+                    Consolas,
+                    Monaco,
+                    Liberation Mono,
+                    Lucida Console,
+                    monospace;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="error-container">
+            <h1>An error occurred.</h1>
+            <div>
+                <div class="error-message">{{ detail }}</div>
+                <div>Maybe try <a href="/">going home</a> and attempt that again?</div>
+            </div>
+        </div>
+    </body>
+</html>
