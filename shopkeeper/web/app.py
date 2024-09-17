@@ -11,7 +11,7 @@ from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 from starlette.types import Scope
 
-from shopkeeper.bot import client
+from shopkeeper.bot import client, guild
 from shopkeeper.config import config
 from shopkeeper.web.routers import auth_router, listing_images_router, listings_router
 
@@ -20,7 +20,11 @@ templates = Jinja2Templates(directory="shopkeeper/web/templates")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    asyncio.create_task(client.start(config.token))
+    await client.login(config.token)
+    if config.init_on_startup:
+        await client.tree.sync(guild=guild)
+
+    asyncio.create_task(client.connect())
 
     yield
 

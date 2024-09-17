@@ -49,5 +49,6 @@ app:
     COPY . .
 
     ENTRYPOINT ["python", "-m", "shopkeeper"]
+    CMD ["start"]
 
     SAVE IMAGE --push ghcr.io/nint8835/shopkeeper:latest

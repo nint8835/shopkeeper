@@ -14,6 +14,10 @@ app = typer.Typer()
 @app.command()
 def start() -> None:
     """Run Shopkeeper."""
+
+    if config.init_on_startup:
+        upgrade()
+
     uvicorn.run(
         "shopkeeper.web.app:app",
         host=config.bind_host,

@@ -27,6 +27,8 @@ class Config(BaseSettings):
 
     behind_reverse_proxy: bool = False
 
+    init_on_startup: bool = True
+
     @property
     def async_db_connection_uri(self) -> str:
         return f"sqlite+aiosqlite:///{self.db_path}"
