@@ -1,0 +1,27 @@
+name: shopkeeper
+
+services:
+    # Shopkeeper's image runs as a non-root user, so we need to fix the volume permissions
+    # https://pratikpc.medium.com/use-docker-compose-named-volumes-as-non-root-within-your-containers-1911eb30f731
+    fix-volume-owner:
+        image: alpine
+        user: root
+        group_add:
+            - 65532
+        volumes:
+            - data:/data/
+        command: chown -R 65532:65532 /data/
+
+    shopkeeper:
+        image: ghcr.io/nint8835/shopkeeper:latest
+        env_file: .env
+        ports:
+            - '8000:8000'
+        volumes:
+            - data:/data/
+        depends_on:
+            fix-volume-owner:
+                condition: service_completed_successfully
+
+volumes:
+    data:
