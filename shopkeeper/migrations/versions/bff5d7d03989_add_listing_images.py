@@ -102,6 +102,7 @@ async def backfill_images() -> None:
                 )
 
     session.commit()
+    await bot.close()
 
 
 def upgrade() -> None:
