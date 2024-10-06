@@ -92,6 +92,7 @@ class EditListing(app_commands.Group):
     ) -> None:
         """Edit the status of a listing."""
         try:
+            await interaction.response.defer(ephemeral=True)
             async with async_session() as session:
                 await Listing.edit(
                     listing,
@@ -99,7 +100,7 @@ class EditListing(app_commands.Group):
                     session,
                     status=status,
                 )
-            await interaction.response.send_message("Listing updated", ephemeral=True)
+            await interaction.followup.send("Listing updated", ephemeral=True)
         except HTTPException as e:
             await interaction.response.send_message(e.detail, ephemeral=True)
 
