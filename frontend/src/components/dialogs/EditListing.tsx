@@ -37,7 +37,7 @@ export default function EditListingDialog({ listing }: { listing: ListingSchema 
         },
     });
 
-    const { mutateAsync: editListing } = useEditListing();
+    const { mutateAsync: editListing, isPending: mutationPending } = useEditListing();
 
     function handleOpenChange(open: boolean) {
         form.reset({
@@ -142,7 +142,9 @@ export default function EditListingDialog({ listing }: { listing: ListingSchema 
                         <RootFormMessage />
 
                         <DialogFooter>
-                            <Button type="submit">Submit</Button>
+                            <Button type="submit" disabled={mutationPending}>
+                                Submit
+                            </Button>
                         </DialogFooter>
                     </form>
                 </Form>

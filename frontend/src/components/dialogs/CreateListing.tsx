@@ -37,7 +37,7 @@ export default function CreateListingDialog() {
         },
     });
 
-    const { mutateAsync: createListing } = useCreateListing();
+    const { mutateAsync: createListing, isPending: mutationPending } = useCreateListing();
 
     function handleOpenChange(open: boolean) {
         form.reset({ title: '', type: 'sell', description: '', price: '' });
@@ -138,7 +138,9 @@ export default function CreateListingDialog() {
                         <RootFormMessage />
 
                         <DialogFooter>
-                            <Button type="submit">Submit</Button>
+                            <Button type="submit" disabled={mutationPending}>
+                                Submit
+                            </Button>
                         </DialogFooter>
                     </form>
                 </Form>
