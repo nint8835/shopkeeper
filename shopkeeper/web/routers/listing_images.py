@@ -29,7 +29,10 @@ async def get_image(image_id: int, db: AsyncSession = Depends(get_db)) -> Any:
     if not image:
         raise HTTPException(404, "Image not found.")
 
-    return FileResponse(config.image_path / image.path)
+    return FileResponse(
+        config.image_path / image.path,
+        headers={"Cache-Control": "private, max-age=31536000"},
+    )
 
 
 @listing_images_router.get("/{image_id}/thumbnail", include_in_schema=False)
@@ -49,7 +52,11 @@ async def get_image_thumbnail(image_id: int, db: AsyncSession = Depends(get_db))
         img.save(img_bytes, format="PNG")
         img_bytes.seek(0)
 
-    return StreamingResponse(img_bytes, media_type="image/png")
+    return StreamingResponse(
+        img_bytes,
+        media_type="image/png",
+        headers={"Cache-Control": "private, max-age=31536000"},
+    )
 
 
 __all__ = ["listing_images_router"]
