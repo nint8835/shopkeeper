@@ -21,6 +21,8 @@ class ListingImage(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     path: Mapped[str]
+    width: Mapped[int]
+    height: Mapped[int]
 
     listing_id: Mapped[int] = mapped_column(ForeignKey("listings.id"))
     listing: Mapped["Listing"] = relationship(back_populates="images")
@@ -52,7 +54,12 @@ class ListingImage(Base):
         with open(file_path, "wb") as f:
             await attachment.save(f)
 
-        instance = ListingImage(listing_id=listing_id, path=str(image_path))
+        instance = ListingImage(
+            listing_id=listing_id,
+            path=str(image_path),
+            width=attachment.width,
+            height=attachment.height,
+        )
         session.add(instance)
 
         return instance

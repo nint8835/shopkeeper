@@ -13,6 +13,8 @@ export const listingStatusSchema = z.union([z.literal('open'), z.literal('pendin
 
 export const listingImageSchemaSchema = z.object({
     id: z.number(),
+    width: z.number(),
+    height: z.number(),
     url: z.string(),
     thumbnail_url: z.string(),
 });

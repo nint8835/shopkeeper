@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { useGetListings } from '@/queries/api/shopkeeperComponents';
 import { FullListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
-import { Masonry } from 'masonic';
+import { Masonry, type RenderComponentProps } from 'masonic';
 import { useState } from 'react';
 import Markdown from 'react-markdown';
 import remarkGemoji from 'remark-gemoji';
@@ -24,7 +24,7 @@ function DiscordMarkdownField({ text }: { text: string }) {
     );
 }
 
-function ListingCard({ data: listing }: { data: FullListingSchema }) {
+function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>) {
     const { user } = useStore();
 
     return (
@@ -54,7 +54,13 @@ function ListingCard({ data: listing }: { data: FullListingSchema }) {
                                     <CarouselItem key={image.id}>
                                         <Dialog>
                                             <DialogTrigger asChild>
-                                                <img className="w-full" loading="lazy" src={image.thumbnail_url} />
+                                                <img
+                                                    className="w-full"
+                                                    width={image.width}
+                                                    height={image.height}
+                                                    loading="lazy"
+                                                    src={image.thumbnail_url}
+                                                />
                                             </DialogTrigger>
                                             <DialogContent className="flex max-h-screen max-w-none items-center justify-center">
                                                 <img className="max-h-screen p-4" loading="lazy" src={image.url} />
