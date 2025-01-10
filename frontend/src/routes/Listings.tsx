@@ -10,9 +10,11 @@ import { cn } from '@/lib/utils';
 import { useGetListings } from '@/queries/api/shopkeeperComponents';
 import { FullListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
+import { Masonry } from 'masonic';
 import { useState } from 'react';
 import Markdown from 'react-markdown';
 import remarkGemoji from 'remark-gemoji';
+import { useWindowSize } from 'usehooks-ts';
 
 function DiscordMarkdownField({ text }: { text: string }) {
     return (
@@ -22,7 +24,7 @@ function DiscordMarkdownField({ text }: { text: string }) {
     );
 }
 
-function ListingCard({ listing }: { listing: FullListingSchema }) {
+function ListingCard({ data: listing }: { data: FullListingSchema }) {
     const { user } = useStore();
 
     return (
@@ -92,6 +94,7 @@ export default function ListingsRoute() {
         pending: true,
         closed: false,
     });
+    const { width: windowWidth } = useWindowSize();
 
     const {
         user: { id: currentUserId },
@@ -108,6 +111,17 @@ export default function ListingsRoute() {
         },
         { placeholderData: keepPreviousData },
     );
+
+    let columnCount;
+    if (windowWidth < 768) {
+        columnCount = 1;
+    } else if (windowWidth < 1024) {
+        columnCount = 2;
+    } else if (windowWidth < 1280) {
+        columnCount = 3;
+    } else {
+        columnCount = 4;
+    }
 
     return (
         <div>
@@ -129,11 +143,14 @@ export default function ListingsRoute() {
                         <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500"></div>
                     </div>
                 ) : listings && listings.length !== 0 ? (
-                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {listings.map((listing) => (
-                            <ListingCard key={listing.id} listing={listing} />
-                        ))}
-                    </div>
+                    <Masonry
+                        items={listings}
+                        render={ListingCard}
+                        columnGutter={8}
+                        columnCount={columnCount}
+                        itemKey={({ id }) => id}
+                        key={listings.length}
+                    />
                 ) : (
                     <div className="flex justify-center italic text-muted-foreground">
                         No listings found - try checking your filters?
