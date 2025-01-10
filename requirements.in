@@ -1,5 +1,6 @@
 aiosqlite==0.20.0
 alembic==1.13.1
+audioop-lts==0.2.1
 authlib==1.4.0
 discord.py==2.4.0
 fastapi==0.115.6
