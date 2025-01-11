@@ -8,12 +8,13 @@
         "build": "tsc && vite build",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview",
-        "gen-openapi": "npx openapi-codegen gen shopkeeper && npx ts-to-zod frontend/src/queries/api/shopkeeperSchemas.ts frontend/src/queries/api/shopkeeperZod.ts"
+        "gen-openapi": "npx openapi-codegen gen shopkeeper && npx ts-to-zod frontend/src/queries/api/shopkeeperSchemas.ts frontend/src/queries/api/shopkeeperZod.ts && npx prettier -w frontend/src/queries/**/*.ts"
     },
     "dependencies": {
         "@fontsource-variable/inter": "^5.0.18",
         "@hookform/resolvers": "^3.6.0",
         "@radix-ui/react-checkbox": "^1.1.1",
+        "@radix-ui/react-context-menu": "^2.2.4",
         "@radix-ui/react-dialog": "^1.1.1",
         "@radix-ui/react-label": "^2.1.0",
         "@radix-ui/react-select": "^2.1.1",

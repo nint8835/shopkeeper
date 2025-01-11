@@ -1,10 +1,11 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
+from shopkeeper.config import config
 from shopkeeper.models.listing import Listing
 from shopkeeper.web.dependencies.auth import require_discord_user
 from shopkeeper.web.dependencies.database import get_db
@@ -28,7 +29,9 @@ async def get_listings(
     db: AsyncSession = Depends(get_db),
 ) -> Any:
     """Retrieve a list of listings."""
-    listings_query = select(Listing).options(joinedload(Listing.images))
+    listings_query = (
+        select(Listing).options(joinedload(Listing.images)).filter_by(is_hidden=False)
+    )
 
     if filters.statuses is not None:
         listings_query = listings_query.filter(Listing.status.in_(filters.statuses))
@@ -77,6 +80,29 @@ async def edit_listing(
         status=listing.status,
         session=db,
     )
+
+
+@listings_router.post("/{listing_id}/hide", status_code=202)
+async def hide_listing(
+    listing_id: int,
+    db: AsyncSession = Depends(get_db),
+    user: DiscordUser = Depends(require_discord_user),
+) -> None:
+    """Hide a listing. This route requires you to be the owner of the bot."""
+    if user.id != str(config.owner_id):
+        raise HTTPException(403, "You do not have permission to hide listings.")
+
+    listing = (
+        await db.execute(select(Listing).filter_by(id=listing_id, is_hidden=False))
+    ).scalar_one_or_none()
+
+    if not listing:
+        raise HTTPException(404, "Listing not found.")
+
+    listing.is_hidden = True
+    await db.commit()
+
+    return None
 
 
 __all__ = ["listings_router"]

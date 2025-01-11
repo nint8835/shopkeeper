@@ -51,13 +51,16 @@ class Listing(Base):
     price: Mapped[str]
     type: Mapped[ListingType]
     status: Mapped[ListingStatus]
+    is_hidden: Mapped[bool] = mapped_column(default=False)
 
     owner_id: Mapped[int]
     message_id: Mapped[int]
     thread_id: Mapped[int]
 
     images: Mapped[list["ListingImage"]] = relationship(
-        back_populates="listing", lazy="raise"
+        back_populates="listing",
+        lazy="raise",
+        primaryjoin="and_(Listing.id == ListingImage.listing_id, ListingImage.is_hidden == False)",
     )
 
     @property

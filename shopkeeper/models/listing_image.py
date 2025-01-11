@@ -23,6 +23,7 @@ class ListingImage(Base):
     path: Mapped[str]
     width: Mapped[int]
     height: Mapped[int]
+    is_hidden: Mapped[bool] = mapped_column(default=False)
 
     listing_id: Mapped[int] = mapped_column(ForeignKey("listings.id"))
     listing: Mapped["Listing"] = relationship(back_populates="images")
