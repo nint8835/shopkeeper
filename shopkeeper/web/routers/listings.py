@@ -41,6 +41,9 @@ async def get_listings(
             Listing.owner_id.in_([int(owner) for owner in filters.owners])
         )
 
+    if filters.types is not None:
+        listings_query = listings_query.filter(Listing.type.in_(filters.types))
+
     return (await db.execute(listings_query)).unique().scalars().all()
 
 

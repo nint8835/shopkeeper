@@ -4,7 +4,7 @@
  * @version 0.1.0
  */
 import * as reactQuery from '@tanstack/react-query';
-import { ShopkeeperContext, useShopkeeperContext } from './shopkeeperContext';
+import { useShopkeeperContext, ShopkeeperContext } from './shopkeeperContext';
 import type * as Fetcher from './shopkeeperFetcher';
 import { shopkeeperFetch } from './shopkeeperFetcher';
 import type * as Schemas from './shopkeeperSchemas';

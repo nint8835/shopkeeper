@@ -10,7 +10,7 @@ import { queryClient } from '@/lib/query';
 import { useStore } from '@/lib/state';
 import { cn } from '@/lib/utils';
 import { useGetListings, useHideImage, useHideListing } from '@/queries/api/shopkeeperComponents';
-import { FullListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
+import type { FullListingSchema, ListingStatus, ListingType } from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
 import { Masonry, type RenderComponentProps } from 'masonic';
 import Markdown from 'react-markdown';
@@ -137,9 +137,10 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
 }
 
 export default function ListingsRoute() {
-    const [searchParams] = useSearchParams({ status: ['open', 'pending'] });
+    const [searchParams] = useSearchParams({ status: ['open', 'pending'], type: ['buy', 'sell'] });
     const filteredStatuses = searchParams.getAll('status') as ListingStatus[];
     const filteredOwners = searchParams.getAll('owner');
+    const filteredTypes = searchParams.getAll('type') as ListingType[];
 
     const { width: windowWidth } = useWindowSize();
 
@@ -148,6 +149,7 @@ export default function ListingsRoute() {
             body: {
                 statuses: filteredStatuses,
                 owners: filteredOwners.length > 0 ? filteredOwners : null,
+                types: filteredTypes,
             },
         },
         { placeholderData: keepPreviousData },

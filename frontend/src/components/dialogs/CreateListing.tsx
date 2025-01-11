@@ -50,7 +50,7 @@ export default function CreateListingDialog() {
             toast.success('Listing created successfully', {
                 action: { label: 'Open', onClick: () => window.open(newListing.url) },
             });
-            queryClient.invalidateQueries({ queryKey: ['api', 'listings', { status: 'open' }] });
+            queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
             handleOpenChange(false);
         } catch (e) {
             form.setError('root', { message: (e as Error).message || 'An unexpected error occurred' });
