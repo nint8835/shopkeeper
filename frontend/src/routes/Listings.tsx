@@ -13,8 +13,8 @@ import { useGetListings, useHideImage, useHideListing } from '@/queries/api/shop
 import { FullListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
 import { Masonry, type RenderComponentProps } from 'masonic';
-import { useState } from 'react';
 import Markdown from 'react-markdown';
+import { useSearchParams } from 'react-router-dom';
 import remarkGemoji from 'remark-gemoji';
 import { useWindowSize } from 'usehooks-ts';
 
@@ -137,25 +137,17 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
 }
 
 export default function ListingsRoute() {
-    const [onlyMine, setOnlyMine] = useState(false);
-    const [selectedStatuses, setSelectedStatuses] = useState<Record<ListingStatus, boolean>>({
-        open: true,
-        pending: true,
-        closed: false,
-    });
-    const { width: windowWidth } = useWindowSize();
+    const [searchParams] = useSearchParams({ status: ['open', 'pending'] });
+    const filteredStatuses = searchParams.getAll('status') as ListingStatus[];
+    const filteredOwners = searchParams.getAll('owner');
 
-    const {
-        user: { id: currentUserId },
-    } = useStore();
+    const { width: windowWidth } = useWindowSize();
 
     const { data: listings, isFetching } = useGetListings(
         {
             body: {
-                statuses: Object.entries(selectedStatuses)
-                    .filter(([_, enabled]) => enabled)
-                    .map(([status, _]) => status as ListingStatus),
-                owners: onlyMine ? [currentUserId] : null,
+                statuses: filteredStatuses,
+                owners: filteredOwners.length > 0 ? filteredOwners : null,
             },
         },
         { placeholderData: keepPreviousData },
@@ -177,12 +169,7 @@ export default function ListingsRoute() {
             <header className="flex w-full flex-col items-center justify-between space-y-2 p-2 md:flex-row">
                 <h1 className="content-center text-xl font-semibold">Shopkeeper</h1>
                 <div className="flex space-x-2">
-                    <ListingFiltersDialog
-                        selectedStatuses={selectedStatuses}
-                        setSelectedStatuses={setSelectedStatuses}
-                        onlyMine={onlyMine}
-                        setOnlyMine={setOnlyMine}
-                    />
+                    <ListingFiltersDialog />
                     <CreateListingDialog />
                 </div>
             </header>
