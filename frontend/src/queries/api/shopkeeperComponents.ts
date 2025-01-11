@@ -131,6 +131,43 @@ export const useEditListing = (
     });
 };
 
+export type HideListingPathParams = {
+    listingId: number;
+};
+
+export type HideListingError = Fetcher.ErrorWrapper<{
+    status: 422;
+    payload: Schemas.HTTPValidationError;
+}>;
+
+export type HideListingVariables = {
+    pathParams: HideListingPathParams;
+} & ShopkeeperContext['fetcherOptions'];
+
+/**
+ * Hide a listing. This route requires you to be the owner of the bot.
+ */
+export const fetchHideListing = (variables: HideListingVariables, signal?: AbortSignal) =>
+    shopkeeperFetch<void, HideListingError, undefined, {}, {}, HideListingPathParams>({
+        url: '/api/listings/{listingId}/hide',
+        method: 'post',
+        ...variables,
+        signal,
+    });
+
+/**
+ * Hide a listing. This route requires you to be the owner of the bot.
+ */
+export const useHideListing = (
+    options?: Omit<reactQuery.UseMutationOptions<void, HideListingError, HideListingVariables>, 'mutationFn'>,
+) => {
+    const { fetcherOptions } = useShopkeeperContext();
+    return reactQuery.useMutation<void, HideListingError, HideListingVariables>({
+        mutationFn: (variables: HideListingVariables) => fetchHideListing({ ...fetcherOptions, ...variables }),
+        ...options,
+    });
+};
+
 export type GetCurrentUserError = Fetcher.ErrorWrapper<undefined>;
 
 export type GetCurrentUserVariables = ShopkeeperContext['fetcherOptions'];
@@ -166,6 +203,43 @@ export const useGetCurrentUser = <TData = Schemas.DiscordUser | null>(
         queryFn: ({ signal }) => fetchGetCurrentUser({ ...fetcherOptions, ...variables }, signal),
         ...options,
         ...queryOptions,
+    });
+};
+
+export type HideImagePathParams = {
+    imageId: number;
+};
+
+export type HideImageError = Fetcher.ErrorWrapper<{
+    status: 422;
+    payload: Schemas.HTTPValidationError;
+}>;
+
+export type HideImageVariables = {
+    pathParams: HideImagePathParams;
+} & ShopkeeperContext['fetcherOptions'];
+
+/**
+ * Hide a listing image. This route requires you to be the owner of the bot.
+ */
+export const fetchHideImage = (variables: HideImageVariables, signal?: AbortSignal) =>
+    shopkeeperFetch<void, HideImageError, undefined, {}, {}, HideImagePathParams>({
+        url: '/images/{imageId}/hide',
+        method: 'post',
+        ...variables,
+        signal,
+    });
+
+/**
+ * Hide a listing image. This route requires you to be the owner of the bot.
+ */
+export const useHideImage = (
+    options?: Omit<reactQuery.UseMutationOptions<void, HideImageError, HideImageVariables>, 'mutationFn'>,
+) => {
+    const { fetcherOptions } = useShopkeeperContext();
+    return reactQuery.useMutation<void, HideImageError, HideImageVariables>({
+        mutationFn: (variables: HideImageVariables) => fetchHideImage({ ...fetcherOptions, ...variables }),
+        ...options,
     });
 };
 

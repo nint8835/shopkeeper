@@ -12,6 +12,7 @@ from shopkeeper.config import config
 from shopkeeper.models.listing_image import ListingImage
 from shopkeeper.web.dependencies.auth import require_discord_user
 from shopkeeper.web.dependencies.database import get_db
+from shopkeeper.web.schemas.discord_user import DiscordUser
 
 listing_images_router = APIRouter(
     tags=["Listing Images"], dependencies=[Depends(require_discord_user)]
@@ -57,6 +58,29 @@ async def get_image_thumbnail(image_id: int, db: AsyncSession = Depends(get_db))
         media_type="image/png",
         headers={"Cache-Control": "private, max-age=31536000"},
     )
+
+
+@listing_images_router.post("/{image_id}/hide", status_code=202)
+async def hide_image(
+    image_id: int,
+    db: AsyncSession = Depends(get_db),
+    user: DiscordUser = Depends(require_discord_user),
+) -> Any:
+    """Hide a listing image. This route requires you to be the owner of the bot."""
+    if user.id != str(config.owner_id):
+        raise HTTPException(403, "You do not have permission to hide images.")
+
+    image = (
+        await db.execute(select(ListingImage).filter_by(id=image_id, is_hidden=False))
+    ).scalar_one_or_none()
+
+    if not image:
+        raise HTTPException(404, "Image not found.")
+
+    image.is_hidden = True
+    await db.commit()
+
+    return None
 
 
 __all__ = ["listing_images_router"]
