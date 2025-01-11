@@ -51,6 +51,7 @@ class Listing(Base):
     price: Mapped[str]
     type: Mapped[ListingType]
     status: Mapped[ListingStatus]
+    is_hidden: Mapped[bool] = mapped_column(default=False)
 
     owner_id: Mapped[int]
     message_id: Mapped[int]
