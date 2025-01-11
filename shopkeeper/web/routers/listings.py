@@ -28,7 +28,9 @@ async def get_listings(
     db: AsyncSession = Depends(get_db),
 ) -> Any:
     """Retrieve a list of listings."""
-    listings_query = select(Listing).options(joinedload(Listing.images))
+    listings_query = (
+        select(Listing).options(joinedload(Listing.images)).filter_by(is_hidden=False)
+    )
 
     if filters.statuses is not None:
         listings_query = listings_query.filter(Listing.status.in_(filters.statuses))

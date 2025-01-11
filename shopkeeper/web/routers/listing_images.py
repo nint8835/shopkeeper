@@ -23,7 +23,7 @@ async def get_image(image_id: int, db: AsyncSession = Depends(get_db)) -> Any:
     """Retrieve a listing image."""
 
     image = (
-        await db.execute(select(ListingImage).filter_by(id=image_id))
+        await db.execute(select(ListingImage).filter_by(id=image_id, is_hidden=False))
     ).scalar_one_or_none()
 
     if not image:
@@ -40,7 +40,7 @@ async def get_image_thumbnail(image_id: int, db: AsyncSession = Depends(get_db))
     """Retrieve a listing image thumbnail."""
 
     image = (
-        await db.execute(select(ListingImage).filter_by(id=image_id))
+        await db.execute(select(ListingImage).filter_by(id=image_id, is_hidden=False))
     ).scalar_one_or_none()
 
     if not image:
