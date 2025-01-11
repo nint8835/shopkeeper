@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { queryClient } from '@/lib/query';
 import { useStore } from '@/lib/state';
 import { cn } from '@/lib/utils';
-import { useGetListings } from '@/queries/api/shopkeeperComponents';
+import { useGetListings, useHideListing } from '@/queries/api/shopkeeperComponents';
 import { FullListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
 import { Masonry, type RenderComponentProps } from 'masonic';
@@ -26,6 +27,7 @@ function DiscordMarkdownField({ text }: { text: string }) {
 
 function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>) {
     const { user } = useStore();
+    const { mutateAsync: hideListing, isPending: hidePending } = useHideListing();
 
     return (
         <Card
@@ -85,9 +87,23 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                         Open
                     </a>
                 </Button>
-                {listing.status !== 'closed' && (user.is_owner || user.id === listing.owner_id) && (
-                    <EditListingDialog listing={listing} />
-                )}
+                <div className="space-x-2">
+                    {listing.status !== 'closed' && (user.is_owner || user.id === listing.owner_id) && (
+                        <EditListingDialog listing={listing} />
+                    )}
+                    {user.is_owner && (
+                        <Button
+                            variant="destructive"
+                            onClick={async () => {
+                                await hideListing({ pathParams: { listingId: listing.id } });
+                                queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
+                            }}
+                            disabled={hidePending}
+                        >
+                            Hide
+                        </Button>
+                    )}
+                </div>
             </CardFooter>
         </Card>
     );
