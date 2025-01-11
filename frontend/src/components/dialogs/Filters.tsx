@@ -86,6 +86,36 @@ function OwnerFilter() {
     );
 }
 
+function TypeFilter() {
+    const [searchParams, setSearchParams] = useSearchParams({ type: ['sell', 'buy'] });
+
+    return (
+        <div className="space-y-2">
+            <Label>Type</Label>
+            <div className="flex items-center space-x-2">
+                <Checkbox
+                    id="sell-type-checkbox"
+                    checked={searchParams.getAll('type').includes('sell')}
+                    onCheckedChange={paramToggler(searchParams, setSearchParams, 'type', 'sell')}
+                />
+                <label htmlFor="sell-type-checkbox" className="text-sm leading-none">
+                    For sale
+                </label>
+            </div>
+            <div className="flex items-center space-x-2">
+                <Checkbox
+                    id="buy-type-checkbox"
+                    checked={searchParams.getAll('type').includes('buy')}
+                    onCheckedChange={paramToggler(searchParams, setSearchParams, 'type', 'buy')}
+                />
+                <label htmlFor="buy-type-checkbox" className="text-sm leading-none">
+                    Looking to buy
+                </label>
+            </div>
+        </div>
+    );
+}
+
 export default function ListingFiltersDialog() {
     return (
         <Dialog>
@@ -100,6 +130,7 @@ export default function ListingFiltersDialog() {
                 </DialogHeader>
                 <div className="space-y-8">
                     <StatusFilter />
+                    <TypeFilter />
                     <OwnerFilter />
                 </div>
             </DialogContent>

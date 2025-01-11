@@ -39,6 +39,7 @@ export const listingSchemaSchema = z.object({
 export const searchListingsSchemaSchema = z.object({
     statuses: z.array(listingStatusSchema).optional().nullable(),
     owners: z.array(z.string()).optional().nullable(),
+    types: z.array(listingTypeSchema).optional().nullable(),
 });
 
 export const createListingSchemaSchema = z.object({

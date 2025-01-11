@@ -31,6 +31,7 @@ class FullListingSchema(ListingSchema):
 class SearchListingsSchema(BaseModel):
     statuses: list[ListingStatus] | None = None
     owners: list[str] | None = None
+    types: list[ListingType] | None = None
 
 
 class CreateListingSchema(BaseModel):

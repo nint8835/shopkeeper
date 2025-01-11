@@ -83,6 +83,7 @@ export type ListingType = 'buy' | 'sell';
 export type SearchListingsSchema = {
     statuses?: ListingStatus[] | null;
     owners?: string[] | null;
+    types?: ListingType[] | null;
 };
 
 export type ValidationError = {
