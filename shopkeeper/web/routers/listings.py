@@ -44,6 +44,11 @@ async def get_listings(
     if filters.types is not None:
         listings_query = listings_query.filter(Listing.type.in_(filters.types))
 
+    if filters.has_issues is not None:
+        listings_query = listings_query.filter(
+            Listing.get_issues_clause() == filters.has_issues
+        )
+
     return (await db.execute(listings_query)).unique().scalars().all()
 
 

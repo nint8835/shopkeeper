@@ -225,10 +225,11 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
 }
 
 export default function ListingsRoute() {
-    const [searchParams] = useSearchParams({ status: ['open', 'pending'], type: ['buy', 'sell'] });
+    const [searchParams, setSearchParams] = useSearchParams({ status: ['open', 'pending'], type: ['buy', 'sell'] });
     const filteredStatuses = searchParams.getAll('status') as ListingStatus[];
     const filteredOwners = searchParams.getAll('owner');
     const filteredTypes = searchParams.getAll('type') as ListingType[];
+    const filterHasIssues = searchParams.get('has_issues');
 
     const { width: windowWidth } = useWindowSize();
 
@@ -238,11 +239,13 @@ export default function ListingsRoute() {
                 statuses: filteredStatuses,
                 owners: filteredOwners.length > 0 ? filteredOwners : null,
                 types: filteredTypes,
+                has_issues: filterHasIssues ? filterHasIssues === 'true' : null,
             },
         },
         { placeholderData: keepPreviousData },
     );
     const { data: issueCount } = useGetUserIssueCount({});
+    const currentUserId = useStore((state) => state.user?.id);
 
     let columnCount;
     if (windowWidth < 768) {
@@ -261,7 +264,20 @@ export default function ListingsRoute() {
                 <h1 className="content-center text-xl font-semibold">Shopkeeper</h1>
                 <div className="flex flex-col gap-2 md:flex-row">
                     {issueCount && issueCount > 0 && (
-                        <Button variant="destructive" className="space-x-2">
+                        <Button
+                            variant="destructive"
+                            className="space-x-2"
+                            onClick={() => {
+                                const newParams = new URLSearchParams();
+                                newParams.set('has_issues', 'true');
+                                newParams.set('owner', currentUserId);
+                                newParams.set('status', 'open');
+                                newParams.append('status', 'pending');
+                                newParams.set('type', 'buy');
+                                newParams.append('type', 'sell');
+                                setSearchParams(newParams);
+                            }}
+                        >
                             <AlertCircle />
                             <span>{issueCount} listings have issues</span>
                         </Button>

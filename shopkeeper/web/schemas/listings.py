@@ -45,6 +45,7 @@ class SearchListingsSchema(BaseModel):
     statuses: list[ListingStatus] | None = None
     owners: list[str] | None = None
     types: list[ListingType] | None = None
+    has_issues: bool | None = None
 
 
 class CreateListingSchema(BaseModel):

@@ -97,6 +97,7 @@ export type SearchListingsSchema = {
     statuses?: ListingStatus[] | null;
     owners?: string[] | null;
     types?: ListingType[] | null;
+    has_issues?: boolean | null;
 };
 
 export type ValidationError = {
