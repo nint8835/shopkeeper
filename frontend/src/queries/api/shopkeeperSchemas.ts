@@ -50,6 +50,7 @@ export type FullListingSchema = {
     status: ListingStatus;
     url: string;
     owner_id: string;
+    issues: ListingIssueDetailsSchema[];
     images: ListingImageSchema[];
 };
 
@@ -65,6 +66,11 @@ export type ListingImageSchema = {
     thumbnail_url: string;
 };
 
+export type ListingIssueDetailsSchema = {
+    title: string;
+    description: string;
+};
+
 export type ListingSchema = {
     id: number;
     title: string;
@@ -74,6 +80,7 @@ export type ListingSchema = {
     status: ListingStatus;
     url: string;
     owner_id: string;
+    issues: ListingIssueDetailsSchema[];
 };
 
 export type ListingStatus = 'open' | 'pending' | 'closed';

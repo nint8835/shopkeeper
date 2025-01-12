@@ -11,6 +11,11 @@ export const discordUserSchema = z.object({
 
 export const listingStatusSchema = z.union([z.literal('open'), z.literal('pending'), z.literal('closed')]);
 
+export const listingIssueDetailsSchemaSchema = z.object({
+    title: z.string(),
+    description: z.string(),
+});
+
 export const listingImageSchemaSchema = z.object({
     id: z.number(),
     width: z.number(),
@@ -34,6 +39,7 @@ export const listingSchemaSchema = z.object({
     status: listingStatusSchema,
     url: z.string(),
     owner_id: z.string(),
+    issues: z.array(listingIssueDetailsSchemaSchema),
 });
 
 export const searchListingsSchemaSchema = z.object({
@@ -65,6 +71,7 @@ export const fullListingSchemaSchema = z.object({
     status: listingStatusSchema,
     url: z.string(),
     owner_id: z.string(),
+    issues: z.array(listingIssueDetailsSchemaSchema),
     images: z.array(listingImageSchemaSchema),
 });
 

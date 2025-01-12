@@ -11,6 +11,11 @@ class ListingImageSchema(BaseModel):
     thumbnail_url: str
 
 
+class ListingIssueDetailsSchema(BaseModel):
+    title: str
+    description: str
+
+
 class ListingSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True, coerce_numbers_to_str=True)
 
@@ -22,6 +27,7 @@ class ListingSchema(BaseModel):
     status: ListingStatus
     url: str
     owner_id: str
+    issues: list[ListingIssueDetailsSchema]
 
 
 class FullListingSchema(ListingSchema):

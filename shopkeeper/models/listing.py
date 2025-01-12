@@ -1,10 +1,12 @@
+from dataclasses import dataclass
 from difflib import unified_diff
 from enum import Enum
 from types import EllipsisType
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Callable, cast
 
 import discord
 from fastapi import HTTPException
+from sqlalchemy import ColumnElement, and_, not_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -84,6 +86,14 @@ class Listing(Base):
             embed.add_field(name="Price", value=self.price, inline=True)
 
         return embed
+
+    @property
+    def issues(self) -> list["ListingIssueDetails"]:
+        return [issue.details for issue in all_listing_issues if issue.predicate(self)]
+
+    @staticmethod
+    def get_issues_clause() -> ColumnElement[bool]:
+        return or_(*[issue.sql_clause() for issue in all_listing_issues])
 
     @classmethod
     async def create(
@@ -234,3 +244,50 @@ class Listing(Base):
             )
 
         return listing_instance
+
+
+@dataclass
+class ListingIssueDetails:
+    title: str
+    description: str
+
+
+@dataclass
+class ListingIssues:
+    details: ListingIssueDetails
+    sql_clause: Callable[[], ColumnElement[bool]]
+    predicate: Callable[["Listing"], bool]
+
+
+all_listing_issues: list[ListingIssues] = [
+    ListingIssues(
+        details=ListingIssueDetails(
+            title="No images",
+            description="Your listing has no images. Please send one or more photos of the item in your listing's thread.",
+        ),
+        sql_clause=lambda: and_(
+            not_(Listing.images.any()), Listing.type == ListingType.Sell
+        ),
+        predicate=lambda listing: (
+            len(listing.images) == 0 and listing.type == ListingType.Sell
+        ),
+    ),
+    ListingIssues(
+        details=ListingIssueDetails(
+            title="No price",
+            description="Your listing has no price. Please add a price to your listing.",
+        ),
+        sql_clause=lambda: and_(Listing.price == "", Listing.type == ListingType.Sell),
+        predicate=lambda listing: (
+            listing.price == "" and listing.type == ListingType.Sell
+        ),
+    ),
+    ListingIssues(
+        details=ListingIssueDetails(
+            title="No description",
+            description="Your listing has no description. Please add a description to your listing.",
+        ),
+        sql_clause=lambda: Listing.description == "",
+        predicate=lambda listing: listing.description == "",
+    ),
+]
