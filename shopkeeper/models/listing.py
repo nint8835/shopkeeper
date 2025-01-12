@@ -89,6 +89,9 @@ class Listing(Base):
 
     @property
     def issues(self) -> list["ListingIssueDetails"]:
+        if self.status == ListingStatus.Closed:
+            return []
+
         return [issue.details for issue in all_listing_issues if issue.predicate(self)]
 
     @staticmethod
@@ -269,7 +272,7 @@ all_listing_issues: list[ListingIssues] = [
     ListingIssues(
         details=ListingIssueDetails(
             title="No images",
-            description="Your listing has no images. Please send one or more photos of the item in your listing's thread.",
+            description="Your listing has no images. Please send at least one photo the item in your listing's thread.",
             icon="image",
             resolution_location="discord",
         ),
@@ -283,7 +286,7 @@ all_listing_issues: list[ListingIssues] = [
     ListingIssues(
         details=ListingIssueDetails(
             title="No price",
-            description="Your listing has no price. Please add a price to your listing.",
+            description="Your listing has no price.",
             icon="dollar-sign",
         ),
         sql_clause=lambda: and_(Listing.price == "", Listing.type == ListingType.Sell),
@@ -294,7 +297,7 @@ all_listing_issues: list[ListingIssues] = [
     ListingIssues(
         details=ListingIssueDetails(
             title="No description",
-            description="Your listing has no description. Please add a description to your listing.",
+            description="Your listing has no description.",
             icon="text",
         ),
         sql_clause=lambda: Listing.description == "",
