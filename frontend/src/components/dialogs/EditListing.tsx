@@ -19,14 +19,19 @@ import { ListingSchema } from '@/queries/api/shopkeeperSchemas';
 import { editListingSchemaSchema } from '@/queries/api/shopkeeperZod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DialogTitle } from '@radix-ui/react-dialog';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-export default function EditListingDialog({ listing }: { listing: ListingSchema }) {
-    const [open, setOpen] = useState(false);
-
+export default function EditListingDialog({
+    listing,
+    open,
+    setOpen,
+}: {
+    listing: ListingSchema;
+    open: boolean;
+    setOpen: (open: boolean) => void;
+}) {
     const form = useForm<z.infer<typeof editListingSchemaSchema>>({
         resolver: zodResolver(editListingSchemaSchema),
         defaultValues: {

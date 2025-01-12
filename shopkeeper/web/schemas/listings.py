@@ -1,6 +1,11 @@
 from pydantic import BaseModel, ConfigDict, Field
 
-from shopkeeper.models.listing import ListingStatus, ListingType
+from shopkeeper.models.listing import (
+    ListingIssueIcon,
+    ListingIssueResolutionLocation,
+    ListingStatus,
+    ListingType,
+)
 
 
 class ListingImageSchema(BaseModel):
@@ -14,6 +19,8 @@ class ListingImageSchema(BaseModel):
 class ListingIssueDetailsSchema(BaseModel):
     title: str
     description: str
+    icon: ListingIssueIcon
+    resolution_location: ListingIssueResolutionLocation
 
 
 class ListingSchema(BaseModel):

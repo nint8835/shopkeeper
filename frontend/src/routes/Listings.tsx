@@ -11,10 +11,17 @@ import { queryClient } from '@/lib/query';
 import { useStore } from '@/lib/state';
 import { cn } from '@/lib/utils';
 import { useGetListings, useHideImage, useHideListing } from '@/queries/api/shopkeeperComponents';
-import type { FullListingSchema, ListingStatus, ListingType } from '@/queries/api/shopkeeperSchemas';
+import type {
+    FullListingSchema,
+    ListingIssueIcon,
+    ListingIssueResolutionLocation,
+    ListingStatus,
+    ListingType,
+} from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
-import { CircleAlert } from 'lucide-react';
+import { CircleAlert, DollarSign, Image, LucideProps, Text } from 'lucide-react';
 import { Masonry, type RenderComponentProps } from 'masonic';
+import React, { useState } from 'react';
 import Markdown from 'react-markdown';
 import { useSearchParams } from 'react-router-dom';
 import remarkGemoji from 'remark-gemoji';
@@ -28,9 +35,43 @@ function DiscordMarkdownField({ text }: { text: string }) {
     );
 }
 
-function ListingAlertDialog({ listing }: { listing: FullListingSchema }) {
+const issueIcons: Record<ListingIssueIcon, React.FC<LucideProps>> = {
+    'dollar-sign': DollarSign,
+    image: Image,
+    text: Text,
+};
+
+function ListingAlertDialog({
+    listing,
+    setEditDialogOpen,
+}: {
+    listing: FullListingSchema;
+    setEditDialogOpen: (open: boolean) => void;
+}) {
+    const [open, setOpen] = useState(false);
+
+    const issueResolutionButtons: Record<ListingIssueResolutionLocation, React.FC> = {
+        ui: () => (
+            <Button
+                onClick={() => {
+                    setOpen(false);
+                    setEditDialogOpen(true);
+                }}
+            >
+                Edit
+            </Button>
+        ),
+        discord: () => (
+            <Button asChild>
+                <a href={listing.url} target="_blank">
+                    Open
+                </a>
+            </Button>
+        ),
+    };
+
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger>
                 <TooltipProvider>
                     <Tooltip>
@@ -45,8 +86,24 @@ function ListingAlertDialog({ listing }: { listing: FullListingSchema }) {
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Listing Issues</DialogTitle>
+                    <DialogTitle>Listing issues</DialogTitle>
                 </DialogHeader>
+
+                {listing.issues.map((issue) => {
+                    const IssueIcon = issueIcons[issue.icon];
+                    const ResolutionButton = issueResolutionButtons[issue.resolution_location];
+
+                    return (
+                        <div key={issue.title} className="flex flex-row items-center space-x-2">
+                            <IssueIcon height="32px" width="32px" className="h-full" />
+                            <div className="flex-1">
+                                <div className="text-sm font-medium">{issue.title}</div>
+                                <div className="text-sm text-muted-foreground">{issue.description}</div>
+                            </div>
+                            <ResolutionButton />
+                        </div>
+                    );
+                })}
             </DialogContent>
         </Dialog>
     );
@@ -56,6 +113,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
     const { user } = useStore();
     const { mutateAsync: hideListing, isPending: hidePending } = useHideListing();
     const { mutateAsync: hideImage, isPending: hideImagePending } = useHideImage();
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
 
     return (
         <Card
@@ -65,7 +123,9 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                 { open: '', pending: 'border-l-yellow-400', closed: 'border-l-red-400' }[listing.status],
             )}
         >
-            {listing.issues.length > 0 && listing.owner_id === user.id && <ListingAlertDialog listing={listing} />}
+            {listing.issues.length > 0 && listing.owner_id === user.id && (
+                <ListingAlertDialog listing={listing} setEditDialogOpen={setEditDialogOpen} />
+            )}
             <CardHeader>
                 <CardTitle className="w-full overflow-hidden text-ellipsis" title={listing.title}>
                     {listing.title}
@@ -143,7 +203,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                 </Button>
                 <div className="space-x-2">
                     {listing.status !== 'closed' && (user.is_owner || user.id === listing.owner_id) && (
-                        <EditListingDialog listing={listing} />
+                        <EditListingDialog listing={listing} open={editDialogOpen} setOpen={setEditDialogOpen} />
                     )}
                     {user.is_owner && (
                         <Button

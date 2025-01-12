@@ -69,7 +69,13 @@ export type ListingImageSchema = {
 export type ListingIssueDetailsSchema = {
     title: string;
     description: string;
+    icon: ListingIssueIcon;
+    resolution_location: ListingIssueResolutionLocation;
 };
+
+export type ListingIssueIcon = 'image' | 'text' | 'dollar-sign';
+
+export type ListingIssueResolutionLocation = 'ui' | 'discord';
 
 export type ListingSchema = {
     id: number;

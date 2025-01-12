@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from difflib import unified_diff
 from enum import Enum
 from types import EllipsisType
-from typing import TYPE_CHECKING, Callable, cast
+from typing import TYPE_CHECKING, Callable, Literal, cast
 
 import discord
 from fastapi import HTTPException
@@ -246,10 +246,16 @@ class Listing(Base):
         return listing_instance
 
 
+type ListingIssueIcon = Literal["image", "text", "dollar-sign"]
+type ListingIssueResolutionLocation = Literal["ui", "discord"]
+
+
 @dataclass
 class ListingIssueDetails:
     title: str
     description: str
+    icon: ListingIssueIcon
+    resolution_location: ListingIssueResolutionLocation = "ui"
 
 
 @dataclass
@@ -264,6 +270,8 @@ all_listing_issues: list[ListingIssues] = [
         details=ListingIssueDetails(
             title="No images",
             description="Your listing has no images. Please send one or more photos of the item in your listing's thread.",
+            icon="image",
+            resolution_location="discord",
         ),
         sql_clause=lambda: and_(
             not_(Listing.images.any()), Listing.type == ListingType.Sell
@@ -276,6 +284,7 @@ all_listing_issues: list[ListingIssues] = [
         details=ListingIssueDetails(
             title="No price",
             description="Your listing has no price. Please add a price to your listing.",
+            icon="dollar-sign",
         ),
         sql_clause=lambda: and_(Listing.price == "", Listing.type == ListingType.Sell),
         predicate=lambda listing: (
@@ -286,6 +295,7 @@ all_listing_issues: list[ListingIssues] = [
         details=ListingIssueDetails(
             title="No description",
             description="Your listing has no description. Please add a description to your listing.",
+            icon="text",
         ),
         sql_clause=lambda: Listing.description == "",
         predicate=lambda listing: listing.description == "",
