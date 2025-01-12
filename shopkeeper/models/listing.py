@@ -11,10 +11,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, joinedload, mapped_column, relationship
 
 import shopkeeper.bot as bot
+import shopkeeper.models.listing_event as listing_event
 from shopkeeper.config import config
 from shopkeeper.db import Base
 
 if TYPE_CHECKING:
+    from .listing_event import ListingEvent
     from .listing_image import ListingImage
 
 
@@ -63,6 +65,9 @@ class Listing(Base):
         back_populates="listing",
         lazy="raise",
         primaryjoin="and_(Listing.id == ListingImage.listing_id, ListingImage.is_hidden == False)",
+    )
+    events: Mapped[list["ListingEvent"]] = relationship(
+        back_populates="listing", lazy="raise"
     )
 
     @property
@@ -115,6 +120,7 @@ class Listing(Base):
             price=price,
             owner_id=owner_id,
             status=ListingStatus.Open,
+            images=[],
         )
 
         marketplace_channel = cast(
@@ -135,6 +141,14 @@ class Listing(Base):
 
         async with session.begin():
             session.add(new_listing)
+            await session.flush()
+            session.add(
+                listing_event.ListingEvent(
+                    listing_id=new_listing.id,
+                    type=listing_event.EventType.ListingCreated,
+                    to_value=new_listing.title,
+                )
+            )
             await session.commit()
 
         if config.events_channel_id is not None:
@@ -194,12 +208,21 @@ class Listing(Base):
             )
 
             edited_message_sections: list[str] = []
+            listing_events: list["ListingEvent"] = []
             should_close_thread = False
 
             if title is not ...:
                 if listing_instance.title != title:
                     edited_message_sections.append(
                         f"Title changed from {listing_instance.title} to {title}"
+                    )
+                    listing_events.append(
+                        listing_event.ListingEvent(
+                            listing_id=listing_instance.id,
+                            type=listing_event.EventType.TitleChanged,
+                            from_value=listing_instance.title,
+                            to_value=title,
+                        )
                     )
                     await thread.edit(name=title)
 
@@ -220,12 +243,28 @@ class Listing(Base):
                     edited_message_sections.append(
                         f"Description changed:\n```diff\n{'\n'.join(diff)}\n```"
                     )
+                    listing_events.append(
+                        listing_event.ListingEvent(
+                            listing_id=listing_instance.id,
+                            type=listing_event.EventType.DescriptionChanged,
+                            from_value=listing_instance.description,
+                            to_value=description,
+                        )
+                    )
 
                 listing_instance.description = description
             if price is not ...:
                 if listing_instance.price != price:
                     edited_message_sections.append(
                         f"Price changed from {stringify_diff_field(listing_instance.price)} to {stringify_diff_field(price)}"
+                    )
+                    listing_events.append(
+                        listing_event.ListingEvent(
+                            listing_id=listing_instance.id,
+                            type=listing_event.EventType.PriceChanged,
+                            from_value=listing_instance.price,
+                            to_value=price,
+                        )
                     )
 
                 listing_instance.price = price
@@ -234,10 +273,21 @@ class Listing(Base):
                     edited_message_sections.append(
                         f"Status changed from {listing_instance.status.name} to {status.name}"
                     )
+                    listing_events.append(
+                        listing_event.ListingEvent(
+                            listing_id=listing_instance.id,
+                            type=listing_event.EventType.StatusChanged,
+                            from_value=listing_instance.status.name,
+                            to_value=status.name,
+                        )
+                    )
                     if status == ListingStatus.Closed:
                         should_close_thread = True
 
                 listing_instance.status = status
+
+            if listing_events:
+                session.add_all(listing_events)
 
             await session.commit()
 
