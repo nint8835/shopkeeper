@@ -13,3 +13,9 @@ export const useStore = create<State>()(
         setUser: (user) => set({ user }),
     })),
 );
+
+export const defaultQueryParams = {
+    status: ['open', 'pending'],
+    type: ['buy', 'sell'],
+    owner: [] as string[],
+};

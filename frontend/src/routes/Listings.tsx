@@ -8,7 +8,7 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { queryClient } from '@/lib/query';
-import { useStore } from '@/lib/state';
+import { defaultQueryParams, useStore } from '@/lib/state';
 import { cn } from '@/lib/utils';
 import { useGetListings, useGetUserIssueCount, useHideImage, useHideListing } from '@/queries/api/shopkeeperComponents';
 import type {
@@ -19,7 +19,7 @@ import type {
     ListingType,
 } from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
-import { AlertCircle, CircleAlert, DollarSign, Image, LucideProps, Text } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CircleAlert, DollarSign, Image, LucideProps, Text } from 'lucide-react';
 import { Masonry, type RenderComponentProps } from 'masonic';
 import React, { useState } from 'react';
 import Markdown from 'react-markdown';
@@ -225,7 +225,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
 }
 
 export default function ListingsRoute() {
-    const [searchParams, setSearchParams] = useSearchParams({ status: ['open', 'pending'], type: ['buy', 'sell'] });
+    const [searchParams, setSearchParams] = useSearchParams(defaultQueryParams);
     const filteredStatuses = searchParams.getAll('status') as ListingStatus[];
     const filteredOwners = searchParams.getAll('owner');
     const filteredTypes = searchParams.getAll('type') as ListingType[];
@@ -236,9 +236,10 @@ export default function ListingsRoute() {
     const { data: listings, isFetching } = useGetListings(
         {
             body: {
-                statuses: filteredStatuses,
+                statuses:
+                    filteredStatuses.length > 0 ? filteredStatuses : (defaultQueryParams.status as ListingStatus[]),
                 owners: filteredOwners.length > 0 ? filteredOwners : null,
-                types: filteredTypes,
+                types: filteredTypes.length > 0 ? filteredTypes : (defaultQueryParams.type as ListingType[]),
                 has_issues: filterHasIssues ? filterHasIssues === 'true' : null,
             },
         },
@@ -258,30 +259,42 @@ export default function ListingsRoute() {
         columnCount = 4;
     }
 
+    const inIssueView = filterHasIssues === 'true';
+
     return (
         <div>
             <header className="flex w-full flex-col items-center justify-between space-y-2 p-2 md:flex-row">
                 <h1 className="content-center text-xl font-semibold">Shopkeeper</h1>
                 <div className="flex flex-col gap-2 md:flex-row">
-                    {issueCount && issueCount > 0 && (
-                        <Button
-                            variant="destructive"
-                            className="space-x-2"
-                            onClick={() => {
-                                const newParams = new URLSearchParams();
-                                newParams.set('has_issues', 'true');
-                                newParams.set('owner', currentUserId);
-                                newParams.set('status', 'open');
-                                newParams.append('status', 'pending');
-                                newParams.set('type', 'buy');
-                                newParams.append('type', 'sell');
-                                setSearchParams(newParams);
-                            }}
-                        >
-                            <AlertCircle />
-                            <span>{issueCount} listings have issues</span>
-                        </Button>
-                    )}
+                    {((issueCount && issueCount > 0) || inIssueView) &&
+                        (inIssueView ? (
+                            <Button
+                                variant="secondary"
+                                className="space-x-2"
+                                onClick={() => {
+                                    setSearchParams({});
+                                }}
+                            >
+                                <ArrowLeft />
+                                <span>Back to all listings</span>
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="destructive"
+                                className="space-x-2"
+                                onClick={() => {
+                                    setSearchParams({
+                                        has_issues: 'true',
+                                        owner: [currentUserId],
+                                        status: [],
+                                        type: [],
+                                    });
+                                }}
+                            >
+                                <AlertCircle />
+                                <span>{issueCount} listings have issues</span>
+                            </Button>
+                        ))}
                     <div className="space-x-2">
                         <ListingFiltersDialog />
                         <CreateListingDialog />
