@@ -5,14 +5,23 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { queryClient } from '@/lib/query';
-import { useStore } from '@/lib/state';
+import { defaultQueryParams, useStore } from '@/lib/state';
 import { cn } from '@/lib/utils';
-import { useGetListings, useHideImage, useHideListing } from '@/queries/api/shopkeeperComponents';
-import type { FullListingSchema, ListingStatus, ListingType } from '@/queries/api/shopkeeperSchemas';
+import { useGetListings, useGetUserIssueCount, useHideImage, useHideListing } from '@/queries/api/shopkeeperComponents';
+import type {
+    FullListingSchema,
+    ListingIssueIcon,
+    ListingIssueResolutionLocation,
+    ListingStatus,
+    ListingType,
+} from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
+import { AlertCircle, ArrowLeft, CircleAlert, DollarSign, Image, LucideProps, Text } from 'lucide-react';
 import { Masonry, type RenderComponentProps } from 'masonic';
+import React, { useState } from 'react';
 import Markdown from 'react-markdown';
 import { useSearchParams } from 'react-router-dom';
 import remarkGemoji from 'remark-gemoji';
@@ -26,10 +35,86 @@ function DiscordMarkdownField({ text }: { text: string }) {
     );
 }
 
+const issueIcons: Record<ListingIssueIcon, React.FC<LucideProps>> = {
+    'dollar-sign': DollarSign,
+    image: Image,
+    text: Text,
+};
+
+function ListingAlertDialog({
+    listing,
+    setEditDialogOpen,
+}: {
+    listing: FullListingSchema;
+    setEditDialogOpen: (open: boolean) => void;
+}) {
+    const [open, setOpen] = useState(false);
+
+    const issueResolutionButtons: Record<ListingIssueResolutionLocation, React.FC> = {
+        ui: () => (
+            <Button
+                onClick={() => {
+                    setOpen(false);
+                    setEditDialogOpen(true);
+                }}
+            >
+                Edit
+            </Button>
+        ),
+        discord: () => (
+            <Button asChild>
+                <a href={listing.url} target="_blank">
+                    Open
+                </a>
+            </Button>
+        ),
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <DialogTrigger asChild>
+                            <button className="absolute right-0 top-0 -translate-y-2 translate-x-2 rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700">
+                                <CircleAlert />
+                            </button>
+                        </DialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>This listing has issues. Click to view.</TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Listing issues</DialogTitle>
+                </DialogHeader>
+
+                {listing.issues.map((issue) => {
+                    const IssueIcon = issueIcons[issue.icon];
+                    const ResolutionButton = issueResolutionButtons[issue.resolution_location];
+
+                    return (
+                        <div key={issue.title} className="flex flex-row items-center space-x-2">
+                            <IssueIcon height="32px" width="32px" className="h-full" />
+                            <div className="flex-1">
+                                <div className="text-sm font-medium">{issue.title}</div>
+                                <div className="text-sm text-muted-foreground">{issue.description}</div>
+                            </div>
+                            <ResolutionButton />
+                        </div>
+                    );
+                })}
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>) {
     const { user } = useStore();
     const { mutateAsync: hideListing, isPending: hidePending } = useHideListing();
     const { mutateAsync: hideImage, isPending: hideImagePending } = useHideImage();
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
 
     return (
         <Card
@@ -39,6 +124,9 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                 { open: '', pending: 'border-l-yellow-400', closed: 'border-l-red-400' }[listing.status],
             )}
         >
+            {listing.issues.length > 0 && listing.owner_id === user.id && (
+                <ListingAlertDialog listing={listing} setEditDialogOpen={setEditDialogOpen} />
+            )}
             <CardHeader>
                 <CardTitle className="w-full overflow-hidden text-ellipsis" title={listing.title}>
                     {listing.title}
@@ -116,7 +204,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                 </Button>
                 <div className="space-x-2">
                     {listing.status !== 'closed' && (user.is_owner || user.id === listing.owner_id) && (
-                        <EditListingDialog listing={listing} />
+                        <EditListingDialog listing={listing} open={editDialogOpen} setOpen={setEditDialogOpen} />
                     )}
                     {user.is_owner && (
                         <Button
@@ -137,23 +225,28 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
 }
 
 export default function ListingsRoute() {
-    const [searchParams] = useSearchParams({ status: ['open', 'pending'], type: ['buy', 'sell'] });
+    const [searchParams, setSearchParams] = useSearchParams(defaultQueryParams);
     const filteredStatuses = searchParams.getAll('status') as ListingStatus[];
     const filteredOwners = searchParams.getAll('owner');
     const filteredTypes = searchParams.getAll('type') as ListingType[];
+    const filterHasIssues = searchParams.get('has_issues');
 
     const { width: windowWidth } = useWindowSize();
 
     const { data: listings, isFetching } = useGetListings(
         {
             body: {
-                statuses: filteredStatuses,
+                statuses:
+                    filteredStatuses.length > 0 ? filteredStatuses : (defaultQueryParams.status as ListingStatus[]),
                 owners: filteredOwners.length > 0 ? filteredOwners : null,
-                types: filteredTypes,
+                types: filteredTypes.length > 0 ? filteredTypes : (defaultQueryParams.type as ListingType[]),
+                has_issues: filterHasIssues ? filterHasIssues === 'true' : null,
             },
         },
         { placeholderData: keepPreviousData },
     );
+    const { data: issueCount } = useGetUserIssueCount({});
+    const currentUserId = useStore((state) => state.user?.id);
 
     let columnCount;
     if (windowWidth < 768) {
@@ -166,13 +259,46 @@ export default function ListingsRoute() {
         columnCount = 4;
     }
 
+    const inIssueView = filterHasIssues === 'true';
+
     return (
         <div>
             <header className="flex w-full flex-col items-center justify-between space-y-2 p-2 md:flex-row">
                 <h1 className="content-center text-xl font-semibold">Shopkeeper</h1>
-                <div className="flex space-x-2">
-                    <ListingFiltersDialog />
-                    <CreateListingDialog />
+                <div className="flex flex-col gap-2 md:flex-row">
+                    {((issueCount && issueCount > 0) || inIssueView) &&
+                        (inIssueView ? (
+                            <Button
+                                variant="secondary"
+                                className="space-x-2"
+                                onClick={() => {
+                                    setSearchParams({});
+                                }}
+                            >
+                                <ArrowLeft />
+                                <span>Back to all listings</span>
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="destructive"
+                                className="space-x-2"
+                                onClick={() => {
+                                    setSearchParams({
+                                        has_issues: 'true',
+                                        owner: [currentUserId],
+                                        status: [],
+                                        type: [],
+                                    });
+                                }}
+                            >
+                                <AlertCircle />
+                                <span>{issueCount} listings have issues</span>
+                            </Button>
+                        ))}
+                    <div className="space-x-2">
+                        <ListingFiltersDialog />
+                        <CreateListingDialog />
+                    </div>
                 </div>
             </header>
             <div className="p-2">

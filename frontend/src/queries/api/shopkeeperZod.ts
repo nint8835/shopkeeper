@@ -25,21 +25,22 @@ export const validationErrorSchema = z.object({
     type: z.string(),
 });
 
-export const listingSchemaSchema = z.object({
-    id: z.number(),
+export const listingIssueIconSchema = z.union([z.literal('image'), z.literal('text'), z.literal('dollar-sign')]);
+
+export const listingIssueResolutionLocationSchema = z.union([z.literal('ui'), z.literal('discord')]);
+
+export const listingIssueDetailsSchemaSchema = z.object({
     title: z.string(),
     description: z.string(),
-    price: z.string(),
-    type: listingTypeSchema,
-    status: listingStatusSchema,
-    url: z.string(),
-    owner_id: z.string(),
+    icon: listingIssueIconSchema,
+    resolution_location: listingIssueResolutionLocationSchema,
 });
 
 export const searchListingsSchemaSchema = z.object({
     statuses: z.array(listingStatusSchema).optional().nullable(),
     owners: z.array(z.string()).optional().nullable(),
     types: z.array(listingTypeSchema).optional().nullable(),
+    has_issues: z.boolean().optional().nullable(),
 });
 
 export const createListingSchemaSchema = z.object({
@@ -65,9 +66,22 @@ export const fullListingSchemaSchema = z.object({
     status: listingStatusSchema,
     url: z.string(),
     owner_id: z.string(),
+    issues: z.array(listingIssueDetailsSchemaSchema),
     images: z.array(listingImageSchemaSchema),
 });
 
 export const hTTPValidationErrorSchema = z.object({
     detail: z.array(validationErrorSchema).optional(),
+});
+
+export const listingSchemaSchema = z.object({
+    id: z.number(),
+    title: z.string(),
+    description: z.string(),
+    price: z.string(),
+    type: listingTypeSchema,
+    status: listingStatusSchema,
+    url: z.string(),
+    owner_id: z.string(),
+    issues: z.array(listingIssueDetailsSchemaSchema),
 });

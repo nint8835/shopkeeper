@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { useStore } from '@/lib/state';
+import { defaultQueryParams, useStore } from '@/lib/state';
 import type { CheckedState } from '@radix-ui/react-checkbox';
 import { Filter } from 'lucide-react';
 import { type SetURLSearchParams, useSearchParams } from 'react-router-dom';
@@ -26,7 +26,7 @@ function paramToggler(searchParams: URLSearchParams, setSearchParams: SetURLSear
 }
 
 function StatusFilter() {
-    const [searchParams, setSearchParams] = useSearchParams({ status: ['open', 'pending'] });
+    const [searchParams, setSearchParams] = useSearchParams({ status: defaultQueryParams.status });
 
     return (
         <div className="space-y-2">
@@ -66,7 +66,7 @@ function StatusFilter() {
 }
 
 function OwnerFilter() {
-    const [searchParams, setSearchParams] = useSearchParams({ owner: [] });
+    const [searchParams, setSearchParams] = useSearchParams({ owner: defaultQueryParams.owner });
     const currentUserId = useStore((state) => state.user?.id);
 
     return (
@@ -87,7 +87,7 @@ function OwnerFilter() {
 }
 
 function TypeFilter() {
-    const [searchParams, setSearchParams] = useSearchParams({ type: ['sell', 'buy'] });
+    const [searchParams, setSearchParams] = useSearchParams({ type: defaultQueryParams.type });
 
     return (
         <div className="space-y-2">

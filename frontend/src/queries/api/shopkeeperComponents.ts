@@ -168,6 +168,44 @@ export const useHideListing = (
     });
 };
 
+export type GetUserIssueCountError = Fetcher.ErrorWrapper<undefined>;
+
+export type GetUserIssueCountVariables = ShopkeeperContext['fetcherOptions'];
+
+/**
+ * Retrieve a count of the number of listings owned by the user with issues needing resolution.
+ */
+export const fetchGetUserIssueCount = (variables: GetUserIssueCountVariables, signal?: AbortSignal) =>
+    shopkeeperFetch<number, GetUserIssueCountError, undefined, {}, {}, {}>({
+        url: '/api/listings/issue-count',
+        method: 'get',
+        ...variables,
+        signal,
+    });
+
+/**
+ * Retrieve a count of the number of listings owned by the user with issues needing resolution.
+ */
+export const useGetUserIssueCount = <TData = number>(
+    variables: GetUserIssueCountVariables,
+    options?: Omit<
+        reactQuery.UseQueryOptions<number, GetUserIssueCountError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { fetcherOptions, queryOptions, queryKeyFn } = useShopkeeperContext(options);
+    return reactQuery.useQuery<number, GetUserIssueCountError, TData>({
+        queryKey: queryKeyFn({
+            path: '/api/listings/issue-count',
+            operationId: 'getUserIssueCount',
+            variables,
+        }),
+        queryFn: ({ signal }) => fetchGetUserIssueCount({ ...fetcherOptions, ...variables }, signal),
+        ...options,
+        ...queryOptions,
+    });
+};
+
 export type GetCurrentUserError = Fetcher.ErrorWrapper<undefined>;
 
 export type GetCurrentUserVariables = ShopkeeperContext['fetcherOptions'];
@@ -248,6 +286,11 @@ export type QueryOperation =
           path: '/api/listings/search';
           operationId: 'getListings';
           variables: GetListingsVariables;
+      }
+    | {
+          path: '/api/listings/issue-count';
+          operationId: 'getUserIssueCount';
+          variables: GetUserIssueCountVariables;
       }
     | {
           path: '/auth/me';

@@ -50,6 +50,7 @@ export type FullListingSchema = {
     status: ListingStatus;
     url: string;
     owner_id: string;
+    issues: ListingIssueDetailsSchema[];
     images: ListingImageSchema[];
 };
 
@@ -65,6 +66,17 @@ export type ListingImageSchema = {
     thumbnail_url: string;
 };
 
+export type ListingIssueDetailsSchema = {
+    title: string;
+    description: string;
+    icon: ListingIssueIcon;
+    resolution_location: ListingIssueResolutionLocation;
+};
+
+export type ListingIssueIcon = 'image' | 'text' | 'dollar-sign';
+
+export type ListingIssueResolutionLocation = 'ui' | 'discord';
+
 export type ListingSchema = {
     id: number;
     title: string;
@@ -74,6 +86,7 @@ export type ListingSchema = {
     status: ListingStatus;
     url: string;
     owner_id: string;
+    issues: ListingIssueDetailsSchema[];
 };
 
 export type ListingStatus = 'open' | 'pending' | 'closed';
@@ -84,6 +97,7 @@ export type SearchListingsSchema = {
     statuses?: ListingStatus[] | null;
     owners?: string[] | null;
     types?: ListingType[] | null;
+    has_issues?: boolean | null;
 };
 
 export type ValidationError = {
