@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { queryClient } from '@/lib/query';
 import { useStore } from '@/lib/state';
 import { cn } from '@/lib/utils';
-import { useGetListings, useHideImage, useHideListing } from '@/queries/api/shopkeeperComponents';
+import { useGetListings, useGetUserIssueCount, useHideImage, useHideListing } from '@/queries/api/shopkeeperComponents';
 import type {
     FullListingSchema,
     ListingIssueIcon,
@@ -19,7 +19,7 @@ import type {
     ListingType,
 } from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
-import { CircleAlert, DollarSign, Image, LucideProps, Text } from 'lucide-react';
+import { AlertCircle, CircleAlert, DollarSign, Image, LucideProps, Text } from 'lucide-react';
 import { Masonry, type RenderComponentProps } from 'masonic';
 import React, { useState } from 'react';
 import Markdown from 'react-markdown';
@@ -242,6 +242,7 @@ export default function ListingsRoute() {
         },
         { placeholderData: keepPreviousData },
     );
+    const { data: issueCount } = useGetUserIssueCount({});
 
     let columnCount;
     if (windowWidth < 768) {
@@ -258,9 +259,17 @@ export default function ListingsRoute() {
         <div>
             <header className="flex w-full flex-col items-center justify-between space-y-2 p-2 md:flex-row">
                 <h1 className="content-center text-xl font-semibold">Shopkeeper</h1>
-                <div className="flex space-x-2">
-                    <ListingFiltersDialog />
-                    <CreateListingDialog />
+                <div className="flex flex-col gap-2 md:flex-row">
+                    {issueCount && issueCount > 0 && (
+                        <Button variant="destructive" className="space-x-2">
+                            <AlertCircle />
+                            <span>{issueCount} listings have issues</span>
+                        </Button>
+                    )}
+                    <div className="space-x-2">
+                        <ListingFiltersDialog />
+                        <CreateListingDialog />
+                    </div>
                 </div>
             </header>
             <div className="p-2">
