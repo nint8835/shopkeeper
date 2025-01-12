@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING, Callable, Literal, cast
 
 import discord
 from fastapi import HTTPException
-from sqlalchemy import ColumnElement, and_, not_, or_
+from sqlalchemy import ColumnElement, and_, not_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, joinedload, mapped_column, relationship
 
 import shopkeeper.bot as bot
 from shopkeeper.config import config
@@ -161,7 +161,17 @@ class Listing(Base):
         status: ListingStatus | EllipsisType = ...,
     ) -> "Listing":
         async with session.begin():
-            listing_instance = await session.get(Listing, listing)
+            listing_instance = (
+                (
+                    await session.execute(
+                        select(Listing)
+                        .options(joinedload(Listing.images))
+                        .filter_by(id=listing)
+                    )
+                )
+                .unique()
+                .scalar_one_or_none()
+            )
 
             if listing_instance is None:
                 raise HTTPException(status_code=404, detail="Listing not found")
