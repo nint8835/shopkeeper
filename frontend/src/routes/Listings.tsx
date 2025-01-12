@@ -5,13 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { queryClient } from '@/lib/query';
 import { useStore } from '@/lib/state';
 import { cn } from '@/lib/utils';
 import { useGetListings, useHideImage, useHideListing } from '@/queries/api/shopkeeperComponents';
 import type { FullListingSchema, ListingStatus, ListingType } from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
+import { CircleAlert } from 'lucide-react';
 import { Masonry, type RenderComponentProps } from 'masonic';
 import Markdown from 'react-markdown';
 import { useSearchParams } from 'react-router-dom';
@@ -23,6 +25,30 @@ function DiscordMarkdownField({ text }: { text: string }) {
         <Markdown className="prose prose-zinc prose-invert" remarkPlugins={[remarkGemoji]}>
             {text}
         </Markdown>
+    );
+}
+
+function ListingAlertDialog({ listing }: { listing: FullListingSchema }) {
+    return (
+        <Dialog>
+            <DialogTrigger>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button className="absolute right-0 top-0 -translate-y-2 translate-x-2 rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700">
+                                <CircleAlert />
+                            </button>
+                        </TooltipTrigger>
+                        <TooltipContent>This listing has issues. Click to view.</TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Listing Issues</DialogTitle>
+                </DialogHeader>
+            </DialogContent>
+        </Dialog>
     );
 }
 
@@ -39,6 +65,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                 { open: '', pending: 'border-l-yellow-400', closed: 'border-l-red-400' }[listing.status],
             )}
         >
+            {listing.issues.length > 0 && listing.owner_id === user.id && <ListingAlertDialog listing={listing} />}
             <CardHeader>
                 <CardTitle className="w-full overflow-hidden text-ellipsis" title={listing.title}>
                     {listing.title}
