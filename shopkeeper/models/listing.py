@@ -272,7 +272,7 @@ all_listing_issues: list[ListingIssues] = [
     ListingIssues(
         details=ListingIssueDetails(
             title="No images",
-            description="Your listing has no images. Please send at least one photo the item in your listing's thread.",
+            description="Your listing has no images. Please send at least one photo of the item in your listing's thread.",
             icon="image",
             resolution_location="discord",
         ),
