@@ -72,18 +72,19 @@ function ListingAlertDialog({
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger>
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <DialogTrigger asChild>
                             <button className="absolute right-0 top-0 -translate-y-2 translate-x-2 rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700">
                                 <CircleAlert />
                             </button>
-                        </TooltipTrigger>
-                        <TooltipContent>This listing has issues. Click to view.</TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
-            </DialogTrigger>
+                        </DialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>This listing has issues. Click to view.</TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Listing issues</DialogTitle>
