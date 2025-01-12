@@ -1,12 +1,12 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import and_, func, not_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from shopkeeper.config import config
-from shopkeeper.models.listing import Listing
+from shopkeeper.models.listing import Listing, ListingStatus
 from shopkeeper.web.dependencies.auth import require_discord_user
 from shopkeeper.web.dependencies.database import get_db
 from shopkeeper.web.schemas.discord_user import DiscordUser
@@ -106,6 +106,28 @@ async def hide_listing(
     await db.commit()
 
     return None
+
+
+@listings_router.get("/issue-count")
+async def get_user_issue_count(
+    db: AsyncSession = Depends(get_db),
+    user: DiscordUser = Depends(require_discord_user),
+) -> int:
+    """Retrieve a count of the number of listings owned by the user with issues needing resolution."""
+    return (
+        await db.execute(
+            select(func.count("*"))
+            .select_from(Listing)
+            .filter(
+                and_(
+                    Listing.status != ListingStatus.Closed,
+                    not_(Listing.is_hidden),
+                    Listing.owner_id == int(user.id),
+                    Listing.get_issues_clause(),
+                )
+            )
+        )
+    ).scalar_one()
 
 
 __all__ = ["listings_router"]
