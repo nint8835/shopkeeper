@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { queryClient } from '@/lib/query';
 import { defaultQueryParams, useStore } from '@/lib/state';
-import { cn } from '@/lib/utils';
+import { cn, pluralize } from '@/lib/utils';
 import { useGetListings, useGetUserIssueCount, useHideImage, useHideListing } from '@/queries/api/shopkeeperComponents';
 import type {
     FullListingSchema,
@@ -292,7 +292,9 @@ export default function ListingsRoute() {
                                 }}
                             >
                                 <AlertCircle />
-                                <span>{issueCount} listings have issues</span>
+                                <span>
+                                    {issueCount} {pluralize(issueCount || 0, 'listing has', 'listings have')} issues
+                                </span>
                             </Button>
                         ))}
                     <div className="space-x-2">
