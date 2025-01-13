@@ -19,7 +19,7 @@ import type {
     ListingType,
 } from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
-import { AlertCircle, ArrowLeft, CircleAlert, DollarSign, Image, LucideProps, Text } from 'lucide-react';
+import { AlertCircle, CircleAlert, DollarSign, FilterX, Image, LucideProps, Text } from 'lucide-react';
 import { Masonry, type RenderComponentProps } from 'masonic';
 import React, { useState } from 'react';
 import Markdown from 'react-markdown';
@@ -225,22 +225,36 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
 }
 
 export default function ListingsRoute() {
-    const [searchParams, setSearchParams] = useSearchParams(defaultQueryParams);
-    const filteredStatuses = searchParams.getAll('status') as ListingStatus[];
-    const filteredOwners = searchParams.getAll('owner');
-    const filteredTypes = searchParams.getAll('type') as ListingType[];
-    const filterHasIssues = searchParams.get('has_issues');
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    function getParamBoolean<V>(key: string, fallback: V): [boolean | V, boolean] {
+        const value = searchParams.get(key);
+        return value !== null ? [value === 'true', true] : [fallback, false];
+    }
+
+    function getParamArray<V>(key: string, fallback: V): [string[] | V, boolean] {
+        const value = searchParams.getAll(key);
+        return value.length > 0 ? [value, true] : [fallback, false];
+    }
+
+    const [filteredStatuses, statusFilterSet] = getParamArray('status', defaultQueryParams.status) as [
+        ListingStatus[],
+        boolean,
+    ];
+    const [filteredOwners, ownerFilterSet] = getParamArray('owner', null);
+    const [filteredTypes, typeFilterSet] = getParamArray('type', defaultQueryParams.type) as [ListingType[], boolean];
+    const [filterHasIssues, hasIssuesFilterSet] = getParamBoolean('has_issues', null);
+
+    const filtersActive = statusFilterSet || ownerFilterSet || typeFilterSet || hasIssuesFilterSet;
 
     const { width: windowWidth } = useWindowSize();
-
     const { data: listings, isFetching } = useGetListings(
         {
             body: {
-                statuses:
-                    filteredStatuses.length > 0 ? filteredStatuses : (defaultQueryParams.status as ListingStatus[]),
-                owners: filteredOwners.length > 0 ? filteredOwners : null,
-                types: filteredTypes.length > 0 ? filteredTypes : (defaultQueryParams.type as ListingType[]),
-                has_issues: filterHasIssues ? filterHasIssues === 'true' : null,
+                statuses: filteredStatuses,
+                owners: filteredOwners,
+                types: filteredTypes,
+                has_issues: filterHasIssues,
             },
         },
         { placeholderData: keepPreviousData },
@@ -259,44 +273,42 @@ export default function ListingsRoute() {
         columnCount = 4;
     }
 
-    const inIssueView = filterHasIssues === 'true';
-
     return (
         <div>
             <header className="flex w-full flex-col items-center justify-between space-y-2 p-2 md:flex-row">
                 <h1 className="content-center text-xl font-semibold">Shopkeeper</h1>
                 <div className="flex flex-col gap-2 md:flex-row">
-                    {((issueCount && issueCount > 0) || inIssueView) &&
-                        (inIssueView ? (
-                            <Button
-                                variant="secondary"
-                                className="space-x-2"
-                                onClick={() => {
-                                    setSearchParams({});
-                                }}
-                            >
-                                <ArrowLeft />
-                                <span>Back to all listings</span>
-                            </Button>
-                        ) : (
-                            <Button
-                                variant="destructive"
-                                className="space-x-2"
-                                onClick={() => {
-                                    setSearchParams({
-                                        has_issues: 'true',
-                                        owner: [currentUserId],
-                                        status: [],
-                                        type: [],
-                                    });
-                                }}
-                            >
-                                <AlertCircle />
-                                <span>
-                                    {issueCount} {pluralize(issueCount || 0, 'listing has', 'listings have')} issues
-                                </span>
-                            </Button>
-                        ))}
+                    {issueCount && issueCount > 0 && (
+                        <Button
+                            variant="destructive"
+                            className="space-x-2"
+                            onClick={() => {
+                                setSearchParams({
+                                    has_issues: 'true',
+                                    owner: [currentUserId],
+                                    status: [],
+                                    type: [],
+                                });
+                            }}
+                        >
+                            <AlertCircle />
+                            <span>
+                                {issueCount} {pluralize(issueCount || 0, 'listing has', 'listings have')} issues
+                            </span>
+                        </Button>
+                    )}
+                    {filtersActive && (
+                        <Button
+                            variant="secondary"
+                            className="space-x-2"
+                            onClick={() => {
+                                setSearchParams({});
+                            }}
+                        >
+                            <FilterX />
+                            <span>Reset filters</span>
+                        </Button>
+                    )}
                     <div className="space-x-2">
                         <ListingFiltersDialog />
                         <CreateListingDialog />
