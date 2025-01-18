@@ -15,7 +15,7 @@ export const useStore = create<State>()(
 );
 
 export const defaultQueryParams = {
-    status: ['open', 'pending'],
+    status: ['open'],
     type: ['buy', 'sell'],
     owner: [] as string[],
 };
