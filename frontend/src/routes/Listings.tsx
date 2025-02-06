@@ -25,11 +25,12 @@ import React, { useState } from 'react';
 import Markdown from 'react-markdown';
 import { useSearchParams } from 'react-router-dom';
 import remarkGemoji from 'remark-gemoji';
+import remarkGfm from 'remark-gfm';
 import { useWindowSize } from 'usehooks-ts';
 
 function DiscordMarkdownField({ text }: { text: string }) {
     return (
-        <Markdown className="prose prose-zinc prose-invert" remarkPlugins={[remarkGemoji]}>
+        <Markdown className="prose prose-zinc prose-invert" remarkPlugins={[remarkGemoji, remarkGfm]}>
             {text}
         </Markdown>
     );
