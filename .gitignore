@@ -183,6 +183,8 @@ dist-ssr
 *.sln
 *.sw?
 
+.python-version
+
 shopkeeper.sqlite
 images/*
 !images/.gitkeep

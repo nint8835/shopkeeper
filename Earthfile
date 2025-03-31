@@ -1,5 +1,14 @@
 VERSION 0.8
 
+pip-lockfile:
+    FROM ghcr.io/astral-sh/uv:python3.13-bookworm
+    WORKDIR /shopkeeper
+
+    COPY pyproject.toml uv.lock ./
+    RUN uv pip compile pyproject.toml -o requirements.txt
+
+    SAVE ARTIFACT requirements.txt
+
 python-deps:
     FROM cgr.dev/chainguard/python:latest-dev
     WORKDIR /shopkeeper
@@ -10,7 +19,7 @@ python-deps:
     ENV PATH="/shopkeeper/venv/bin:$PATH"
 
     RUN python -m venv /shopkeeper/venv
-    COPY requirements.txt .
+    COPY +pip-lockfile/requirements.txt .
 
     RUN pip install --no-cache-dir -r requirements.txt
 
