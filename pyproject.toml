@@ -5,22 +5,22 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "aiosqlite==0.20.0",
-    "alembic==1.13.1",
-    "audioop-lts==0.2.1",
-    "authlib==1.4.0",
-    "discord-py==2.4.0",
-    "fastapi==0.115.6",
-    "pillow==10.4.0",
-    "pydantic==2.10.4",
-    "pydantic-settings==2.7.0",
-    "sqlalchemy[asyncio]==2.0.36",
-    "starlette[full]==0.41.3",
-    "typer==0.12.3",
-    "uvicorn==0.30.1",
+    "aiosqlite~=0.21.0",
+    "alembic~=1.15.2",
+    "audioop-lts~=0.2.1",
+    "authlib~=1.5.1",
+    "discord-py==2.5.2",
+    "fastapi~=0.115.12",
+    "pillow~=11.1.0",
+    "pydantic~=2.11.1",
+    "pydantic-settings~=2.8.1",
+    "sqlalchemy[asyncio]~=2.0.40",
+    "starlette[full]~=0.46.1",
+    "typer~=0.15.2",
+    "uvicorn~=0.34.0",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff==0.3.2",
+    "ruff~=0.11.2",
 ]
