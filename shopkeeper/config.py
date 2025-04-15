@@ -6,28 +6,22 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Config(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="shopkeeper_", env_file=".env")
 
-    token: str
-
-    db_path: str = "shopkeeper.sqlite"
-    db_log_queries: bool = False
-
-    image_path: Path = Path("images")
-
-    guild_id: int
-    channel_id: int
-    owner_id: int
-    events_channel_id: int | None = None
-
+    behind_reverse_proxy: bool = False
     bind_host: str = "0.0.0.0"
     bind_port: int = 8000
-
+    channel_id: int
     client_id: str | None = None
     client_secret: str | None = None
-    session_secret: str = "replace-me"
-
-    behind_reverse_proxy: bool = False
-
+    db_log_queries: bool = False
+    db_path: str = "shopkeeper.sqlite"
+    events_channel_id: int | None = None
+    guild_id: int
+    image_path: Path = Path("images")
     init_on_startup: bool = True
+    owner_id: int
+    session_secret: str = "replace-me"
+    token: str
+    reminder_interval: int = 60 * 60 * 24 * 14  # 14 days
 
     @property
     def async_db_connection_uri(self) -> str:
