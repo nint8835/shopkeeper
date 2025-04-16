@@ -13,6 +13,7 @@ dependencies = [
     "fastapi~=0.115.12",
     "fastapi-rss~=0.3.0",
     "fastapi-utils[all]~=0.8.0",
+    "markdown~=3.8",
     "pillow~=11.1.0",
     "pydantic~=2.11.1",
     "pydantic-settings~=2.8.1",

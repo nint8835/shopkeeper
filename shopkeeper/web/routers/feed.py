@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi_rss import GUID, Item, RSSFeed, RSSResponse  # type: ignore
+from markdown import markdown
 from sqlalchemy import not_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -32,7 +33,8 @@ async def get_feed(
     items = [
         Item(
             guid=GUID(content=str(event.id)),
-            title=f"{event.from_value} -> {event.to_value}",
+            title=event.title,
+            description=markdown(event.description),
             pub_date=event.time,
         )
         for event in events
