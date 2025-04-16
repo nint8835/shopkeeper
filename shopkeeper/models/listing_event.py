@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
@@ -25,6 +26,9 @@ class ListingEvent(Base):
     type: Mapped[EventType]
     from_value: Mapped[Optional[str]]
     to_value: Mapped[Optional[str]]
+    time: Mapped[datetime] = mapped_column(
+        default=lambda: datetime.now(tz=timezone.utc)
+    )
 
     listing_id: Mapped[int] = mapped_column(ForeignKey("listings.id"))
     listing: Mapped["Listing"] = relationship(back_populates="events")
