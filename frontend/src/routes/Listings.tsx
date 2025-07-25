@@ -279,7 +279,7 @@ export default function ListingsRoute() {
             <header className="flex w-full flex-col items-center justify-between space-y-2 p-2 md:flex-row">
                 <h1 className="content-center text-xl font-semibold">Shopkeeper</h1>
                 <div className="flex flex-col gap-2 md:flex-row">
-                    {issueCount && issueCount > 0 && (
+                    {issueCount && issueCount > 0 ? (
                         <Button
                             variant="destructive"
                             className="space-x-2"
@@ -297,7 +297,7 @@ export default function ListingsRoute() {
                                 {issueCount} {pluralize(issueCount || 0, 'listing has', 'listings have')} issues
                             </span>
                         </Button>
-                    )}
+                    ) : null}
                     {filtersActive && (
                         <Button
                             variant="secondary"
