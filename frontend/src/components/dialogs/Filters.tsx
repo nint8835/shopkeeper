@@ -8,7 +8,6 @@ import type { CheckedState } from '@radix-ui/react-checkbox';
 import { useNavigate, UseNavigateResult } from '@tanstack/react-router';
 import { Filter } from 'lucide-react';
 
-// TODO: Fix behaviour when filtering to only user's listings
 function paramToggler<
     K extends Exclude<keyof typeof Route.types.searchSchema, 'has_issues'>,
     V extends (typeof Route.types.searchSchema)[K] extends Array<infer U> | undefined ? U : never,
