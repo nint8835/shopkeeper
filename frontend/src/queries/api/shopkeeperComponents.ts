@@ -4,10 +4,15 @@
  * @version 0.1.0
  */
 import * as reactQuery from '@tanstack/react-query';
-import { useShopkeeperContext, ShopkeeperContext } from './shopkeeperContext';
+import { useShopkeeperContext, ShopkeeperContext, queryKeyFn } from './shopkeeperContext';
+import { deepMerge } from './shopkeeperUtils';
 import type * as Fetcher from './shopkeeperFetcher';
 import { shopkeeperFetch } from './shopkeeperFetcher';
 import type * as Schemas from './shopkeeperSchemas';
+
+type QueryFnOptions = {
+    signal?: AbortController['signal'];
+};
 
 export type GetListingsError = Fetcher.ErrorWrapper<{
     status: 422;
@@ -34,21 +39,61 @@ export const fetchGetListings = (variables: GetListingsVariables, signal?: Abort
 /**
  * Retrieve a list of listings.
  */
-export const useGetListings = <TData = GetListingsResponse>(
+export function getListingsQuery(variables: GetListingsVariables): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: (options: QueryFnOptions) => Promise<GetListingsResponse>;
+};
+
+export function getListingsQuery(variables: GetListingsVariables | reactQuery.SkipToken): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: ((options: QueryFnOptions) => Promise<GetListingsResponse>) | reactQuery.SkipToken;
+};
+
+export function getListingsQuery(variables: GetListingsVariables | reactQuery.SkipToken) {
+    return {
+        queryKey: queryKeyFn({
+            path: '/api/listings/search',
+            operationId: 'getListings',
+            variables,
+        }),
+        queryFn:
+            variables === reactQuery.skipToken
+                ? reactQuery.skipToken
+                : ({ signal }: QueryFnOptions) => fetchGetListings(variables, signal),
+    };
+}
+
+/**
+ * Retrieve a list of listings.
+ */
+export const useSuspenseGetListings = <TData = GetListingsResponse>(
     variables: GetListingsVariables,
     options?: Omit<
         reactQuery.UseQueryOptions<GetListingsResponse, GetListingsError, TData>,
         'queryKey' | 'queryFn' | 'initialData'
     >,
 ) => {
-    const { fetcherOptions, queryOptions, queryKeyFn } = useShopkeeperContext(options);
+    const { queryOptions, fetcherOptions } = useShopkeeperContext(options);
+    return reactQuery.useSuspenseQuery<GetListingsResponse, GetListingsError, TData>({
+        ...getListingsQuery(deepMerge(fetcherOptions, variables)),
+        ...options,
+        ...queryOptions,
+    });
+};
+
+/**
+ * Retrieve a list of listings.
+ */
+export const useGetListings = <TData = GetListingsResponse>(
+    variables: GetListingsVariables | reactQuery.SkipToken,
+    options?: Omit<
+        reactQuery.UseQueryOptions<GetListingsResponse, GetListingsError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { queryOptions, fetcherOptions } = useShopkeeperContext(options);
     return reactQuery.useQuery<GetListingsResponse, GetListingsError, TData>({
-        queryKey: queryKeyFn({
-            path: '/api/listings/search',
-            operationId: 'getListings',
-            variables,
-        }),
-        queryFn: ({ signal }) => fetchGetListings({ ...fetcherOptions, ...variables }, signal),
+        ...getListingsQuery(variables === reactQuery.skipToken ? variables : deepMerge(fetcherOptions, variables)),
         ...options,
         ...queryOptions,
     });
@@ -85,7 +130,7 @@ export const useCreateListing = (
 ) => {
     const { fetcherOptions } = useShopkeeperContext();
     return reactQuery.useMutation<Schemas.ListingSchema, CreateListingError, CreateListingVariables>({
-        mutationFn: (variables: CreateListingVariables) => fetchCreateListing({ ...fetcherOptions, ...variables }),
+        mutationFn: (variables: CreateListingVariables) => fetchCreateListing(deepMerge(fetcherOptions, variables)),
         ...options,
     });
 };
@@ -126,7 +171,7 @@ export const useEditListing = (
 ) => {
     const { fetcherOptions } = useShopkeeperContext();
     return reactQuery.useMutation<Schemas.ListingSchema, EditListingError, EditListingVariables>({
-        mutationFn: (variables: EditListingVariables) => fetchEditListing({ ...fetcherOptions, ...variables }),
+        mutationFn: (variables: EditListingVariables) => fetchEditListing(deepMerge(fetcherOptions, variables)),
         ...options,
     });
 };
@@ -163,7 +208,7 @@ export const useHideListing = (
 ) => {
     const { fetcherOptions } = useShopkeeperContext();
     return reactQuery.useMutation<void, HideListingError, HideListingVariables>({
-        mutationFn: (variables: HideListingVariables) => fetchHideListing({ ...fetcherOptions, ...variables }),
+        mutationFn: (variables: HideListingVariables) => fetchHideListing(deepMerge(fetcherOptions, variables)),
         ...options,
     });
 };
@@ -186,21 +231,63 @@ export const fetchGetUserIssueCount = (variables: GetUserIssueCountVariables, si
 /**
  * Retrieve a count of the number of listings owned by the user with issues needing resolution.
  */
-export const useGetUserIssueCount = <TData = number>(
+export function getUserIssueCountQuery(variables: GetUserIssueCountVariables): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: (options: QueryFnOptions) => Promise<number>;
+};
+
+export function getUserIssueCountQuery(variables: GetUserIssueCountVariables | reactQuery.SkipToken): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: ((options: QueryFnOptions) => Promise<number>) | reactQuery.SkipToken;
+};
+
+export function getUserIssueCountQuery(variables: GetUserIssueCountVariables | reactQuery.SkipToken) {
+    return {
+        queryKey: queryKeyFn({
+            path: '/api/listings/issue-count',
+            operationId: 'getUserIssueCount',
+            variables,
+        }),
+        queryFn:
+            variables === reactQuery.skipToken
+                ? reactQuery.skipToken
+                : ({ signal }: QueryFnOptions) => fetchGetUserIssueCount(variables, signal),
+    };
+}
+
+/**
+ * Retrieve a count of the number of listings owned by the user with issues needing resolution.
+ */
+export const useSuspenseGetUserIssueCount = <TData = number>(
     variables: GetUserIssueCountVariables,
     options?: Omit<
         reactQuery.UseQueryOptions<number, GetUserIssueCountError, TData>,
         'queryKey' | 'queryFn' | 'initialData'
     >,
 ) => {
-    const { fetcherOptions, queryOptions, queryKeyFn } = useShopkeeperContext(options);
+    const { queryOptions, fetcherOptions } = useShopkeeperContext(options);
+    return reactQuery.useSuspenseQuery<number, GetUserIssueCountError, TData>({
+        ...getUserIssueCountQuery(deepMerge(fetcherOptions, variables)),
+        ...options,
+        ...queryOptions,
+    });
+};
+
+/**
+ * Retrieve a count of the number of listings owned by the user with issues needing resolution.
+ */
+export const useGetUserIssueCount = <TData = number>(
+    variables: GetUserIssueCountVariables | reactQuery.SkipToken,
+    options?: Omit<
+        reactQuery.UseQueryOptions<number, GetUserIssueCountError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { queryOptions, fetcherOptions } = useShopkeeperContext(options);
     return reactQuery.useQuery<number, GetUserIssueCountError, TData>({
-        queryKey: queryKeyFn({
-            path: '/api/listings/issue-count',
-            operationId: 'getUserIssueCount',
-            variables,
-        }),
-        queryFn: ({ signal }) => fetchGetUserIssueCount({ ...fetcherOptions, ...variables }, signal),
+        ...getUserIssueCountQuery(
+            variables === reactQuery.skipToken ? variables : deepMerge(fetcherOptions, variables),
+        ),
         ...options,
         ...queryOptions,
     });
@@ -224,21 +311,61 @@ export const fetchGetCurrentUser = (variables: GetCurrentUserVariables, signal?:
 /**
  * Retrieve the details of the current user.
  */
-export const useGetCurrentUser = <TData = Schemas.DiscordUser | null>(
+export function getCurrentUserQuery(variables: GetCurrentUserVariables): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: (options: QueryFnOptions) => Promise<Schemas.DiscordUser | null>;
+};
+
+export function getCurrentUserQuery(variables: GetCurrentUserVariables | reactQuery.SkipToken): {
+    queryKey: reactQuery.QueryKey;
+    queryFn: ((options: QueryFnOptions) => Promise<Schemas.DiscordUser | null>) | reactQuery.SkipToken;
+};
+
+export function getCurrentUserQuery(variables: GetCurrentUserVariables | reactQuery.SkipToken) {
+    return {
+        queryKey: queryKeyFn({
+            path: '/auth/me',
+            operationId: 'getCurrentUser',
+            variables,
+        }),
+        queryFn:
+            variables === reactQuery.skipToken
+                ? reactQuery.skipToken
+                : ({ signal }: QueryFnOptions) => fetchGetCurrentUser(variables, signal),
+    };
+}
+
+/**
+ * Retrieve the details of the current user.
+ */
+export const useSuspenseGetCurrentUser = <TData = Schemas.DiscordUser | null>(
     variables: GetCurrentUserVariables,
     options?: Omit<
         reactQuery.UseQueryOptions<Schemas.DiscordUser | null, GetCurrentUserError, TData>,
         'queryKey' | 'queryFn' | 'initialData'
     >,
 ) => {
-    const { fetcherOptions, queryOptions, queryKeyFn } = useShopkeeperContext(options);
+    const { queryOptions, fetcherOptions } = useShopkeeperContext(options);
+    return reactQuery.useSuspenseQuery<Schemas.DiscordUser | null, GetCurrentUserError, TData>({
+        ...getCurrentUserQuery(deepMerge(fetcherOptions, variables)),
+        ...options,
+        ...queryOptions,
+    });
+};
+
+/**
+ * Retrieve the details of the current user.
+ */
+export const useGetCurrentUser = <TData = Schemas.DiscordUser | null>(
+    variables: GetCurrentUserVariables | reactQuery.SkipToken,
+    options?: Omit<
+        reactQuery.UseQueryOptions<Schemas.DiscordUser | null, GetCurrentUserError, TData>,
+        'queryKey' | 'queryFn' | 'initialData'
+    >,
+) => {
+    const { queryOptions, fetcherOptions } = useShopkeeperContext(options);
     return reactQuery.useQuery<Schemas.DiscordUser | null, GetCurrentUserError, TData>({
-        queryKey: queryKeyFn({
-            path: '/auth/me',
-            operationId: 'getCurrentUser',
-            variables,
-        }),
-        queryFn: ({ signal }) => fetchGetCurrentUser({ ...fetcherOptions, ...variables }, signal),
+        ...getCurrentUserQuery(variables === reactQuery.skipToken ? variables : deepMerge(fetcherOptions, variables)),
         ...options,
         ...queryOptions,
     });
@@ -276,7 +403,7 @@ export const useHideImage = (
 ) => {
     const { fetcherOptions } = useShopkeeperContext();
     return reactQuery.useMutation<void, HideImageError, HideImageVariables>({
-        mutationFn: (variables: HideImageVariables) => fetchHideImage({ ...fetcherOptions, ...variables }),
+        mutationFn: (variables: HideImageVariables) => fetchHideImage(deepMerge(fetcherOptions, variables)),
         ...options,
     });
 };
@@ -285,15 +412,15 @@ export type QueryOperation =
     | {
           path: '/api/listings/search';
           operationId: 'getListings';
-          variables: GetListingsVariables;
+          variables: GetListingsVariables | reactQuery.SkipToken;
       }
     | {
           path: '/api/listings/issue-count';
           operationId: 'getUserIssueCount';
-          variables: GetUserIssueCountVariables;
+          variables: GetUserIssueCountVariables | reactQuery.SkipToken;
       }
     | {
           path: '/auth/me';
           operationId: 'getCurrentUser';
-          variables: GetCurrentUserVariables;
+          variables: GetCurrentUserVariables | reactQuery.SkipToken;
       };

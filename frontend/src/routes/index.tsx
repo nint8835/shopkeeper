@@ -10,7 +10,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { queryClient } from '@/lib/query';
 import { defaultQueryParams, useStore } from '@/lib/state';
 import { arraysEqual, cn, pluralize } from '@/lib/utils';
-import { useGetListings, useGetUserIssueCount, useHideImage, useHideListing } from '@/queries/api/shopkeeperComponents';
+import {
+    getListingsQuery,
+    useGetUserIssueCount,
+    useHideImage,
+    useHideListing,
+    useSuspenseGetListings,
+} from '@/queries/api/shopkeeperComponents';
 import type {
     FullListingSchema,
     ListingIssueIcon,
@@ -42,6 +48,11 @@ export const Route = createFileRoute('/')({
     search: {
         middlewares: [stripSearchParams(defaultQueryParams)],
     },
+    loaderDeps: ({ search: { status, type, owner, has_issues } }) => ({ status, type, owner, has_issues }),
+    loader: ({ deps: { status, type, owner, has_issues } }) =>
+        queryClient.ensureQueryData(
+            getListingsQuery({ body: { statuses: status, types: type, owners: owner, has_issues } }),
+        ),
 });
 
 function DiscordMarkdownField({ text }: { text: string }) {
@@ -264,7 +275,7 @@ function RouteComponent() {
     const filtersActive = statusFilterSet || ownerFilterSet || typeFilterSet || hasIssuesFilterSet;
 
     const { width: windowWidth } = useWindowSize();
-    const { data: listings, isFetching } = useGetListings(
+    const { data: listings } = useSuspenseGetListings(
         {
             body: {
                 statuses: filteredStatuses,
@@ -332,11 +343,7 @@ function RouteComponent() {
                 </div>
             </header>
             <div className="p-2">
-                {isFetching && !listings ? (
-                    <div className="flex w-full flex-row justify-center">
-                        <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500"></div>
-                    </div>
-                ) : listings && listings.length !== 0 ? (
+                {listings.length !== 0 ? (
                     <Masonry
                         items={listings}
                         render={ListingCard}

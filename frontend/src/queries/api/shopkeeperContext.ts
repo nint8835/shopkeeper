@@ -1,7 +1,12 @@
-import type { QueryKey, UseQueryOptions } from '@tanstack/react-query';
+import { skipToken, type DefaultError, type Enabled, type QueryKey, type UseQueryOptions } from '@tanstack/react-query';
 import { QueryOperation } from './shopkeeperComponents';
 
-export type ShopkeeperContext = {
+export type ShopkeeperContext<
+    TQueryFnData = unknown,
+    TError = DefaultError,
+    TData = TQueryFnData,
+    TQueryKey extends QueryKey = QueryKey,
+> = {
     fetcherOptions: {
         /**
          * Headers to inject in the fetcher
@@ -17,12 +22,8 @@ export type ShopkeeperContext = {
          * Set this to `false` to disable automatic refetching when the query mounts or changes query keys.
          * Defaults to `true`.
          */
-        enabled?: boolean;
+        enabled?: Enabled<TQueryFnData, TError, TQueryFnData, TQueryKey>;
     };
-    /**
-     * Query key manager.
-     */
-    queryKeyFn: (operation: QueryOperation) => QueryKey;
 };
 
 /**
@@ -32,20 +33,19 @@ export type ShopkeeperContext = {
  */
 export function useShopkeeperContext<
     TQueryFnData = unknown,
-    TError = unknown,
+    TError = DefaultError,
     TData = TQueryFnData,
     TQueryKey extends QueryKey = QueryKey,
 >(
     _queryOptions?: Omit<UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>, 'queryKey' | 'queryFn'>,
-): ShopkeeperContext {
+): ShopkeeperContext<TQueryFnData, TError, TData, TQueryKey> {
     return {
         fetcherOptions: {},
         queryOptions: {},
-        queryKeyFn,
     };
 }
 
-export const queryKeyFn = (operation: QueryOperation) => {
+export const queryKeyFn = (operation: QueryOperation): QueryKey => {
     const queryKey: unknown[] = hasPathParams(operation)
         ? operation.path
               .split('/')
@@ -63,6 +63,7 @@ export const queryKeyFn = (operation: QueryOperation) => {
 
     return queryKey;
 };
+
 // Helpers
 const resolvePathParam = (key: string, pathParams: Record<string, string>) => {
     if (key.startsWith('{') && key.endsWith('}')) {
@@ -76,7 +77,8 @@ const hasPathParams = (
 ): operation is QueryOperation & {
     variables: { pathParams: Record<string, string> };
 } => {
-    return Boolean((operation.variables as any).pathParams);
+    if (operation.variables === skipToken) return false;
+    return 'variables' in operation && 'pathParams' in operation.variables;
 };
 
 const hasBody = (
@@ -84,7 +86,8 @@ const hasBody = (
 ): operation is QueryOperation & {
     variables: { body: Record<string, unknown> };
 } => {
-    return Boolean((operation.variables as any).body);
+    if (operation.variables === skipToken) return false;
+    return 'variables' in operation && 'body' in operation.variables;
 };
 
 const hasQueryParams = (
@@ -92,5 +95,6 @@ const hasQueryParams = (
 ): operation is QueryOperation & {
     variables: { queryParams: Record<string, unknown> };
 } => {
-    return Boolean((operation.variables as any).queryParams);
+    if (operation.variables === skipToken) return false;
+    return 'variables' in operation && 'queryParams' in operation.variables;
 };
