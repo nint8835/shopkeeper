@@ -2,31 +2,39 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { defaultQueryParams, useStore } from '@/lib/state';
+import { useStore } from '@/lib/state';
+import { Route } from '@/routes/index';
 import type { CheckedState } from '@radix-ui/react-checkbox';
+import { useNavigate, UseNavigateResult } from '@tanstack/react-router';
 import { Filter } from 'lucide-react';
-import { type SetURLSearchParams, useSearchParams } from 'react-router-dom';
 
-function paramToggler(searchParams: URLSearchParams, setSearchParams: SetURLSearchParams, key: string, value: string) {
+// TODO: Fix type errors
+// TODO: Fix behaviour when filtering to only user's listings
+// TODO: Fix ordering causing default stripping to not work
+function paramToggler(
+    filters: typeof Route.types.searchSchema,
+    navigate: UseNavigateResult<'/'>,
+    key: Exclude<keyof typeof Route.types.searchSchema, 'has_issues'>,
+    value: any,
+) {
     return (checked: CheckedState) => {
-        const currentState = searchParams.getAll(key).includes(value);
+        const currentState = filters[key]!.includes(value);
         const newState = !!checked;
         if (newState === currentState) {
             return;
         }
-        setSearchParams((params) => {
-            if (newState) {
-                params.append(key, value);
-            } else {
-                params.delete(key, value);
-            }
-            return params;
+        navigate({
+            search: (prevSearch) => ({
+                ...prevSearch,
+                [key]: newState ? prevSearch[key]?.concat(value) : prevSearch[key]?.filter((v: any) => v !== value),
+            }),
         });
     };
 }
 
 function StatusFilter() {
-    const [searchParams, setSearchParams] = useSearchParams({ status: defaultQueryParams.status });
+    const filters = Route.useSearch();
+    const navigate = useNavigate({ from: Route.fullPath });
 
     return (
         <div className="space-y-2">
@@ -34,8 +42,8 @@ function StatusFilter() {
             <div className="flex items-center space-x-2">
                 <Checkbox
                     id="open-status-checkbox"
-                    checked={searchParams.getAll('status').includes('open')}
-                    onCheckedChange={paramToggler(searchParams, setSearchParams, 'status', 'open')}
+                    checked={filters.status.includes('open')}
+                    onCheckedChange={paramToggler(filters, navigate, 'status', 'open')}
                 />
                 <label htmlFor="open-status-checkbox" className="text-sm leading-none">
                     Open
@@ -44,8 +52,8 @@ function StatusFilter() {
             <div className="flex items-center space-x-2">
                 <Checkbox
                     id="pending-status-checkbox"
-                    checked={searchParams.getAll('status').includes('pending')}
-                    onCheckedChange={paramToggler(searchParams, setSearchParams, 'status', 'pending')}
+                    checked={filters.status.includes('pending')}
+                    onCheckedChange={paramToggler(filters, navigate, 'status', 'pending')}
                 />
                 <label htmlFor="pending-status-checkbox" className="text-sm leading-none">
                     Pending
@@ -54,8 +62,8 @@ function StatusFilter() {
             <div className="flex items-center space-x-2">
                 <Checkbox
                     id="closed-status-checkbox"
-                    checked={searchParams.getAll('status').includes('closed')}
-                    onCheckedChange={paramToggler(searchParams, setSearchParams, 'status', 'closed')}
+                    checked={filters.status.includes('closed')}
+                    onCheckedChange={paramToggler(filters, navigate, 'status', 'closed')}
                 />
                 <label htmlFor="closed-status-checkbox" className="text-sm leading-none">
                     Closed
@@ -66,7 +74,8 @@ function StatusFilter() {
 }
 
 function OwnerFilter() {
-    const [searchParams, setSearchParams] = useSearchParams({ owner: defaultQueryParams.owner });
+    const filters = Route.useSearch();
+    const navigate = useNavigate({ from: Route.fullPath });
     const currentUserId = useStore((state) => state.user?.id);
 
     return (
@@ -75,8 +84,8 @@ function OwnerFilter() {
             <div className="flex items-center space-x-2">
                 <Checkbox
                     id="only-mine-checkbox"
-                    checked={searchParams.getAll('owner').includes(currentUserId)}
-                    onCheckedChange={paramToggler(searchParams, setSearchParams, 'owner', currentUserId)}
+                    checked={filters.owner && filters.owner.includes(currentUserId)}
+                    onCheckedChange={paramToggler(filters, navigate, 'owner', currentUserId)}
                 />
                 <label htmlFor="only-mine-checkbox" className="text-sm leading-none">
                     Show only my listings
@@ -87,7 +96,8 @@ function OwnerFilter() {
 }
 
 function TypeFilter() {
-    const [searchParams, setSearchParams] = useSearchParams({ type: defaultQueryParams.type });
+    const filters = Route.useSearch();
+    const navigate = useNavigate({ from: Route.fullPath });
 
     return (
         <div className="space-y-2">
@@ -95,8 +105,8 @@ function TypeFilter() {
             <div className="flex items-center space-x-2">
                 <Checkbox
                     id="sell-type-checkbox"
-                    checked={searchParams.getAll('type').includes('sell')}
-                    onCheckedChange={paramToggler(searchParams, setSearchParams, 'type', 'sell')}
+                    checked={filters.type.includes('sell')}
+                    onCheckedChange={paramToggler(filters, navigate, 'type', 'sell')}
                 />
                 <label htmlFor="sell-type-checkbox" className="text-sm leading-none">
                     For sale
@@ -105,8 +115,8 @@ function TypeFilter() {
             <div className="flex items-center space-x-2">
                 <Checkbox
                     id="buy-type-checkbox"
-                    checked={searchParams.getAll('type').includes('buy')}
-                    onCheckedChange={paramToggler(searchParams, setSearchParams, 'type', 'buy')}
+                    checked={filters.type.includes('buy')}
+                    onCheckedChange={paramToggler(filters, navigate, 'type', 'buy')}
                 />
                 <label htmlFor="buy-type-checkbox" className="text-sm leading-none">
                     Looking to buy

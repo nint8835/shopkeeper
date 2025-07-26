@@ -1,5 +1,6 @@
 import CreateListingDialog from '@/components/dialogs/CreateListing';
 import EditListingDialog from '@/components/dialogs/EditListing';
+import ListingFiltersDialog from '@/components/dialogs/Filters';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -325,7 +326,7 @@ function RouteComponent() {
                         </Button>
                     )}
                     <div className="space-x-2">
-                        {/* <ListingFiltersDialog /> */}
+                        <ListingFiltersDialog />
                         <CreateListingDialog />
                     </div>
                 </div>
