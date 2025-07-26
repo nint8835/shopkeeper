@@ -26,7 +26,10 @@ function paramToggler(
         navigate({
             search: (prevSearch) => ({
                 ...prevSearch,
-                [key]: newState ? prevSearch[key]?.concat(value) : prevSearch[key]?.filter((v: any) => v !== value),
+                [key]: (newState
+                    ? prevSearch[key]?.concat(value)
+                    : prevSearch[key]?.filter((v: any) => v !== value)
+                )?.sort(),
             }),
         });
     };
