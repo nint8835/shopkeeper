@@ -9,14 +9,18 @@ import { useNavigate, UseNavigateResult } from '@tanstack/react-router';
 import { Filter } from 'lucide-react';
 
 // TODO: Fix behaviour when filtering to only user's listings
-function paramToggler<K extends Exclude<keyof typeof Route.types.searchSchema, 'has_issues'>>(
-    filters: typeof Route.types.searchSchema,
-    navigate: UseNavigateResult<'/'>,
-    key: K,
-    value: (typeof Route.types.searchSchema)[K] extends Array<infer U> | undefined ? U : never,
-) {
+function paramToggler<
+    K extends Exclude<keyof typeof Route.types.searchSchema, 'has_issues'>,
+    V extends (typeof Route.types.searchSchema)[K] extends Array<infer U> | undefined ? U : never,
+>(filters: typeof Route.types.searchSchema, navigate: UseNavigateResult<'/'>, key: K, value: V) {
     return (checked: CheckedState) => {
-        const currentState = (filters[key]! as Array<typeof value>).includes(value);
+        let currentValue = filters[key] as V[] | undefined;
+
+        if (currentValue === undefined) {
+            currentValue = [] as V[];
+        }
+
+        const currentState = currentValue.includes(value);
         const newState = !!checked;
         if (newState === currentState) {
             return;
@@ -24,10 +28,7 @@ function paramToggler<K extends Exclude<keyof typeof Route.types.searchSchema, '
         navigate({
             search: (prevSearch) => ({
                 ...prevSearch,
-                [key]: (newState
-                    ? prevSearch[key]?.concat(value as string)
-                    : (prevSearch[key] as (typeof value)[] | undefined)?.filter((v) => v !== value)
-                )?.sort(),
+                [key]: (newState ? currentValue.concat(value) : currentValue.filter((v) => v !== value))?.sort(),
             }),
         });
     };
@@ -85,7 +86,7 @@ function OwnerFilter() {
             <div className="flex items-center space-x-2">
                 <Checkbox
                     id="only-mine-checkbox"
-                    checked={filters.owner && filters.owner.includes(currentUserId)}
+                    checked={filters.owner !== undefined && filters.owner.includes(currentUserId)}
                     onCheckedChange={paramToggler(filters, navigate, 'owner', currentUserId)}
                 />
                 <label htmlFor="only-mine-checkbox" className="text-sm leading-none">
