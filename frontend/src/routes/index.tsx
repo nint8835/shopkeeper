@@ -9,24 +9,40 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { queryClient } from '@/lib/query';
 import { defaultQueryParams, useStore } from '@/lib/state';
-import { cn, pluralize } from '@/lib/utils';
+import { arraysEqual, cn, pluralize } from '@/lib/utils';
 import { useGetListings, useGetUserIssueCount, useHideImage, useHideListing } from '@/queries/api/shopkeeperComponents';
 import type {
     FullListingSchema,
     ListingIssueIcon,
     ListingIssueResolutionLocation,
-    ListingStatus,
-    ListingType,
 } from '@/queries/api/shopkeeperSchemas';
+import { listingStatusSchema, listingTypeSchema } from '@/queries/api/shopkeeperZod';
 import { keepPreviousData } from '@tanstack/react-query';
+import { createFileRoute, stripSearchParams, useNavigate } from '@tanstack/react-router';
+import { zodValidator } from '@tanstack/zod-adapter';
 import { AlertCircle, CircleAlert, DollarSign, FilterX, Image, LucideProps, Text } from 'lucide-react';
 import { Masonry, type RenderComponentProps } from 'masonic';
 import React, { useState } from 'react';
 import Markdown from 'react-markdown';
-import { useSearchParams } from 'react-router-dom';
 import remarkGemoji from 'remark-gemoji';
 import remarkGfm from 'remark-gfm';
 import { useWindowSize } from 'usehooks-ts';
+import { z } from 'zod';
+
+const searchSchema = z.object({
+    status: z.array(listingStatusSchema).default(defaultQueryParams.status),
+    type: z.array(listingTypeSchema).default(defaultQueryParams.type),
+    owner: z.array(z.string()).optional(),
+    has_issues: z.boolean().optional(),
+});
+
+export const Route = createFileRoute('/')({
+    component: RouteComponent,
+    validateSearch: zodValidator(searchSchema),
+    search: {
+        middlewares: [stripSearchParams(defaultQueryParams)],
+    },
+});
 
 function DiscordMarkdownField({ text }: { text: string }) {
     return (
@@ -225,26 +241,25 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
     );
 }
 
-export default function ListingsRoute() {
-    const [searchParams, setSearchParams] = useSearchParams();
+function RouteComponent() {
+    const filters = Route.useSearch();
+    const navigate = useNavigate({ from: Route.fullPath });
 
-    function getParamBoolean<V>(key: string, fallback: V): [boolean | V, boolean] {
-        const value = searchParams.get(key);
-        return value !== null ? [value === 'true', true] : [fallback, false];
+    function setSearchParams(params: Partial<z.infer<typeof searchSchema>>) {
+        navigate({ search: params });
     }
 
-    function getParamArray<V>(key: string, fallback: V): [string[] | V, boolean] {
-        const value = searchParams.getAll(key);
-        return value.length > 0 ? [value, true] : [fallback, false];
-    }
+    const filteredStatuses = filters.status;
+    const statusFilterSet = !arraysEqual(filteredStatuses, defaultQueryParams.status);
 
-    const [filteredStatuses, statusFilterSet] = getParamArray('status', defaultQueryParams.status) as [
-        ListingStatus[],
-        boolean,
-    ];
-    const [filteredOwners, ownerFilterSet] = getParamArray('owner', null);
-    const [filteredTypes, typeFilterSet] = getParamArray('type', defaultQueryParams.type) as [ListingType[], boolean];
-    const [filterHasIssues, hasIssuesFilterSet] = getParamBoolean('has_issues', null);
+    const filteredOwners = filters.owner;
+    const ownerFilterSet = filteredOwners && filteredOwners.length > 0;
+
+    const filteredTypes = filters.type;
+    const typeFilterSet = !arraysEqual(filteredTypes, defaultQueryParams.type);
+
+    const filterHasIssues = filters.has_issues;
+    const hasIssuesFilterSet = filterHasIssues !== undefined;
 
     const filtersActive = statusFilterSet || ownerFilterSet || typeFilterSet || hasIssuesFilterSet;
 
@@ -285,10 +300,10 @@ export default function ListingsRoute() {
                             className="space-x-2"
                             onClick={() => {
                                 setSearchParams({
-                                    has_issues: 'true',
+                                    has_issues: true,
                                     owner: [currentUserId],
-                                    status: [],
-                                    type: [],
+                                    status: defaultQueryParams.status,
+                                    type: defaultQueryParams.type,
                                 });
                             }}
                         >
