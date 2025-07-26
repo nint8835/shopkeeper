@@ -1,4 +1,4 @@
-import { DiscordUser } from '@/queries/api/shopkeeperSchemas';
+import type { DiscordUser, ListingStatus, ListingType } from '@/queries/api/shopkeeperSchemas';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
@@ -15,7 +15,7 @@ export const useStore = create<State>()(
 );
 
 export const defaultQueryParams = {
-    status: ['open'],
-    type: ['buy', 'sell'],
+    status: ['open'] as ListingStatus[],
+    type: ['buy', 'sell'] as ListingType[],
     owner: [] as string[],
 };
