@@ -1,6 +1,5 @@
 import CreateListingDialog from '@/components/dialogs/CreateListing';
 import EditListingDialog from '@/components/dialogs/EditListing';
-import ListingFiltersDialog from '@/components/dialogs/Filters';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -19,14 +18,18 @@ import type {
     ListingType,
 } from '@/queries/api/shopkeeperSchemas';
 import { keepPreviousData } from '@tanstack/react-query';
+import { createFileRoute } from '@tanstack/react-router';
 import { AlertCircle, CircleAlert, DollarSign, FilterX, Image, LucideProps, Text } from 'lucide-react';
 import { Masonry, type RenderComponentProps } from 'masonic';
 import React, { useState } from 'react';
 import Markdown from 'react-markdown';
-import { useSearchParams } from 'react-router-dom';
 import remarkGemoji from 'remark-gemoji';
 import remarkGfm from 'remark-gfm';
 import { useWindowSize } from 'usehooks-ts';
+
+export const Route = createFileRoute('/')({
+    component: RouteComponent,
+});
 
 function DiscordMarkdownField({ text }: { text: string }) {
     return (
@@ -225,17 +228,23 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
     );
 }
 
-export default function ListingsRoute() {
-    const [searchParams, setSearchParams] = useSearchParams();
+function RouteComponent() {
+    // const [searchParams, setSearchParams] = useSearchParams();
 
     function getParamBoolean<V>(key: string, fallback: V): [boolean | V, boolean] {
-        const value = searchParams.get(key);
+        // const value = searchParams.get(key);
+        const value = null;
         return value !== null ? [value === 'true', true] : [fallback, false];
     }
 
     function getParamArray<V>(key: string, fallback: V): [string[] | V, boolean] {
-        const value = searchParams.getAll(key);
+        // const value = searchParams.getAll(key);
+        const value = [] as string[];
         return value.length > 0 ? [value, true] : [fallback, false];
+    }
+
+    function setSearchParams(params: Record<string, string | string[]>) {
+        console.log('Setting search params:', params);
     }
 
     const [filteredStatuses, statusFilterSet] = getParamArray('status', defaultQueryParams.status) as [
@@ -311,7 +320,7 @@ export default function ListingsRoute() {
                         </Button>
                     )}
                     <div className="space-x-2">
-                        <ListingFiltersDialog />
+                        {/* <ListingFiltersDialog /> */}
                         <CreateListingDialog />
                     </div>
                 </div>
