@@ -10,7 +10,6 @@ import { Filter } from 'lucide-react';
 
 // TODO: Fix type errors
 // TODO: Fix behaviour when filtering to only user's listings
-// TODO: Fix ordering causing default stripping to not work
 function paramToggler(
     filters: typeof Route.types.searchSchema,
     navigate: UseNavigateResult<'/'>,
