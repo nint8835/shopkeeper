@@ -1,7 +1,6 @@
 import CreateListingDialog from '@/components/dialogs/CreateListing';
 import EditListingDialog from '@/components/dialogs/EditListing';
 import ListingFiltersDialog from '@/components/dialogs/Filters';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { queryClient } from '@/lib/query';
 import { defaultQueryParams, useStore } from '@/lib/state';
 import { arraysEqual, cn, pluralize } from '@/lib/utils';
@@ -36,9 +35,20 @@ import {
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, stripSearchParams, useNavigate } from '@tanstack/react-router';
 import { zodValidator } from '@tanstack/zod-adapter';
-import { AlertCircle, CircleAlert, DollarSign, FilterX, Image, LucideProps, Text } from 'lucide-react';
+import useEmblaCarousel from 'embla-carousel-react';
+import {
+    AlertCircle,
+    ArrowLeft,
+    ArrowRight,
+    CircleAlert,
+    DollarSign,
+    FilterX,
+    Image,
+    LucideProps,
+    Text,
+} from 'lucide-react';
 import { Masonry, type RenderComponentProps } from 'masonic';
-import React from 'react';
+import React, { useCallback } from 'react';
 import Markdown from 'react-markdown';
 import remarkGemoji from 'remark-gemoji';
 import remarkGfm from 'remark-gfm';
@@ -150,7 +160,7 @@ function ListingImage({ image }: { image: ListingImageSchema }) {
     const { isOpen, onOpenChange, onOpen } = useDisclosure();
     const { mutateAsync: hideImage, isPending: hideImagePending } = useHideImage();
     return (
-        <CarouselItem key={image.id}>
+        <div>
             <img
                 className="w-full"
                 width={image.width}
@@ -183,7 +193,41 @@ function ListingImage({ image }: { image: ListingImageSchema }) {
                     </ModalBody>
                 </ModalContent>
             </Modal>
-        </CarouselItem>
+        </div>
+    );
+}
+
+function ListingImageCarousel({ images }: { images: ListingImageSchema[] }) {
+    const [emblaRef, emblaApi] = useEmblaCarousel();
+    const scrollPrev = useCallback(() => {
+        if (emblaApi) emblaApi.scrollPrev();
+    }, [emblaApi]);
+    const scrollNext = useCallback(() => {
+        if (emblaApi) emblaApi.scrollNext();
+    }, [emblaApi]);
+
+    return (
+        <div className="embla space-y-2">
+            <div className="embla__viewport" ref={emblaRef}>
+                <div className="embla__container">
+                    {images.map((image) => (
+                        <div className="embla__slide" key={image.id}>
+                            <ListingImage image={image} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+            {images.length > 1 && (
+                <div className="flex w-full justify-center space-x-2">
+                    <Button radius="full" className="embla__prev w-fit min-w-fit p-2" onPress={scrollPrev}>
+                        <ArrowLeft />
+                    </Button>
+                    <Button radius="full" className="embla__next w-fit min-w-fit p-2" onPress={scrollNext}>
+                        <ArrowRight />
+                    </Button>
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -218,23 +262,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                 </h4>
             </CardHeader>
             <CardBody className="flex-1 space-y-2">
-                {listing.images.length > 0 && (
-                    <Carousel>
-                        <CarouselContent>
-                            {listing.images
-                                .sort((a, b) => a.id - b.id)
-                                .map((image) => (
-                                    <ListingImage key={image.id} image={image} />
-                                ))}
-                        </CarouselContent>
-                        {listing.images.length > 1 && (
-                            <>
-                                <CarouselPrevious className="-left-4" />
-                                <CarouselNext className="-right-4" />
-                            </>
-                        )}
-                    </Carousel>
-                )}
+                {listing.images.length > 0 && <ListingImageCarousel images={listing.images} />}
                 <DiscordMarkdownField text={listing.description || ''} />
             </CardBody>
             <CardFooter className="flex flex-row-reverse justify-between">
