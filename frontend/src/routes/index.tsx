@@ -3,7 +3,6 @@ import EditListingDialog from '@/components/dialogs/EditListing';
 import ListingFiltersDialog from '@/components/dialogs/Filters';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { queryClient } from '@/lib/query';
 import { defaultQueryParams, useStore } from '@/lib/state';
 import { arraysEqual, cn, pluralize } from '@/lib/utils';
@@ -182,49 +181,54 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                         <CarouselContent>
                             {listing.images
                                 .sort((a, b) => a.id - b.id)
-                                .map((image) => (
-                                    <CarouselItem key={image.id}>
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                                <img
-                                                    className="w-full"
-                                                    width={image.width}
-                                                    height={image.height}
-                                                    loading="lazy"
-                                                    src={image.thumbnail_url}
-                                                />
-                                            </DialogTrigger>
-                                            <DialogContent className="flex max-h-screen max-w-none items-center justify-center">
-                                                <ContextMenu>
-                                                    <ContextMenuTrigger>
-                                                        <img
-                                                            className="max-h-screen p-4"
-                                                            loading="lazy"
-                                                            src={image.url}
-                                                        />
-                                                    </ContextMenuTrigger>
-                                                    <ContextMenuContent>
-                                                        {user.is_owner && (
-                                                            <ContextMenuItem
-                                                                onClick={async () => {
-                                                                    await hideImage({
-                                                                        pathParams: { imageId: image.id },
-                                                                    });
-                                                                    queryClient.invalidateQueries({
-                                                                        queryKey: ['api', 'listings'],
-                                                                    });
-                                                                }}
-                                                                disabled={hideImagePending}
-                                                            >
-                                                                Hide
-                                                            </ContextMenuItem>
-                                                        )}
-                                                    </ContextMenuContent>
-                                                </ContextMenu>
-                                            </DialogContent>
-                                        </Dialog>
-                                    </CarouselItem>
-                                ))}
+                                .map((image) => {
+                                    const { isOpen, onOpenChange, onOpen } = useDisclosure();
+                                    return (
+                                        <CarouselItem key={image.id}>
+                                            <img
+                                                className="w-full"
+                                                width={image.width}
+                                                height={image.height}
+                                                loading="lazy"
+                                                src={image.thumbnail_url}
+                                                onClick={onOpen}
+                                            />
+                                            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                                                <ModalContent className="flex max-h-screen max-w-none items-center justify-center">
+                                                    <ModalBody>
+                                                        <ContextMenu>
+                                                            <ContextMenuTrigger>
+                                                                <img
+                                                                    className="max-h-screen p-4"
+                                                                    loading="lazy"
+                                                                    src={image.url}
+                                                                />
+                                                            </ContextMenuTrigger>
+                                                            <ContextMenuContent>
+                                                                {user.is_owner && (
+                                                                    <ContextMenuItem
+                                                                        onClick={async () => {
+                                                                            await hideImage({
+                                                                                pathParams: { imageId: image.id },
+                                                                            });
+                                                                            queryClient.invalidateQueries({
+                                                                                queryKey: ['api', 'listings'],
+                                                                            });
+                                                                        }}
+                                                                        disabled={hideImagePending}
+                                                                    >
+                                                                        Hide
+                                                                    </ContextMenuItem>
+                                                                )}
+                                                            </ContextMenuContent>
+                                                        </ContextMenu>
+                                                    </ModalBody>
+                                                    <ModalFooter />
+                                                </ModalContent>
+                                            </Modal>
+                                        </CarouselItem>
+                                    );
+                                })}
                         </CarouselContent>
                         {listing.images.length > 1 && (
                             <>
