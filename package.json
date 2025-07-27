@@ -11,7 +11,6 @@
         "gen-openapi": "npx openapi-codegen gen shopkeeper && npx ts-to-zod frontend/src/queries/api/shopkeeperSchemas.ts frontend/src/queries/api/shopkeeperZod.ts && npx prettier -w frontend/src/queries/**/*.ts"
     },
     "dependencies": {
-        "@fontsource-variable/inter": "^5.0.18",
         "@heroui/react": "^2.8.1",
         "@hookform/resolvers": "^3.6.0",
         "@radix-ui/react-checkbox": "^1.1.1",
@@ -20,7 +19,6 @@
         "@radix-ui/react-label": "^2.1.0",
         "@radix-ui/react-select": "^2.1.1",
         "@radix-ui/react-slot": "^1.1.0",
-        "@radix-ui/react-tabs": "^1.1.0",
         "@radix-ui/react-tooltip": "^1.1.6",
         "@tailwindcss/vite": "^4.1.11",
         "@tanstack/react-query": "^5.83.0",
