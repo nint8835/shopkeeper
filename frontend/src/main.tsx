@@ -1,10 +1,19 @@
+import { Spinner } from '@heroui/react';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { routeTree } from './routeTree.gen';
 
-const router = createRouter({ routeTree });
+function LoadingSpinner() {
+    return (
+        <div className="flex h-full flex-grow items-center justify-center">
+            <Spinner size="lg" />
+        </div>
+    );
+}
+
+const router = createRouter({ routeTree, defaultPendingComponent: LoadingSpinner });
 
 declare module '@tanstack/react-router' {
     interface Register {
