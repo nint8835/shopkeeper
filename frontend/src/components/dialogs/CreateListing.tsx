@@ -15,13 +15,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { queryClient } from '@/lib/query';
 import { useCreateListing } from '@/queries/api/shopkeeperComponents';
 import { createListingSchemaSchema } from '@/queries/api/shopkeeperZod';
-import { Button } from '@heroui/react';
+import { addToast, Button } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import { z } from 'zod';
 
 export default function CreateListingDialog() {
@@ -47,8 +46,17 @@ export default function CreateListingDialog() {
     async function handleSubmit() {
         try {
             const newListing = await createListing({ body: form.getValues() });
-            toast.success('Listing created successfully', {
-                action: { label: 'Open', onClick: () => window.open(newListing.url) },
+            addToast({
+                title: 'Listing created successfully',
+                endContent: (
+                    <Button
+                        onClick={() => {
+                            window.open(newListing.url);
+                        }}
+                    >
+                        Open
+                    </Button>
+                ),
             });
             queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
             handleOpenChange(false);

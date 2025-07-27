@@ -16,11 +16,10 @@ import { queryClient } from '@/lib/query';
 import { useEditListing } from '@/queries/api/shopkeeperComponents';
 import { ListingSchema } from '@/queries/api/shopkeeperSchemas';
 import { editListingSchemaSchema } from '@/queries/api/shopkeeperZod';
-import { Button } from '@heroui/react';
+import { addToast, Button } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import { z } from 'zod';
 
 export default function EditListingDialog({
@@ -57,8 +56,17 @@ export default function EditListingDialog({
     async function handleSubmit() {
         try {
             const newListing = await editListing({ pathParams: { listingId: listing.id }, body: form.getValues() });
-            toast.success('Listing edited successfully', {
-                action: { label: 'Open', onClick: () => window.open(newListing.url) },
+            addToast({
+                title: 'Listing edited successfully',
+                endContent: (
+                    <Button
+                        onClick={() => {
+                            window.open(newListing.url);
+                        }}
+                    >
+                        Open
+                    </Button>
+                ),
             });
             queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
             handleOpenChange(false);
