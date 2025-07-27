@@ -33,12 +33,14 @@ export default function EditListingDialog({
     listing,
     isOpen,
     onOpen,
+    onClose,
     onOpenChange,
 }: {
     listing: ListingSchema;
     isOpen: boolean;
     onOpen: () => void;
-    onOpenChange: (open: boolean) => void;
+    onClose: () => void;
+    onOpenChange: () => void;
 }) {
     const form = useForm<z.infer<typeof editListingSchemaSchema>>({
         resolver: zodResolver(editListingSchemaSchema),
@@ -59,7 +61,11 @@ export default function EditListingDialog({
             price: listing.price || '',
             status: listing.status,
         });
-        onOpenChange(open);
+        if (!open) {
+            onClose();
+        } else {
+            onOpen();
+        }
     }
 
     async function handleSubmit() {

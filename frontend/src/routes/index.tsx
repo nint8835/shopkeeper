@@ -194,6 +194,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
         isOpen: editDialogIsOpen,
         onOpenChange: editDialogOnOpenChange,
         onOpen: editDialogOnOpen,
+        onClose: editDialogOnClose,
     } = useDisclosure();
 
     return (
@@ -247,6 +248,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                             isOpen={editDialogIsOpen}
                             onOpenChange={editDialogOnOpenChange}
                             onOpen={editDialogOnOpen}
+                            onClose={editDialogOnClose}
                         />
                     )}
                     {user.is_owner && (

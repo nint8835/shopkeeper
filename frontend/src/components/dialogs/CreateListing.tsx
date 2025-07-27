@@ -31,7 +31,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 export default function CreateListingDialog() {
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
     const form = useForm<z.infer<typeof createListingSchemaSchema>>({
         resolver: zodResolver(createListingSchemaSchema),
@@ -47,7 +47,9 @@ export default function CreateListingDialog() {
 
     function handleOpenChange(open: boolean) {
         form.reset({ title: '', type: 'sell', description: '', price: '' });
-        if (open !== isOpen) {
+        if (!open) {
+            onClose();
+        } else {
             onOpen();
         }
     }
