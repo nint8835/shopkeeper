@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useStore } from '@/lib/state';
 import { Route } from '@/routes/index';
+import { Button } from '@heroui/react';
 import type { CheckedState } from '@radix-ui/react-checkbox';
 import { useNavigate, UseNavigateResult } from '@tanstack/react-router';
 import { Filter } from 'lucide-react';
@@ -131,7 +131,7 @@ export default function ListingFiltersDialog() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button variant="bordered">
                     <Filter className="mr-2 h-4 w-4" /> Filters
                 </Button>
             </DialogTrigger>

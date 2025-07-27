@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog';
 import {
     Form,
@@ -16,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { queryClient } from '@/lib/query';
 import { useCreateListing } from '@/queries/api/shopkeeperComponents';
 import { createListingSchemaSchema } from '@/queries/api/shopkeeperZod';
+import { Button } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { Plus } from 'lucide-react';
@@ -60,7 +60,7 @@ export default function CreateListingDialog() {
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button variant="bordered">
                     <Plus className="mr-2 h-4 w-4" /> Create Listing
                 </Button>
             </DialogTrigger>

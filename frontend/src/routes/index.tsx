@@ -1,7 +1,6 @@
 import CreateListingDialog from '@/components/dialogs/CreateListing';
 import EditListingDialog from '@/components/dialogs/EditListing';
 import ListingFiltersDialog from '@/components/dialogs/Filters';
-import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -22,7 +21,7 @@ import type {
     ListingIssueResolutionLocation,
 } from '@/queries/api/shopkeeperSchemas';
 import { listingStatusSchema, listingTypeSchema } from '@/queries/api/shopkeeperZod';
-import { Card, CardBody, CardFooter, CardHeader } from '@heroui/react';
+import { Button, Card, CardBody, CardFooter, CardHeader } from '@heroui/react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, stripSearchParams, useNavigate } from '@tanstack/react-router';
 import { zodValidator } from '@tanstack/zod-adapter';
@@ -236,7 +235,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                     )}
                     {user.is_owner && (
                         <Button
-                            variant="destructive"
+                            color="danger"
                             onClick={async () => {
                                 await hideListing({ pathParams: { listingId: listing.id } });
                                 queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
@@ -307,7 +306,7 @@ function RouteComponent() {
                 <div className="flex flex-col gap-2 md:flex-row">
                     {issueCount && issueCount > 0 ? (
                         <Button
-                            variant="destructive"
+                            color="danger"
                             className="space-x-2"
                             onClick={() => {
                                 setSearchParams({
@@ -326,7 +325,7 @@ function RouteComponent() {
                     ) : null}
                     {filtersActive && (
                         <Button
-                            variant="secondary"
+                            variant="faded"
                             className="space-x-2"
                             onClick={() => {
                                 setSearchParams({});

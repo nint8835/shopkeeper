@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog';
 import {
     Form,
@@ -17,6 +16,7 @@ import { queryClient } from '@/lib/query';
 import { useEditListing } from '@/queries/api/shopkeeperComponents';
 import { ListingSchema } from '@/queries/api/shopkeeperSchemas';
 import { editListingSchemaSchema } from '@/queries/api/shopkeeperZod';
+import { Button } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { useForm } from 'react-hook-form';
@@ -70,7 +70,7 @@ export default function EditListingDialog({
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="secondary">Edit</Button>
+                <Button variant="faded">Edit</Button>
             </DialogTrigger>
             <DialogContent>
                 <Form {...form}>
