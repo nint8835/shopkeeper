@@ -2,7 +2,6 @@ import CreateListingDialog from '@/components/dialogs/CreateListing';
 import EditListingDialog from '@/components/dialogs/EditListing';
 import ListingFiltersDialog from '@/components/dialogs/Filters';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -23,6 +22,7 @@ import type {
     ListingIssueResolutionLocation,
 } from '@/queries/api/shopkeeperSchemas';
 import { listingStatusSchema, listingTypeSchema } from '@/queries/api/shopkeeperZod';
+import { Card, CardBody, CardFooter, CardHeader } from '@heroui/react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, stripSearchParams, useNavigate } from '@tanstack/react-router';
 import { zodValidator } from '@tanstack/zod-adapter';
@@ -155,16 +155,16 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
             {listing.issues.length > 0 && listing.owner_id === user.id && (
                 <ListingAlertDialog listing={listing} setEditDialogOpen={setEditDialogOpen} />
             )}
-            <CardHeader>
-                <CardTitle className="w-full overflow-hidden text-ellipsis" title={listing.title}>
+            <CardHeader className="flex-col items-start">
+                <h3 className="w-full overflow-hidden text-ellipsis text-2xl font-bold" title={listing.title}>
                     {listing.title}
-                </CardTitle>
-                <CardDescription>
+                </h3>
+                <h4 className="text-sm text-muted-foreground">
                     <span>{listing.type === 'buy' ? 'Looking to buy' : 'For sale'}</span>
                     {listing.price && <span> - {listing.price}</span>}
-                </CardDescription>
+                </h4>
             </CardHeader>
-            <CardContent className="flex-1 space-y-2">
+            <CardBody className="flex-1 space-y-2">
                 {listing.images.length > 0 && (
                     <Carousel>
                         <CarouselContent>
@@ -223,7 +223,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                     </Carousel>
                 )}
                 <DiscordMarkdownField text={listing.description || ''} />
-            </CardContent>
+            </CardBody>
             <CardFooter className="flex flex-row-reverse justify-between">
                 <Button asChild>
                     <a href={listing.url} target="_blank">
