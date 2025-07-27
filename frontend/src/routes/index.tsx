@@ -21,7 +21,7 @@ import type {
     ListingIssueResolutionLocation,
 } from '@/queries/api/shopkeeperSchemas';
 import { listingStatusSchema, listingTypeSchema } from '@/queries/api/shopkeeperZod';
-import { Button, Card, CardBody, CardFooter, CardHeader } from '@heroui/react';
+import { Button, Card, CardBody, CardFooter, CardHeader, useDisclosure } from '@heroui/react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, stripSearchParams, useNavigate } from '@tanstack/react-router';
 import { zodValidator } from '@tanstack/zod-adapter';
@@ -139,7 +139,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
     const { user } = useStore();
     const { mutateAsync: hideListing, isPending: hidePending } = useHideListing();
     const { mutateAsync: hideImage, isPending: hideImagePending } = useHideImage();
-    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const { isOpen: editDialogOpen, onOpenChange: setEditDialogOpen, onOpen: handleEditDialogOpen } = useDisclosure();
 
     return (
         <Card
@@ -227,7 +227,12 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                 </Button>
                 <div className="space-x-2">
                     {listing.status !== 'closed' && (user.is_owner || user.id === listing.owner_id) && (
-                        <EditListingDialog listing={listing} open={editDialogOpen} setOpen={setEditDialogOpen} />
+                        <EditListingDialog
+                            listing={listing}
+                            isOpen={editDialogOpen}
+                            onOpenChange={setEditDialogOpen}
+                            onOpen={handleEditDialogOpen}
+                        />
                     )}
                     {user.is_owner && (
                         <Button

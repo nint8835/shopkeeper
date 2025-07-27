@@ -1,8 +1,17 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useStore } from '@/lib/state';
 import { ListingStatus, ListingType } from '@/queries/api/shopkeeperSchemas';
 import { Route } from '@/routes/index';
-import { Button, Checkbox, CheckboxGroup } from '@heroui/react';
+import {
+    Button,
+    Checkbox,
+    CheckboxGroup,
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    useDisclosure,
+} from '@heroui/react';
 import { useNavigate } from '@tanstack/react-router';
 import { Filter } from 'lucide-react';
 
@@ -62,23 +71,24 @@ function TypeFilter() {
 }
 
 export default function ListingFiltersDialog() {
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
     return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <Button variant="bordered">
-                    <Filter className="mr-2 h-4 w-4" /> Filters
-                </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Filters</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-8">
-                    <StatusFilter />
-                    <TypeFilter />
-                    <OwnerFilter />
-                </div>
-            </DialogContent>
-        </Dialog>
+        <>
+            <Button variant="bordered" onPress={onOpen}>
+                <Filter className="mr-2 h-4 w-4" /> Filters
+            </Button>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    <ModalHeader>Filters</ModalHeader>
+                    <ModalBody>
+                        <StatusFilter />
+                        <TypeFilter />
+                        <OwnerFilter />
+                    </ModalBody>
+                    <ModalFooter />
+                </ModalContent>
+            </Modal>
+        </>
     );
 }
