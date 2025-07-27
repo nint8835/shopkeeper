@@ -1,10 +1,8 @@
-import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useStore } from '@/lib/state';
 import { Route } from '@/routes/index';
-import { Button } from '@heroui/react';
-import type { CheckedState } from '@radix-ui/react-checkbox';
+import { Button, Checkbox } from '@heroui/react';
 import { useNavigate, UseNavigateResult } from '@tanstack/react-router';
 import { Filter } from 'lucide-react';
 
@@ -12,7 +10,7 @@ function paramToggler<
     K extends Exclude<keyof typeof Route.types.searchSchema, 'has_issues'>,
     V extends (typeof Route.types.searchSchema)[K] extends Array<infer U> | undefined ? U : never,
 >(filters: typeof Route.types.searchSchema, navigate: UseNavigateResult<'/'>, key: K, value: V) {
-    return (checked: CheckedState) => {
+    return (checked: boolean) => {
         let currentValue = filters[key] as V[] | undefined;
 
         if (currentValue === undefined) {
@@ -42,33 +40,27 @@ function StatusFilter() {
             <Label>Status</Label>
             <div className="flex items-center space-x-2">
                 <Checkbox
-                    id="open-status-checkbox"
-                    checked={filters.status.includes('open')}
-                    onCheckedChange={paramToggler(filters, navigate, 'status', 'open')}
-                />
-                <label htmlFor="open-status-checkbox" className="text-sm leading-none">
+                    isSelected={filters.status.includes('open')}
+                    onValueChange={paramToggler(filters, navigate, 'status', 'open')}
+                >
                     Open
-                </label>
+                </Checkbox>
             </div>
             <div className="flex items-center space-x-2">
                 <Checkbox
-                    id="pending-status-checkbox"
-                    checked={filters.status.includes('pending')}
-                    onCheckedChange={paramToggler(filters, navigate, 'status', 'pending')}
-                />
-                <label htmlFor="pending-status-checkbox" className="text-sm leading-none">
+                    isSelected={filters.status.includes('pending')}
+                    onValueChange={paramToggler(filters, navigate, 'status', 'pending')}
+                >
                     Pending
-                </label>
+                </Checkbox>
             </div>
             <div className="flex items-center space-x-2">
                 <Checkbox
-                    id="closed-status-checkbox"
-                    checked={filters.status.includes('closed')}
-                    onCheckedChange={paramToggler(filters, navigate, 'status', 'closed')}
-                />
-                <label htmlFor="closed-status-checkbox" className="text-sm leading-none">
+                    isSelected={filters.status.includes('closed')}
+                    onValueChange={paramToggler(filters, navigate, 'status', 'closed')}
+                >
                     Closed
-                </label>
+                </Checkbox>
             </div>
         </div>
     );
@@ -84,13 +76,11 @@ function OwnerFilter() {
             <Label>Owner</Label>
             <div className="flex items-center space-x-2">
                 <Checkbox
-                    id="only-mine-checkbox"
-                    checked={filters.owner !== undefined && filters.owner.includes(currentUserId)}
-                    onCheckedChange={paramToggler(filters, navigate, 'owner', currentUserId)}
-                />
-                <label htmlFor="only-mine-checkbox" className="text-sm leading-none">
+                    isSelected={filters.owner !== undefined && filters.owner.includes(currentUserId)}
+                    onValueChange={paramToggler(filters, navigate, 'owner', currentUserId)}
+                >
                     Show only my listings
-                </label>
+                </Checkbox>
             </div>
         </div>
     );
@@ -105,23 +95,19 @@ function TypeFilter() {
             <Label>Type</Label>
             <div className="flex items-center space-x-2">
                 <Checkbox
-                    id="sell-type-checkbox"
-                    checked={filters.type.includes('sell')}
-                    onCheckedChange={paramToggler(filters, navigate, 'type', 'sell')}
-                />
-                <label htmlFor="sell-type-checkbox" className="text-sm leading-none">
+                    isSelected={filters.type.includes('sell')}
+                    onValueChange={paramToggler(filters, navigate, 'type', 'sell')}
+                >
                     For sale
-                </label>
+                </Checkbox>
             </div>
             <div className="flex items-center space-x-2">
                 <Checkbox
-                    id="buy-type-checkbox"
-                    checked={filters.type.includes('buy')}
-                    onCheckedChange={paramToggler(filters, navigate, 'type', 'buy')}
-                />
-                <label htmlFor="buy-type-checkbox" className="text-sm leading-none">
+                    isSelected={filters.type.includes('buy')}
+                    onValueChange={paramToggler(filters, navigate, 'type', 'buy')}
+                >
                     Looking to buy
-                </label>
+                </Checkbox>
             </div>
         </div>
     );
