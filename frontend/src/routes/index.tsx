@@ -4,7 +4,6 @@ import ListingFiltersDialog from '@/components/dialogs/Filters';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { queryClient } from '@/lib/query';
 import { defaultQueryParams, useStore } from '@/lib/state';
 import { arraysEqual, cn, pluralize } from '@/lib/utils';
@@ -21,7 +20,7 @@ import type {
     ListingIssueResolutionLocation,
 } from '@/queries/api/shopkeeperSchemas';
 import { listingStatusSchema, listingTypeSchema } from '@/queries/api/shopkeeperZod';
-import { Button, Card, CardBody, CardFooter, CardHeader, useDisclosure } from '@heroui/react';
+import { Button, Card, CardBody, CardFooter, CardHeader, Tooltip, useDisclosure } from '@heroui/react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, stripSearchParams, useNavigate } from '@tanstack/react-router';
 import { zodValidator } from '@tanstack/zod-adapter';
@@ -97,18 +96,13 @@ function ListingAlertDialog({
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <DialogTrigger asChild>
-                            <button className="absolute right-0 top-0 -translate-y-2 translate-x-2 rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700">
-                                <CircleAlert />
-                            </button>
-                        </DialogTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>This listing has issues. Click to view.</TooltipContent>
+            <DialogTrigger asChild>
+                <Tooltip content="This listing has issues. Click to view.">
+                    <button className="w-fit rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700">
+                        <CircleAlert />
+                    </button>
                 </Tooltip>
-            </TooltipProvider>
+            </DialogTrigger>
 
             <DialogContent>
                 <DialogHeader>
@@ -124,7 +118,7 @@ function ListingAlertDialog({
                             <IssueIcon height="32px" width="32px" className="h-full" />
                             <div className="flex-1">
                                 <div className="text-sm font-medium">{issue.title}</div>
-                                <div className="text-sm text-muted-foreground">{issue.description}</div>
+                                <div className="text-muted-foreground text-sm">{issue.description}</div>
                             </div>
                             <ResolutionButton />
                         </div>
@@ -156,7 +150,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                 <h3 className="w-full overflow-hidden text-ellipsis text-2xl font-bold" title={listing.title}>
                     {listing.title}
                 </h3>
-                <h4 className="text-sm text-muted-foreground">
+                <h4 className="text-muted-foreground text-sm">
                     <span>{listing.type === 'buy' ? 'Looking to buy' : 'For sale'}</span>
                     {listing.price && <span> - {listing.price}</span>}
                 </h4>
@@ -353,7 +347,7 @@ function RouteComponent() {
                         key={listings.length}
                     />
                 ) : (
-                    <div className="flex justify-center italic text-muted-foreground">
+                    <div className="text-muted-foreground flex justify-center italic">
                         No listings found - try checking your filters?
                     </div>
                 )}
