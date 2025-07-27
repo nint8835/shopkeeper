@@ -8,7 +8,6 @@ import {
     FormMessage,
     RootFormMessage,
 } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { queryClient } from '@/lib/query';
 import { useCreateListing } from '@/queries/api/shopkeeperComponents';
 import { createListingSchemaSchema } from '@/queries/api/shopkeeperZod';
@@ -21,6 +20,8 @@ import {
     ModalContent,
     ModalFooter,
     ModalHeader,
+    Select,
+    SelectItem,
     Textarea,
     useDisclosure,
 } from '@heroui/react';
@@ -98,19 +99,12 @@ export default function CreateListingDialog() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Type</FormLabel>
-
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="sell">For sale</SelectItem>
-                                                    <SelectItem value="buy">Looking to buy</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-
+                                            <FormControl>
+                                                <Select onChange={field.onChange} selectedKeys={[field.value]}>
+                                                    <SelectItem key="sell">For sale</SelectItem>
+                                                    <SelectItem key="buy">Looking to buy</SelectItem>
+                                                </Select>
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}

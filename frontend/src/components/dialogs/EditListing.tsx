@@ -8,7 +8,6 @@ import {
     FormMessage,
     RootFormMessage,
 } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { queryClient } from '@/lib/query';
 import { useEditListing } from '@/queries/api/shopkeeperComponents';
 import { ListingSchema } from '@/queries/api/shopkeeperSchemas';
@@ -22,6 +21,8 @@ import {
     ModalContent,
     ModalFooter,
     ModalHeader,
+    Select,
+    SelectItem,
     Textarea,
 } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -137,20 +138,13 @@ export default function EditListingDialog({
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Status</FormLabel>
-
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="open">Open</SelectItem>
-                                                    <SelectItem value="pending">Pending</SelectItem>
-                                                    <SelectItem value="closed">Closed</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-
+                                            <FormControl>
+                                                <Select onChange={field.onChange} selectedKeys={[field.value]}>
+                                                    <SelectItem key="open">Open</SelectItem>
+                                                    <SelectItem key="pending">Pending</SelectItem>
+                                                    <SelectItem key="closed">Closed</SelectItem>
+                                                </Select>
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
