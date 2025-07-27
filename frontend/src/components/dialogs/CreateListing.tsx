@@ -1,13 +1,4 @@
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-    RootFormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage, RootFormMessage } from '@/components/ui/form';
 import { queryClient } from '@/lib/query';
 import { useCreateListing } from '@/queries/api/shopkeeperComponents';
 import { createListingSchemaSchema } from '@/queries/api/shopkeeperZod';
@@ -88,9 +79,8 @@ export default function CreateListingDialog() {
                                     name="title"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Title</FormLabel>
                                             <FormControl>
-                                                <Input {...field} />
+                                                <Input label="Title" {...field} />
                                             </FormControl>
                                         </FormItem>
                                     )}
@@ -100,9 +90,12 @@ export default function CreateListingDialog() {
                                     name="type"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Type</FormLabel>
                                             <FormControl>
-                                                <Select onChange={field.onChange} selectedKeys={[field.value]}>
+                                                <Select
+                                                    label="Type"
+                                                    onChange={field.onChange}
+                                                    selectedKeys={[field.value]}
+                                                >
                                                     <SelectItem key="sell">For sale</SelectItem>
                                                     <SelectItem key="buy">Looking to buy</SelectItem>
                                                 </Select>
@@ -116,13 +109,13 @@ export default function CreateListingDialog() {
                                     name="description"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Description</FormLabel>
                                             <FormControl>
-                                                <Textarea {...field} />
+                                                <Textarea
+                                                    label="Description"
+                                                    description="Supports Discord-flavoured Markdown. Leave blank for no description."
+                                                    {...field}
+                                                />
                                             </FormControl>
-                                            <FormDescription>
-                                                Supports Discord-flavoured Markdown. Leave blank for no description.
-                                            </FormDescription>
                                         </FormItem>
                                     )}
                                 />
@@ -131,11 +124,13 @@ export default function CreateListingDialog() {
                                     name="price"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Price</FormLabel>
                                             <FormControl>
-                                                <Input {...field} />
+                                                <Input
+                                                    label="Price"
+                                                    description="Leave blank for no price."
+                                                    {...field}
+                                                />
                                             </FormControl>
-                                            <FormDescription>Leave blank for no price.</FormDescription>
                                         </FormItem>
                                     )}
                                 />

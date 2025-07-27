@@ -13,7 +13,6 @@
     "dependencies": {
         "@heroui/react": "^2.8.1",
         "@hookform/resolvers": "^3.6.0",
-        "@radix-ui/react-label": "^2.1.0",
         "@radix-ui/react-slot": "^1.1.0",
         "@tailwindcss/vite": "^4.1.11",
         "@tanstack/react-query": "^5.83.0",
