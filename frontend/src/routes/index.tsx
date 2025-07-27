@@ -89,10 +89,8 @@ function ListingAlertDialog({
             </Button>
         ),
         discord: () => (
-            <Button asChild>
-                <a href={listing.url} target="_blank">
-                    Open
-                </a>
+            <Button as="a" href={listing.url} target="_blank">
+                Open
             </Button>
         ),
     };
@@ -224,10 +222,8 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                 <DiscordMarkdownField text={listing.description || ''} />
             </CardBody>
             <CardFooter className="flex flex-row-reverse justify-between">
-                <Button asChild>
-                    <a href={listing.url} target="_blank">
-                        Open
-                    </a>
+                <Button as="a" href={listing.url} target="_blank">
+                    Open
                 </Button>
                 <div className="space-x-2">
                     {listing.status !== 'closed' && (user.is_owner || user.id === listing.owner_id) && (

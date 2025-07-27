@@ -49,11 +49,7 @@ export default function CreateListingDialog() {
             addToast({
                 title: 'Listing created successfully',
                 endContent: (
-                    <Button
-                        onClick={() => {
-                            window.open(newListing.url);
-                        }}
-                    >
+                    <Button as="a" target="_blank" href={newListing.url}>
                         Open
                     </Button>
                 ),
