@@ -8,7 +8,6 @@ import {
     FormMessage,
     RootFormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { queryClient } from '@/lib/query';
 import { useCreateListing } from '@/queries/api/shopkeeperComponents';
@@ -16,6 +15,7 @@ import { createListingSchemaSchema } from '@/queries/api/shopkeeperZod';
 import {
     addToast,
     Button,
+    Input,
     Modal,
     ModalBody,
     ModalContent,
