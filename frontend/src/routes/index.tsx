@@ -3,7 +3,7 @@ import EditListingDialog from '@/components/dialogs/EditListing';
 import ListingFiltersDialog from '@/components/dialogs/Filters';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { queryClient } from '@/lib/query';
 import { defaultQueryParams, useStore } from '@/lib/state';
 import { arraysEqual, cn, pluralize } from '@/lib/utils';
@@ -20,13 +20,26 @@ import type {
     ListingIssueResolutionLocation,
 } from '@/queries/api/shopkeeperSchemas';
 import { listingStatusSchema, listingTypeSchema } from '@/queries/api/shopkeeperZod';
-import { Button, Card, CardBody, CardFooter, CardHeader, Tooltip, useDisclosure } from '@heroui/react';
+import {
+    Button,
+    Card,
+    CardBody,
+    CardFooter,
+    CardHeader,
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    Tooltip,
+    useDisclosure,
+} from '@heroui/react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, stripSearchParams, useNavigate } from '@tanstack/react-router';
 import { zodValidator } from '@tanstack/zod-adapter';
 import { AlertCircle, CircleAlert, DollarSign, FilterX, Image, LucideProps, Text } from 'lucide-react';
 import { Masonry, type RenderComponentProps } from 'masonic';
-import React, { useState } from 'react';
+import React from 'react';
 import Markdown from 'react-markdown';
 import remarkGemoji from 'remark-gemoji';
 import remarkGfm from 'remark-gfm';
@@ -74,13 +87,13 @@ function ListingAlertDialog({
     listing: FullListingSchema;
     setEditDialogOpen: (open: boolean) => void;
 }) {
-    const [open, setOpen] = useState(false);
+    const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 
     const issueResolutionButtons: Record<ListingIssueResolutionLocation, React.FC> = {
         ui: () => (
             <Button
-                onClick={() => {
-                    setOpen(false);
+                onPress={() => {
+                    onClose();
                     setEditDialogOpen(true);
                 }}
             >
@@ -95,37 +108,41 @@ function ListingAlertDialog({
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Tooltip content="This listing has issues. Click to view.">
-                    <button className="w-fit rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700">
-                        <CircleAlert />
-                    </button>
-                </Tooltip>
-            </DialogTrigger>
+        <>
+            <Tooltip content="This listing has issues. Click to view.">
+                <button
+                    className="w-fit rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700"
+                    onClick={onOpen}
+                >
+                    <CircleAlert />
+                </button>
+            </Tooltip>
 
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Listing issues</DialogTitle>
-                </DialogHeader>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    <ModalHeader>Listing issues</ModalHeader>
 
-                {listing.issues.map((issue) => {
-                    const IssueIcon = issueIcons[issue.icon];
-                    const ResolutionButton = issueResolutionButtons[issue.resolution_location];
+                    <ModalBody>
+                        {listing.issues.map((issue) => {
+                            const IssueIcon = issueIcons[issue.icon];
+                            const ResolutionButton = issueResolutionButtons[issue.resolution_location];
 
-                    return (
-                        <div key={issue.title} className="flex flex-row items-center space-x-2">
-                            <IssueIcon height="32px" width="32px" className="h-full" />
-                            <div className="flex-1">
-                                <div className="text-sm font-medium">{issue.title}</div>
-                                <div className="text-muted-foreground text-sm">{issue.description}</div>
-                            </div>
-                            <ResolutionButton />
-                        </div>
-                    );
-                })}
-            </DialogContent>
-        </Dialog>
+                            return (
+                                <div key={issue.title} className="flex flex-row items-center space-x-2">
+                                    <IssueIcon height="32px" width="32px" className="h-full" />
+                                    <div className="flex-1">
+                                        <div className="text-sm font-medium">{issue.title}</div>
+                                        <div className="text-muted-foreground text-sm">{issue.description}</div>
+                                    </div>
+                                    <ResolutionButton />
+                                </div>
+                            );
+                        })}
+                    </ModalBody>
+                    <ModalFooter />
+                </ModalContent>
+            </Modal>
+        </>
     );
 }
 
@@ -133,7 +150,11 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
     const { user } = useStore();
     const { mutateAsync: hideListing, isPending: hidePending } = useHideListing();
     const { mutateAsync: hideImage, isPending: hideImagePending } = useHideImage();
-    const { isOpen: editDialogOpen, onOpenChange: setEditDialogOpen, onOpen: handleEditDialogOpen } = useDisclosure();
+    const {
+        isOpen: editDialogIsOpen,
+        onOpenChange: editDialogOnOpenChange,
+        onOpen: editDialogOnOpen,
+    } = useDisclosure();
 
     return (
         <Card
@@ -144,7 +165,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
             )}
         >
             {listing.issues.length > 0 && listing.owner_id === user.id && (
-                <ListingAlertDialog listing={listing} setEditDialogOpen={setEditDialogOpen} />
+                <ListingAlertDialog listing={listing} setEditDialogOpen={editDialogOnOpenChange} />
             )}
             <CardHeader className="flex-col items-start">
                 <h3 className="w-full overflow-hidden text-ellipsis text-2xl font-bold" title={listing.title}>
@@ -223,9 +244,9 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                     {listing.status !== 'closed' && (user.is_owner || user.id === listing.owner_id) && (
                         <EditListingDialog
                             listing={listing}
-                            isOpen={editDialogOpen}
-                            onOpenChange={setEditDialogOpen}
-                            onOpen={handleEditDialogOpen}
+                            isOpen={editDialogIsOpen}
+                            onOpenChange={editDialogOnOpenChange}
+                            onOpen={editDialogOnOpen}
                         />
                     )}
                     {user.is_owner && (
