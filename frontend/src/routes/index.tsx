@@ -120,7 +120,7 @@ function ListingAlertDialog({
         <>
             <Tooltip content="This listing has issues. Click to view.">
                 <button
-                    className="w-fit rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700"
+                    className="absolute right-0 top-0 z-50 -translate-y-2 translate-x-2 rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700"
                     onClick={onOpen}
                 >
                     <CircleAlert />
@@ -242,58 +242,60 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
     } = useDisclosure();
 
     return (
-        <Card
-            className={cn(
-                'flex flex-col',
-                listing.status !== 'open' && 'border-l-4',
-                { open: '', pending: 'border-l-yellow-400', closed: 'border-l-red-400' }[listing.status],
-            )}
-        >
+        <>
             {listing.issues.length > 0 && listing.owner_id === user.id && (
                 <ListingAlertDialog listing={listing} setEditDialogOpen={editDialogOnOpenChange} />
             )}
-            <CardHeader className="flex-col items-start">
-                <h3 className="w-full overflow-hidden text-ellipsis text-2xl font-bold" title={listing.title}>
-                    {listing.title}
-                </h3>
-                <h4 className="text-muted-foreground text-sm">
-                    <span>{listing.type === 'buy' ? 'Looking to buy' : 'For sale'}</span>
-                    {listing.price && <span> - {listing.price}</span>}
-                </h4>
-            </CardHeader>
-            <CardBody className="flex-1 space-y-2">
-                {listing.images.length > 0 && <ListingImageCarousel images={listing.images} />}
-                <DiscordMarkdownField text={listing.description || ''} />
-            </CardBody>
-            <CardFooter className="flex flex-row-reverse justify-between">
-                <Button as="a" href={listing.url} target="_blank">
-                    Open
-                </Button>
-                <div className="space-x-2">
-                    {listing.status !== 'closed' && (user.is_owner || user.id === listing.owner_id) && (
-                        <EditListingDialog
-                            listing={listing}
-                            isOpen={editDialogIsOpen}
-                            onOpenChange={editDialogOnOpenChange}
-                            onOpen={editDialogOnOpen}
-                            onClose={editDialogOnClose}
-                        />
-                    )}
-                    {user.is_owner && (
-                        <Button
-                            color="danger"
-                            onClick={async () => {
-                                await hideListing({ pathParams: { listingId: listing.id } });
-                                queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
-                            }}
-                            disabled={hidePending}
-                        >
-                            Hide
-                        </Button>
-                    )}
-                </div>
-            </CardFooter>
-        </Card>
+            <Card
+                className={cn(
+                    'flex flex-col',
+                    listing.status !== 'open' && 'border-l-4',
+                    { open: '', pending: 'border-l-yellow-400', closed: 'border-l-red-400' }[listing.status],
+                )}
+            >
+                <CardHeader className="flex-col items-start">
+                    <h3 className="w-full overflow-hidden text-ellipsis text-2xl font-bold" title={listing.title}>
+                        {listing.title}
+                    </h3>
+                    <h4 className="text-muted-foreground text-sm">
+                        <span>{listing.type === 'buy' ? 'Looking to buy' : 'For sale'}</span>
+                        {listing.price && <span> - {listing.price}</span>}
+                    </h4>
+                </CardHeader>
+                <CardBody className="flex-1 space-y-2">
+                    {listing.images.length > 0 && <ListingImageCarousel images={listing.images} />}
+                    <DiscordMarkdownField text={listing.description || ''} />
+                </CardBody>
+                <CardFooter className="flex flex-row-reverse justify-between">
+                    <Button as="a" href={listing.url} target="_blank">
+                        Open
+                    </Button>
+                    <div className="space-x-2">
+                        {listing.status !== 'closed' && (user.is_owner || user.id === listing.owner_id) && (
+                            <EditListingDialog
+                                listing={listing}
+                                isOpen={editDialogIsOpen}
+                                onOpenChange={editDialogOnOpenChange}
+                                onOpen={editDialogOnOpen}
+                                onClose={editDialogOnClose}
+                            />
+                        )}
+                        {user.is_owner && (
+                            <Button
+                                color="danger"
+                                onClick={async () => {
+                                    await hideListing({ pathParams: { listingId: listing.id } });
+                                    queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
+                                }}
+                                disabled={hidePending}
+                            >
+                                Hide
+                            </Button>
+                        )}
+                    </div>
+                </CardFooter>
+            </Card>
+        </>
     );
 }
 
