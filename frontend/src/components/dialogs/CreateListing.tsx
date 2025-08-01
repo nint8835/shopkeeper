@@ -1,10 +1,11 @@
-import { Form, FormControl, FormField, FormItem, FormMessage, RootFormMessage } from '@/components/ui/form';
 import { queryClient } from '@/lib/query';
 import { useCreateListing } from '@/queries/api/shopkeeperComponents';
+import { ListingType } from '@/queries/api/shopkeeperSchemas';
 import { createListingSchemaSchema } from '@/queries/api/shopkeeperZod';
 import {
     addToast,
     Button,
+    Form,
     Input,
     Modal,
     ModalBody,
@@ -16,38 +17,18 @@ import {
     Textarea,
     useDisclosure,
 } from '@heroui/react';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from '@tanstack/react-form';
 import { Plus } from 'lucide-react';
-import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 export default function CreateListingDialog() {
     const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
-    const form = useForm<z.infer<typeof createListingSchemaSchema>>({
-        resolver: zodResolver(createListingSchemaSchema),
-        defaultValues: {
-            title: '',
-            type: 'sell',
-            description: '',
-            price: '',
-        },
-    });
-
     const { mutateAsync: createListing, isPending: mutationPending } = useCreateListing();
 
-    function handleOpenChange(open: boolean) {
-        form.reset({ title: '', type: 'sell', description: '', price: '' });
-        if (!open) {
-            onClose();
-        } else {
-            onOpen();
-        }
-    }
-
-    async function handleSubmit() {
+    async function handleSubmit(value: z.infer<typeof createListingSchemaSchema>): Promise<string | void> {
         try {
-            const newListing = await createListing({ body: form.getValues() });
+            const newListing = await createListing({ body: value });
             addToast({
                 title: 'Listing created successfully',
                 endContent: (
@@ -58,8 +39,32 @@ export default function CreateListingDialog() {
             });
             queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
             handleOpenChange(false);
+
+            return;
         } catch (e) {
-            form.setError('root', { message: (e as Error).message || 'An unexpected error occurred' });
+            return (e as Error).message || 'An unexpected error occurred';
+        }
+    }
+
+    const tsForm = useForm({
+        defaultValues: {
+            title: '',
+            type: 'sell' as ListingType,
+            description: '',
+            price: '',
+        },
+        onSubmit: ({ value }) => handleSubmit(value),
+        validators: {
+            onChange: createListingSchemaSchema,
+        },
+    });
+
+    function handleOpenChange(open: boolean) {
+        tsForm.reset();
+        if (!open) {
+            onClose();
+        } else {
+            onOpen();
         }
     }
 
@@ -70,80 +75,104 @@ export default function CreateListingDialog() {
             </Button>
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
                 <ModalContent>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(handleSubmit)}>
-                            <ModalHeader>Create Listing</ModalHeader>
-                            <ModalBody>
-                                <FormField
-                                    control={form.control}
-                                    name="title"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input label="Title" {...field} />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="type"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Select
-                                                    label="Type"
-                                                    onChange={field.onChange}
-                                                    selectedKeys={[field.value]}
-                                                >
-                                                    <SelectItem key="sell">For sale</SelectItem>
-                                                    <SelectItem key="buy">Looking to buy</SelectItem>
-                                                </Select>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="description"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Textarea
-                                                    label="Description"
-                                                    description="Supports Discord-flavoured Markdown. Leave blank for no description."
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="price"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input
-                                                    label="Price"
-                                                    description="Leave blank for no price."
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
+                    <Form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            tsForm.handleSubmit();
+                        }}
+                    >
+                        <ModalHeader>Create Listing</ModalHeader>
 
-                                <RootFormMessage />
-                            </ModalBody>
+                        <ModalBody className="w-full">
+                            <tsForm.Field
+                                name="title"
+                                children={(field) => (
+                                    <Input
+                                        name={field.name}
+                                        isRequired
+                                        label="Title"
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        validationBehavior="aria"
+                                        errorMessage={field.state.meta.errors
+                                            .filter((e) => e !== undefined)
+                                            .map((e) => e.message)
+                                            .join(', ')}
+                                        isInvalid={!field.state.meta.isValid}
+                                    />
+                                )}
+                            />
 
-                            <ModalFooter>
-                                <Button type="submit" disabled={mutationPending}>
-                                    Submit
-                                </Button>
-                            </ModalFooter>
-                        </form>
+                            <tsForm.Field
+                                name="type"
+                                children={(field) => (
+                                    <Select
+                                        name={field.name}
+                                        isRequired
+                                        label="Type"
+                                        selectedKeys={[field.state.value]}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        validationBehavior="aria"
+                                        errorMessage={field.state.meta.errors
+                                            .filter((e) => e !== undefined)
+                                            .map((e) => e.message)
+                                            .join(', ')}
+                                        isInvalid={!field.state.meta.isValid}
+                                    >
+                                        <SelectItem key="sell">For sale</SelectItem>
+                                        <SelectItem key="buy">Looking to buy</SelectItem>
+                                    </Select>
+                                )}
+                            />
+
+                            <tsForm.Field
+                                name="description"
+                                children={(field) => (
+                                    <Textarea
+                                        name={field.name}
+                                        label="Description"
+                                        description="Supports Discord-flavoured Markdown. Leave blank for no description."
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        validationBehavior="aria"
+                                        errorMessage={field.state.meta.errors
+                                            .filter((e) => e !== undefined)
+                                            .map((e) => e.message)
+                                            .join(', ')}
+                                        isInvalid={!field.state.meta.isValid}
+                                    />
+                                )}
+                            />
+
+                            <tsForm.Field
+                                name="price"
+                                children={(field) => (
+                                    <Input
+                                        name={field.name}
+                                        label="Price"
+                                        description="Leave blank for no price."
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        validationBehavior="aria"
+                                        errorMessage={field.state.meta.errors
+                                            .filter((e) => e !== undefined)
+                                            .map((e) => e.message)
+                                            .join(', ')}
+                                        isInvalid={!field.state.meta.isValid}
+                                    />
+                                )}
+                            />
+                        </ModalBody>
+
+                        <ModalFooter className="w-full items-end">
+                            <Button type="submit" disabled={mutationPending}>
+                                Submit
+                            </Button>
+                        </ModalFooter>
                     </Form>
                 </ModalContent>
             </Modal>
