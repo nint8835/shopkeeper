@@ -118,9 +118,9 @@ function ListingAlertDialog({
 
     return (
         <>
-            <Tooltip content="This listing has issues. Click to view.">
+            <Tooltip content="This listing has issues. Click to view." className="text-foreground">
                 <button
-                    className="absolute right-0 top-0 z-50 -translate-y-2 translate-x-2 rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700"
+                    className="text-foreground absolute right-0 top-0 z-50 -translate-y-2 translate-x-2 rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700"
                     onClick={onOpen}
                 >
                     <CircleAlert />
