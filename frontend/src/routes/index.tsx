@@ -118,9 +118,9 @@ function ListingAlertDialog({
 
     return (
         <>
-            <Tooltip content="This listing has issues. Click to view." className="text-foreground">
+            <Tooltip content="This listing has issues. Click to view.">
                 <button
-                    className="text-foreground absolute right-0 top-0 z-50 -translate-y-2 translate-x-2 rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700"
+                    className="absolute right-0 top-0 z-50 -translate-y-2 translate-x-2 rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700"
                     onClick={onOpen}
                 >
                     <CircleAlert />
@@ -283,7 +283,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                         {user.is_owner && (
                             <Button
                                 color="danger"
-                                onClick={async () => {
+                                onPress={async () => {
                                     await hideListing({ pathParams: { listingId: listing.id } });
                                     queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
                                 }}
@@ -356,7 +356,7 @@ function RouteComponent() {
                         <Button
                             color="danger"
                             className="space-x-2"
-                            onClick={() => {
+                            onPress={() => {
                                 setSearchParams({
                                     has_issues: true,
                                     owner: [currentUserId],
@@ -375,7 +375,7 @@ function RouteComponent() {
                         <Button
                             variant="faded"
                             className="space-x-2"
-                            onClick={() => {
+                            onPress={() => {
                                 setSearchParams({});
                             }}
                         >
