@@ -4,6 +4,7 @@ import { ListingType } from '@/queries/api/shopkeeperSchemas';
 import { createListingSchemaSchema } from '@/queries/api/shopkeeperZod';
 import {
     addToast,
+    Alert,
     Button,
     Form,
     Input,
@@ -26,7 +27,7 @@ export default function CreateListingDialog() {
 
     const { mutateAsync: createListing, isPending: mutationPending } = useCreateListing();
 
-    async function handleSubmit(value: z.infer<typeof createListingSchemaSchema>): Promise<string | void> {
+    async function handleSubmit(value: z.infer<typeof createListingSchemaSchema>) {
         try {
             const newListing = await createListing({ body: value });
             addToast({
@@ -39,10 +40,13 @@ export default function CreateListingDialog() {
             });
             queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
             handleOpenChange(false);
-
-            return;
         } catch (e) {
-            return (e as Error).message || 'An unexpected error occurred';
+            tsForm.setErrorMap({
+                onSubmit: {
+                    fields: {},
+                    form: (e as Error).message || 'An unexpected error occurred',
+                },
+            });
         }
     }
 
@@ -113,7 +117,7 @@ export default function CreateListingDialog() {
                                         label="Type"
                                         selectedKeys={[field.state.value]}
                                         onBlur={field.handleBlur}
-                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        onChange={(e) => field.handleChange(e.target.value as ListingType)}
                                         validationBehavior="aria"
                                         errorMessage={field.state.meta.errors
                                             .filter((e) => e !== undefined)
@@ -165,6 +169,11 @@ export default function CreateListingDialog() {
                                         isInvalid={!field.state.meta.isValid}
                                     />
                                 )}
+                            />
+
+                            <tsForm.Subscribe
+                                selector={(state) => state.errors}
+                                children={(errors) => errors.length > 0 && <Alert color="danger">{errors}</Alert>}
                             />
                         </ModalBody>
 
