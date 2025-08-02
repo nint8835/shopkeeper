@@ -141,7 +141,7 @@ function ListingAlertDialog({
                                     <IssueIcon height="32px" width="32px" className="h-full" />
                                     <div className="flex-1">
                                         <div className="text-sm font-medium">{issue.title}</div>
-                                        <div className="text-muted-foreground text-sm">{issue.description}</div>
+                                        <div className="text-foreground-500 text-sm">{issue.description}</div>
                                     </div>
                                     <ResolutionButton />
                                 </div>
