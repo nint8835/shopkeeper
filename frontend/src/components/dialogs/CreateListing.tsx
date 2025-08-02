@@ -41,7 +41,7 @@ export default function CreateListingDialog() {
             queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
             handleOpenChange(false);
         } catch (e) {
-            tsForm.setErrorMap({
+            form.setErrorMap({
                 onSubmit: {
                     fields: {},
                     form: (e as Error).message || 'An unexpected error occurred',
@@ -50,7 +50,7 @@ export default function CreateListingDialog() {
         }
     }
 
-    const tsForm = useForm({
+    const form = useForm({
         defaultValues: {
             title: '',
             type: 'sell' as ListingType,
@@ -64,7 +64,7 @@ export default function CreateListingDialog() {
     });
 
     function handleOpenChange(open: boolean) {
-        tsForm.reset();
+        form.reset();
         if (!open) {
             onClose();
         } else {
@@ -82,13 +82,13 @@ export default function CreateListingDialog() {
                     <Form
                         onSubmit={(e) => {
                             e.preventDefault();
-                            tsForm.handleSubmit();
+                            form.handleSubmit();
                         }}
                     >
                         <ModalHeader>Create Listing</ModalHeader>
 
                         <ModalBody className="w-full">
-                            <tsForm.Field
+                            <form.Field
                                 name="title"
                                 children={(field) => (
                                     <Input
@@ -108,7 +108,7 @@ export default function CreateListingDialog() {
                                 )}
                             />
 
-                            <tsForm.Field
+                            <form.Field
                                 name="type"
                                 children={(field) => (
                                     <Select
@@ -131,7 +131,7 @@ export default function CreateListingDialog() {
                                 )}
                             />
 
-                            <tsForm.Field
+                            <form.Field
                                 name="description"
                                 children={(field) => (
                                     <Textarea
@@ -151,7 +151,7 @@ export default function CreateListingDialog() {
                                 )}
                             />
 
-                            <tsForm.Field
+                            <form.Field
                                 name="price"
                                 children={(field) => (
                                     <Input
@@ -171,9 +171,11 @@ export default function CreateListingDialog() {
                                 )}
                             />
 
-                            <tsForm.Subscribe
+                            <form.Subscribe
                                 selector={(state) => state.errors}
-                                children={(errors) => errors.length > 0 && <Alert color="danger">{errors}</Alert>}
+                                children={(errors) =>
+                                    errors.length > 0 && <Alert color="danger">{errors as unknown as string}</Alert>
+                                }
                             />
                         </ModalBody>
 
