@@ -1,150 +1,192 @@
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog';
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-    RootFormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { queryClient } from '@/lib/query';
 import { useCreateListing } from '@/queries/api/shopkeeperComponents';
+import { ListingType } from '@/queries/api/shopkeeperSchemas';
 import { createListingSchemaSchema } from '@/queries/api/shopkeeperZod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { DialogTitle } from '@radix-ui/react-dialog';
+import {
+    addToast,
+    Alert,
+    Button,
+    Form,
+    Input,
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    Select,
+    SelectItem,
+    Textarea,
+    useDisclosure,
+} from '@heroui/react';
+import { useForm } from '@tanstack/react-form';
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import { z } from 'zod';
 
 export default function CreateListingDialog() {
-    const [open, setOpen] = useState(false);
-
-    const form = useForm<z.infer<typeof createListingSchemaSchema>>({
-        resolver: zodResolver(createListingSchemaSchema),
-        defaultValues: {
-            title: '',
-            type: 'sell',
-            description: '',
-            price: '',
-        },
-    });
+    const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
     const { mutateAsync: createListing, isPending: mutationPending } = useCreateListing();
 
-    function handleOpenChange(open: boolean) {
-        form.reset({ title: '', type: 'sell', description: '', price: '' });
-        setOpen(open);
-    }
-
-    async function handleSubmit() {
+    async function handleSubmit(value: z.infer<typeof createListingSchemaSchema>) {
         try {
-            const newListing = await createListing({ body: form.getValues() });
-            toast.success('Listing created successfully', {
-                action: { label: 'Open', onClick: () => window.open(newListing.url) },
+            const newListing = await createListing({ body: value });
+            addToast({
+                title: 'Listing created successfully',
+                endContent: (
+                    <Button as="a" target="_blank" href={newListing.url}>
+                        Open
+                    </Button>
+                ),
             });
             queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
             handleOpenChange(false);
         } catch (e) {
-            form.setError('root', { message: (e as Error).message || 'An unexpected error occurred' });
+            form.setErrorMap({
+                onSubmit: {
+                    fields: {},
+                    form: (e as Error).message || 'An unexpected error occurred',
+                },
+            });
+        }
+    }
+
+    const form = useForm({
+        defaultValues: {
+            title: '',
+            type: 'sell' as ListingType,
+            description: '',
+            price: '',
+        },
+        onSubmit: ({ value }) => handleSubmit(value),
+        validators: {
+            onChange: createListingSchemaSchema,
+        },
+    });
+
+    function handleOpenChange(open: boolean) {
+        form.reset();
+        if (!open) {
+            onClose();
+        } else {
+            onOpen();
         }
     }
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>
-                <Button variant="outline">
-                    <Plus className="mr-2 h-4 w-4" /> Create Listing
-                </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <Form {...form}>
-                    <DialogHeader>
-                        <DialogTitle>Create Listing</DialogTitle>
-                    </DialogHeader>
+        <>
+            <Button variant="bordered" onPress={onOpen}>
+                <Plus className="mr-2 h-4 w-4" /> Create Listing
+            </Button>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    <Form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            form.handleSubmit();
+                        }}
+                    >
+                        <ModalHeader>Create Listing</ModalHeader>
 
-                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-                        <FormField
-                            control={form.control}
-                            name="title"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Title</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="type"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Type</FormLabel>
+                        <ModalBody className="w-full">
+                            <form.Field
+                                name="title"
+                                children={(field) => (
+                                    <Input
+                                        name={field.name}
+                                        isRequired
+                                        label="Title"
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        validationBehavior="aria"
+                                        errorMessage={field.state.meta.errors
+                                            .filter((e) => e !== undefined)
+                                            .map((e) => e.message)
+                                            .join(', ')}
+                                        isInvalid={!field.state.meta.isValid}
+                                    />
+                                )}
+                            />
 
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="sell">For sale</SelectItem>
-                                            <SelectItem value="buy">Looking to buy</SelectItem>
-                                        </SelectContent>
+                            <form.Field
+                                name="type"
+                                children={(field) => (
+                                    <Select
+                                        name={field.name}
+                                        isRequired
+                                        label="Type"
+                                        selectedKeys={[field.state.value]}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value as ListingType)}
+                                        validationBehavior="aria"
+                                        errorMessage={field.state.meta.errors
+                                            .filter((e) => e !== undefined)
+                                            .map((e) => e.message)
+                                            .join(', ')}
+                                        isInvalid={!field.state.meta.isValid}
+                                    >
+                                        <SelectItem key="sell">For sale</SelectItem>
+                                        <SelectItem key="buy">Looking to buy</SelectItem>
                                     </Select>
+                                )}
+                            />
 
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Description</FormLabel>
-                                    <FormControl>
-                                        <Textarea {...field} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Supports Discord-flavoured Markdown. Leave blank for no description.
-                                    </FormDescription>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="price"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Price</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormDescription>Leave blank for no price.</FormDescription>
-                                </FormItem>
-                            )}
-                        />
+                            <form.Field
+                                name="description"
+                                children={(field) => (
+                                    <Textarea
+                                        name={field.name}
+                                        label="Description"
+                                        description="Supports Discord-flavoured Markdown. Leave blank for no description."
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        validationBehavior="aria"
+                                        errorMessage={field.state.meta.errors
+                                            .filter((e) => e !== undefined)
+                                            .map((e) => e.message)
+                                            .join(', ')}
+                                        isInvalid={!field.state.meta.isValid}
+                                    />
+                                )}
+                            />
 
-                        <RootFormMessage />
+                            <form.Field
+                                name="price"
+                                children={(field) => (
+                                    <Input
+                                        name={field.name}
+                                        label="Price"
+                                        description="Leave blank for no price."
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        validationBehavior="aria"
+                                        errorMessage={field.state.meta.errors
+                                            .filter((e) => e !== undefined)
+                                            .map((e) => e.message)
+                                            .join(', ')}
+                                        isInvalid={!field.state.meta.isValid}
+                                    />
+                                )}
+                            />
 
-                        <DialogFooter>
+                            <form.Subscribe
+                                selector={(state) => state.errors}
+                                children={(errors) =>
+                                    errors.length > 0 && <Alert color="danger">{errors as unknown as string}</Alert>
+                                }
+                            />
+                        </ModalBody>
+
+                        <ModalFooter className="w-full items-end">
                             <Button type="submit" disabled={mutationPending}>
                                 Submit
                             </Button>
-                        </DialogFooter>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
+                        </ModalFooter>
+                    </Form>
+                </ModalContent>
+            </Modal>
+        </>
     );
 }

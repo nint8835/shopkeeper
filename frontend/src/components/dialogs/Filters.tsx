@@ -1,76 +1,36 @@
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import { useStore } from '@/lib/state';
+import { ListingStatus, ListingType } from '@/queries/api/shopkeeperSchemas';
 import { Route } from '@/routes/index';
-import type { CheckedState } from '@radix-ui/react-checkbox';
-import { useNavigate, UseNavigateResult } from '@tanstack/react-router';
+import {
+    Button,
+    Checkbox,
+    CheckboxGroup,
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    useDisclosure,
+} from '@heroui/react';
+import { useNavigate } from '@tanstack/react-router';
 import { Filter } from 'lucide-react';
-
-function paramToggler<
-    K extends Exclude<keyof typeof Route.types.searchSchema, 'has_issues'>,
-    V extends (typeof Route.types.searchSchema)[K] extends Array<infer U> | undefined ? U : never,
->(filters: typeof Route.types.searchSchema, navigate: UseNavigateResult<'/'>, key: K, value: V) {
-    return (checked: CheckedState) => {
-        let currentValue = filters[key] as V[] | undefined;
-
-        if (currentValue === undefined) {
-            currentValue = [] as V[];
-        }
-
-        const currentState = currentValue.includes(value);
-        const newState = !!checked;
-        if (newState === currentState) {
-            return;
-        }
-        navigate({
-            search: (prevSearch) => ({
-                ...prevSearch,
-                [key]: (newState ? currentValue.concat(value) : currentValue.filter((v) => v !== value))?.sort(),
-            }),
-        });
-    };
-}
 
 function StatusFilter() {
     const filters = Route.useSearch();
     const navigate = useNavigate({ from: Route.fullPath });
 
     return (
-        <div className="space-y-2">
-            <Label>Status</Label>
-            <div className="flex items-center space-x-2">
-                <Checkbox
-                    id="open-status-checkbox"
-                    checked={filters.status.includes('open')}
-                    onCheckedChange={paramToggler(filters, navigate, 'status', 'open')}
-                />
-                <label htmlFor="open-status-checkbox" className="text-sm leading-none">
-                    Open
-                </label>
-            </div>
-            <div className="flex items-center space-x-2">
-                <Checkbox
-                    id="pending-status-checkbox"
-                    checked={filters.status.includes('pending')}
-                    onCheckedChange={paramToggler(filters, navigate, 'status', 'pending')}
-                />
-                <label htmlFor="pending-status-checkbox" className="text-sm leading-none">
-                    Pending
-                </label>
-            </div>
-            <div className="flex items-center space-x-2">
-                <Checkbox
-                    id="closed-status-checkbox"
-                    checked={filters.status.includes('closed')}
-                    onCheckedChange={paramToggler(filters, navigate, 'status', 'closed')}
-                />
-                <label htmlFor="closed-status-checkbox" className="text-sm leading-none">
-                    Closed
-                </label>
-            </div>
-        </div>
+        <CheckboxGroup
+            label="Status"
+            value={filters.status}
+            onValueChange={(values) =>
+                navigate({ search: (prevSearch) => ({ ...prevSearch, status: values as ListingStatus[] }) })
+            }
+        >
+            <Checkbox value="open">Open</Checkbox>
+            <Checkbox value="pending">Pending</Checkbox>
+            <Checkbox value="closed">Closed</Checkbox>
+        </CheckboxGroup>
     );
 }
 
@@ -80,19 +40,15 @@ function OwnerFilter() {
     const currentUserId = useStore((state) => state.user?.id);
 
     return (
-        <div className="space-y-2">
-            <Label>Owner</Label>
-            <div className="flex items-center space-x-2">
-                <Checkbox
-                    id="only-mine-checkbox"
-                    checked={filters.owner !== undefined && filters.owner.includes(currentUserId)}
-                    onCheckedChange={paramToggler(filters, navigate, 'owner', currentUserId)}
-                />
-                <label htmlFor="only-mine-checkbox" className="text-sm leading-none">
-                    Show only my listings
-                </label>
-            </div>
-        </div>
+        <CheckboxGroup
+            label="Owner"
+            value={filters.owner || []}
+            onValueChange={(values) =>
+                navigate({ search: (prevSearch) => ({ ...prevSearch, owner: values as string[] }) })
+            }
+        >
+            <Checkbox value={currentUserId}>Show only my listings</Checkbox>
+        </CheckboxGroup>
     );
 }
 
@@ -101,50 +57,38 @@ function TypeFilter() {
     const navigate = useNavigate({ from: Route.fullPath });
 
     return (
-        <div className="space-y-2">
-            <Label>Type</Label>
-            <div className="flex items-center space-x-2">
-                <Checkbox
-                    id="sell-type-checkbox"
-                    checked={filters.type.includes('sell')}
-                    onCheckedChange={paramToggler(filters, navigate, 'type', 'sell')}
-                />
-                <label htmlFor="sell-type-checkbox" className="text-sm leading-none">
-                    For sale
-                </label>
-            </div>
-            <div className="flex items-center space-x-2">
-                <Checkbox
-                    id="buy-type-checkbox"
-                    checked={filters.type.includes('buy')}
-                    onCheckedChange={paramToggler(filters, navigate, 'type', 'buy')}
-                />
-                <label htmlFor="buy-type-checkbox" className="text-sm leading-none">
-                    Looking to buy
-                </label>
-            </div>
-        </div>
+        <CheckboxGroup
+            label="Type"
+            value={filters.type}
+            onValueChange={(values) =>
+                navigate({ search: (prevSearch) => ({ ...prevSearch, type: values as ListingType[] }) })
+            }
+        >
+            <Checkbox value="sell">For sale</Checkbox>
+            <Checkbox value="buy">Looking to buy</Checkbox>
+        </CheckboxGroup>
     );
 }
 
 export default function ListingFiltersDialog() {
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
     return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <Button variant="outline">
-                    <Filter className="mr-2 h-4 w-4" /> Filters
-                </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Filters</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-8">
-                    <StatusFilter />
-                    <TypeFilter />
-                    <OwnerFilter />
-                </div>
-            </DialogContent>
-        </Dialog>
+        <>
+            <Button variant="bordered" onPress={onOpen}>
+                <Filter className="mr-2 h-4 w-4" /> Filters
+            </Button>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    <ModalHeader>Filters</ModalHeader>
+                    <ModalBody>
+                        <StatusFilter />
+                        <TypeFilter />
+                        <OwnerFilter />
+                    </ModalBody>
+                    <ModalFooter />
+                </ModalContent>
+            </Modal>
+        </>
     );
 }

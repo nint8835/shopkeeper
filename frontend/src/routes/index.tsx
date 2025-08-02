@@ -1,12 +1,6 @@
 import CreateListingDialog from '@/components/dialogs/CreateListing';
 import EditListingDialog from '@/components/dialogs/EditListing';
 import ListingFiltersDialog from '@/components/dialogs/Filters';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { queryClient } from '@/lib/query';
 import { defaultQueryParams, useStore } from '@/lib/state';
 import { arraysEqual, cn, pluralize } from '@/lib/utils';
@@ -19,16 +13,42 @@ import {
 } from '@/queries/api/shopkeeperComponents';
 import type {
     FullListingSchema,
+    ListingImageSchema,
     ListingIssueIcon,
     ListingIssueResolutionLocation,
 } from '@/queries/api/shopkeeperSchemas';
 import { listingStatusSchema, listingTypeSchema } from '@/queries/api/shopkeeperZod';
+import {
+    Button,
+    Card,
+    CardBody,
+    CardFooter,
+    CardHeader,
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    Tooltip,
+    useDisclosure,
+} from '@heroui/react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, stripSearchParams, useNavigate } from '@tanstack/react-router';
 import { zodValidator } from '@tanstack/zod-adapter';
-import { AlertCircle, CircleAlert, DollarSign, FilterX, Image, LucideProps, Text } from 'lucide-react';
+import useEmblaCarousel from 'embla-carousel-react';
+import {
+    AlertCircle,
+    ArrowLeft,
+    ArrowRight,
+    CircleAlert,
+    DollarSign,
+    FilterX,
+    Image,
+    LucideProps,
+    Text,
+} from 'lucide-react';
 import { Masonry, type RenderComponentProps } from 'masonic';
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 import Markdown from 'react-markdown';
 import remarkGemoji from 'remark-gemoji';
 import remarkGfm from 'remark-gfm';
@@ -76,13 +96,13 @@ function ListingAlertDialog({
     listing: FullListingSchema;
     setEditDialogOpen: (open: boolean) => void;
 }) {
-    const [open, setOpen] = useState(false);
+    const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 
     const issueResolutionButtons: Record<ListingIssueResolutionLocation, React.FC> = {
         ui: () => (
             <Button
-                onClick={() => {
-                    setOpen(false);
+                onPress={() => {
+                    onClose();
                     setEditDialogOpen(true);
                 }}
             >
@@ -90,165 +110,192 @@ function ListingAlertDialog({
             </Button>
         ),
         discord: () => (
-            <Button asChild>
-                <a href={listing.url} target="_blank">
-                    Open
-                </a>
+            <Button as="a" href={listing.url} target="_blank">
+                Open
             </Button>
         ),
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <DialogTrigger asChild>
-                            <button className="absolute right-0 top-0 -translate-y-2 translate-x-2 rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700">
-                                <CircleAlert />
-                            </button>
-                        </DialogTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>This listing has issues. Click to view.</TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
+        <>
+            <Tooltip content="This listing has issues. Click to view.">
+                <button
+                    className="absolute right-0 top-0 z-50 -translate-y-2 translate-x-2 rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700"
+                    onClick={onOpen}
+                >
+                    <CircleAlert />
+                </button>
+            </Tooltip>
 
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Listing issues</DialogTitle>
-                </DialogHeader>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    <ModalHeader>Listing issues</ModalHeader>
 
-                {listing.issues.map((issue) => {
-                    const IssueIcon = issueIcons[issue.icon];
-                    const ResolutionButton = issueResolutionButtons[issue.resolution_location];
+                    <ModalBody>
+                        {listing.issues.map((issue) => {
+                            const IssueIcon = issueIcons[issue.icon];
+                            const ResolutionButton = issueResolutionButtons[issue.resolution_location];
 
-                    return (
-                        <div key={issue.title} className="flex flex-row items-center space-x-2">
-                            <IssueIcon height="32px" width="32px" className="h-full" />
-                            <div className="flex-1">
-                                <div className="text-sm font-medium">{issue.title}</div>
-                                <div className="text-sm text-muted-foreground">{issue.description}</div>
-                            </div>
-                            <ResolutionButton />
+                            return (
+                                <div key={issue.title} className="flex flex-row items-center space-x-2">
+                                    <IssueIcon height="32px" width="32px" className="h-full" />
+                                    <div className="flex-1">
+                                        <div className="text-sm font-medium">{issue.title}</div>
+                                        <div className="text-foreground-500 text-sm">{issue.description}</div>
+                                    </div>
+                                    <ResolutionButton />
+                                </div>
+                            );
+                        })}
+                    </ModalBody>
+                    <ModalFooter />
+                </ModalContent>
+            </Modal>
+        </>
+    );
+}
+
+function ListingImage({ image }: { image: ListingImageSchema }) {
+    const { user } = useStore();
+    const { isOpen, onOpenChange, onOpen } = useDisclosure();
+    const { mutateAsync: hideImage, isPending: hideImagePending } = useHideImage();
+    return (
+        <div>
+            <img
+                className="w-full"
+                width={image.width}
+                height={image.height}
+                loading="lazy"
+                src={image.thumbnail_url}
+                onClick={onOpen}
+            />
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent className="flex max-h-screen max-w-none items-center justify-center">
+                    <ModalBody>
+                        <img className="max-h-screen p-4" loading="lazy" src={image.url} />
+                        {user.is_owner && (
+                            <Button
+                                color="danger"
+                                onPress={async () => {
+                                    await hideImage({
+                                        pathParams: { imageId: image.id },
+                                    });
+                                    queryClient.invalidateQueries({
+                                        queryKey: ['api', 'listings'],
+                                    });
+                                }}
+                                disabled={hideImagePending}
+                            >
+                                Hide
+                            </Button>
+                        )}
+                        <ModalFooter />
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
+        </div>
+    );
+}
+
+function ListingImageCarousel({ images }: { images: ListingImageSchema[] }) {
+    const [emblaRef, emblaApi] = useEmblaCarousel();
+    const scrollPrev = useCallback(() => {
+        if (emblaApi) emblaApi.scrollPrev();
+    }, [emblaApi]);
+    const scrollNext = useCallback(() => {
+        if (emblaApi) emblaApi.scrollNext();
+    }, [emblaApi]);
+
+    return (
+        <div className="embla space-y-2">
+            <div className="embla__viewport" ref={emblaRef}>
+                <div className="embla__container">
+                    {images.map((image) => (
+                        <div className="embla__slide" key={image.id}>
+                            <ListingImage image={image} />
                         </div>
-                    );
-                })}
-            </DialogContent>
-        </Dialog>
+                    ))}
+                </div>
+            </div>
+            {images.length > 1 && (
+                <div className="flex w-full justify-center space-x-2">
+                    <Button radius="full" className="embla__prev w-fit min-w-fit p-2" onPress={scrollPrev}>
+                        <ArrowLeft />
+                    </Button>
+                    <Button radius="full" className="embla__next w-fit min-w-fit p-2" onPress={scrollNext}>
+                        <ArrowRight />
+                    </Button>
+                </div>
+            )}
+        </div>
     );
 }
 
 function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>) {
     const { user } = useStore();
     const { mutateAsync: hideListing, isPending: hidePending } = useHideListing();
-    const { mutateAsync: hideImage, isPending: hideImagePending } = useHideImage();
-    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const {
+        isOpen: editDialogIsOpen,
+        onOpenChange: editDialogOnOpenChange,
+        onOpen: editDialogOnOpen,
+        onClose: editDialogOnClose,
+    } = useDisclosure();
 
     return (
-        <Card
-            className={cn(
-                'flex flex-col',
-                listing.status !== 'open' && 'border-l-4',
-                { open: '', pending: 'border-l-yellow-400', closed: 'border-l-red-400' }[listing.status],
-            )}
-        >
+        <>
             {listing.issues.length > 0 && listing.owner_id === user.id && (
-                <ListingAlertDialog listing={listing} setEditDialogOpen={setEditDialogOpen} />
+                <ListingAlertDialog listing={listing} setEditDialogOpen={editDialogOnOpenChange} />
             )}
-            <CardHeader>
-                <CardTitle className="w-full overflow-hidden text-ellipsis" title={listing.title}>
-                    {listing.title}
-                </CardTitle>
-                <CardDescription>
-                    <span>{listing.type === 'buy' ? 'Looking to buy' : 'For sale'}</span>
-                    {listing.price && <span> - {listing.price}</span>}
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 space-y-2">
-                {listing.images.length > 0 && (
-                    <Carousel>
-                        <CarouselContent>
-                            {listing.images
-                                .sort((a, b) => a.id - b.id)
-                                .map((image) => (
-                                    <CarouselItem key={image.id}>
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                                <img
-                                                    className="w-full"
-                                                    width={image.width}
-                                                    height={image.height}
-                                                    loading="lazy"
-                                                    src={image.thumbnail_url}
-                                                />
-                                            </DialogTrigger>
-                                            <DialogContent className="flex max-h-screen max-w-none items-center justify-center">
-                                                <ContextMenu>
-                                                    <ContextMenuTrigger>
-                                                        <img
-                                                            className="max-h-screen p-4"
-                                                            loading="lazy"
-                                                            src={image.url}
-                                                        />
-                                                    </ContextMenuTrigger>
-                                                    <ContextMenuContent>
-                                                        {user.is_owner && (
-                                                            <ContextMenuItem
-                                                                onClick={async () => {
-                                                                    await hideImage({
-                                                                        pathParams: { imageId: image.id },
-                                                                    });
-                                                                    queryClient.invalidateQueries({
-                                                                        queryKey: ['api', 'listings'],
-                                                                    });
-                                                                }}
-                                                                disabled={hideImagePending}
-                                                            >
-                                                                Hide
-                                                            </ContextMenuItem>
-                                                        )}
-                                                    </ContextMenuContent>
-                                                </ContextMenu>
-                                            </DialogContent>
-                                        </Dialog>
-                                    </CarouselItem>
-                                ))}
-                        </CarouselContent>
-                        {listing.images.length > 1 && (
-                            <>
-                                <CarouselPrevious className="-left-4" />
-                                <CarouselNext className="-right-4" />
-                            </>
-                        )}
-                    </Carousel>
+            <Card
+                className={cn(
+                    'flex flex-col',
+                    listing.status !== 'open' && 'border-l-4',
+                    { open: '', pending: 'border-l-yellow-400', closed: 'border-l-red-400' }[listing.status],
                 )}
-                <DiscordMarkdownField text={listing.description || ''} />
-            </CardContent>
-            <CardFooter className="flex flex-row-reverse justify-between">
-                <Button asChild>
-                    <a href={listing.url} target="_blank">
+            >
+                <CardHeader className="flex-col items-start">
+                    <h3 className="w-full overflow-hidden text-ellipsis text-2xl font-bold" title={listing.title}>
+                        {listing.title}
+                    </h3>
+                    <h4 className="text-muted-foreground text-sm">
+                        <span>{listing.type === 'buy' ? 'Looking to buy' : 'For sale'}</span>
+                        {listing.price && <span> - {listing.price}</span>}
+                    </h4>
+                </CardHeader>
+                <CardBody className="flex-1 space-y-2">
+                    {listing.images.length > 0 && <ListingImageCarousel images={listing.images} />}
+                    <DiscordMarkdownField text={listing.description || ''} />
+                </CardBody>
+                <CardFooter className="flex flex-row-reverse justify-between">
+                    <Button as="a" href={listing.url} target="_blank">
                         Open
-                    </a>
-                </Button>
-                <div className="space-x-2">
-                    {listing.status !== 'closed' && (user.is_owner || user.id === listing.owner_id) && (
-                        <EditListingDialog listing={listing} open={editDialogOpen} setOpen={setEditDialogOpen} />
-                    )}
-                    {user.is_owner && (
-                        <Button
-                            variant="destructive"
-                            onClick={async () => {
-                                await hideListing({ pathParams: { listingId: listing.id } });
-                                queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
-                            }}
-                            disabled={hidePending}
-                        >
-                            Hide
-                        </Button>
-                    )}
-                </div>
-            </CardFooter>
-        </Card>
+                    </Button>
+                    <div className="space-x-2">
+                        {listing.status !== 'closed' && (user.is_owner || user.id === listing.owner_id) && (
+                            <EditListingDialog
+                                listing={listing}
+                                isOpen={editDialogIsOpen}
+                                onOpenChange={editDialogOnOpenChange}
+                                onOpen={editDialogOnOpen}
+                                onClose={editDialogOnClose}
+                            />
+                        )}
+                        {user.is_owner && (
+                            <Button
+                                color="danger"
+                                onPress={async () => {
+                                    await hideListing({ pathParams: { listingId: listing.id } });
+                                    queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
+                                }}
+                                disabled={hidePending}
+                            >
+                                Hide
+                            </Button>
+                        )}
+                    </div>
+                </CardFooter>
+            </Card>
+        </>
     );
 }
 
@@ -307,9 +354,9 @@ function RouteComponent() {
                 <div className="flex flex-col gap-2 md:flex-row">
                     {issueCount && issueCount > 0 ? (
                         <Button
-                            variant="destructive"
+                            color="danger"
                             className="space-x-2"
-                            onClick={() => {
+                            onPress={() => {
                                 setSearchParams({
                                     has_issues: true,
                                     owner: [currentUserId],
@@ -326,9 +373,9 @@ function RouteComponent() {
                     ) : null}
                     {filtersActive && (
                         <Button
-                            variant="secondary"
+                            variant="faded"
                             className="space-x-2"
-                            onClick={() => {
+                            onPress={() => {
                                 setSearchParams({});
                             }}
                         >
@@ -353,7 +400,7 @@ function RouteComponent() {
                         key={listings.length}
                     />
                 ) : (
-                    <div className="flex justify-center italic text-muted-foreground">
+                    <div className="text-muted-foreground flex justify-center italic">
                         No listings found - try checking your filters?
                     </div>
                 )}

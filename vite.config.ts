@@ -1,3 +1,4 @@
+import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -14,6 +15,7 @@ export default defineConfig({
             generatedRouteTree: './frontend/src/routeTree.gen.ts',
         }),
         react(),
+        tailwindcss(),
     ],
     server: {
         proxy: {
