@@ -257,7 +257,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                     <h3 className="w-full overflow-hidden text-ellipsis text-2xl font-bold" title={listing.title}>
                         {listing.title}
                     </h3>
-                    <h4 className="text-muted-foreground text-sm">
+                    <h4 className="text-foreground-500 text-sm">
                         <span>{listing.type === 'buy' ? 'Looking to buy' : 'For sale'}</span>
                         {listing.price && <span> - {listing.price}</span>}
                     </h4>
@@ -400,7 +400,7 @@ function RouteComponent() {
                         key={listings.length}
                     />
                 ) : (
-                    <div className="text-muted-foreground flex justify-center italic">
+                    <div className="text-foreground-500 flex justify-center italic">
                         No listings found - try checking your filters?
                     </div>
                 )}
