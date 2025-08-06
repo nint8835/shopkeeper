@@ -120,7 +120,7 @@ function ListingAlertDialog({
         <>
             <Tooltip content="This listing has issues. Click to view.">
                 <button
-                    className="absolute right-0 top-0 z-50 -translate-y-2 translate-x-2 rounded-full bg-red-800 bg-opacity-50 p-1 transition-colors hover:bg-red-700"
+                    className="bg-opacity-50 absolute top-0 right-0 z-50 translate-x-2 -translate-y-2 rounded-full bg-red-800 p-1 transition-colors hover:bg-red-700"
                     onClick={onOpen}
                 >
                     <CircleAlert />
@@ -206,18 +206,20 @@ function ListingImageCarousel({ images }: { images: ListingImageSchema[] }) {
         if (emblaApi) emblaApi.scrollNext();
     }, [emblaApi]);
 
+    const sortedImages = images.sort((a, b) => a.id - b.id);
+
     return (
         <div className="embla space-y-2">
             <div className="embla__viewport" ref={emblaRef}>
                 <div className="embla__container">
-                    {images.map((image) => (
+                    {sortedImages.map((image) => (
                         <div className="embla__slide" key={image.id}>
                             <ListingImage image={image} />
                         </div>
                     ))}
                 </div>
             </div>
-            {images.length > 1 && (
+            {sortedImages.length > 1 && (
                 <div className="flex w-full justify-center space-x-2">
                     <Button radius="full" className="embla__prev w-fit min-w-fit p-2" onPress={scrollPrev}>
                         <ArrowLeft />
@@ -254,7 +256,7 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                 )}
             >
                 <CardHeader className="flex-col items-start">
-                    <h3 className="w-full overflow-hidden text-ellipsis text-2xl font-bold" title={listing.title}>
+                    <h3 className="w-full overflow-hidden text-2xl font-bold text-ellipsis" title={listing.title}>
                         {listing.title}
                     </h3>
                     <h4 className="text-foreground-500 text-sm">
