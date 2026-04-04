@@ -10,13 +10,15 @@ pip-lockfile:
     SAVE ARTIFACT requirements.txt
 
 python-deps:
-    FROM cgr.dev/chainguard/python:latest-dev
+    FROM python:3.13-slim
     WORKDIR /shopkeeper
 
     ENV LANG=C.UTF-8
     ENV PYTHONDONTWRITEBYTECODE=1
     ENV PYTHONUNBUFFERED=1
     ENV PATH="/shopkeeper/venv/bin:$PATH"
+
+    RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev && rm -rf /var/lib/apt/lists/*
 
     RUN python -m venv /shopkeeper/venv
     COPY +pip-lockfile/requirements.txt .
@@ -26,29 +28,33 @@ python-deps:
     SAVE ARTIFACT venv
 
 node-deps:
-    FROM cgr.dev/chainguard/node:latest
+    FROM node:lts-slim
     WORKDIR /shopkeeper
 
-    COPY --chown=node:node package.json package-lock.json ./
+    COPY package.json package-lock.json ./
     RUN npm install
 
     SAVE ARTIFACT node_modules
 
 frontend:
-    FROM cgr.dev/chainguard/node:latest
+    FROM node:lts-slim
     WORKDIR /shopkeeper
 
     COPY +node-deps/node_modules ./node_modules
 
-    COPY --chown=node:node package.json package-lock.json vite.config.ts tsconfig.json tsconfig.node.json ./
-    COPY --chown=node:node frontend frontend
+    COPY package.json package-lock.json vite.config.ts tsconfig.json tsconfig.node.json ./
+    COPY frontend frontend
     RUN npm run build
 
     SAVE ARTIFACT --keep-ts frontend/dist
 
 app:
-    FROM cgr.dev/chainguard/python:latest
+    ARG TAG
+
+    FROM python:3.13-slim
     WORKDIR /shopkeeper
+
+    RUN groupadd -g 65532 nonroot && useradd -u 65532 -g nonroot -s /sbin/nologin nonroot
 
     ENV PYTHONUNBUFFERED=1
     ENV PATH="/shopkeeper/venv/bin:$PATH"
@@ -57,7 +63,11 @@ app:
     COPY --keep-ts +frontend/dist /shopkeeper/frontend/dist
     COPY . .
 
+    RUN chown -R nonroot:nonroot /shopkeeper
+
+    USER nonroot
+
     ENTRYPOINT ["python", "-m", "shopkeeper"]
     CMD ["start"]
 
-    SAVE IMAGE --push ghcr.io/nint8835/shopkeeper:latest
+    SAVE IMAGE --push ghcr.io/nint8835/shopkeeper:latest ghcr.io/nint8835/shopkeeper:$TAG
