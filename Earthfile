@@ -65,7 +65,7 @@ app:
 
     RUN chown -R nonroot:nonroot /shopkeeper
 
-    USER nonroot
+    USER 65532
 
     ENTRYPOINT ["python", "-m", "shopkeeper"]
     CMD ["start"]
