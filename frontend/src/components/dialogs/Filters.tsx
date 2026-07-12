@@ -1,5 +1,5 @@
 import { useStore } from '@/lib/state';
-import { ListingStatus, ListingType } from '@/queries/api/shopkeeperSchemas';
+import type { ListingStatus, ListingType } from '@/queries/api';
 import { Route } from '@/routes/index';
 import {
     Button,

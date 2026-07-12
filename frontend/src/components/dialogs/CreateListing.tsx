@@ -1,7 +1,6 @@
 import { queryClient } from '@/lib/query';
-import { useCreateListing } from '@/queries/api/shopkeeperComponents';
-import { ListingType } from '@/queries/api/shopkeeperSchemas';
-import { createListingSchemaSchema } from '@/queries/api/shopkeeperZod';
+import { useCreateListingMutation, type ListingType } from '@/queries/api';
+import { zCreateListingSchema } from '@/queries/api/zod.gen';
 import {
     addToast,
     Alert,
@@ -25,9 +24,9 @@ import { z } from 'zod';
 export default function CreateListingDialog() {
     const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
-    const { mutateAsync: createListing, isPending: mutationPending } = useCreateListing();
+    const { mutateAsync: createListing, isPending: mutationPending } = useCreateListingMutation();
 
-    async function handleSubmit(value: z.infer<typeof createListingSchemaSchema>) {
+    async function handleSubmit(value: z.infer<typeof zCreateListingSchema>) {
         try {
             const newListing = await createListing({ body: value });
             addToast({
@@ -38,7 +37,7 @@ export default function CreateListingDialog() {
                     </Button>
                 ),
             });
-            queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
+            queryClient.invalidateQueries({ queryKey: ['getListings'] });
             handleOpenChange(false);
         } catch (e) {
             form.setErrorMap({
@@ -59,7 +58,7 @@ export default function CreateListingDialog() {
         },
         onSubmit: ({ value }) => handleSubmit(value),
         validators: {
-            onChange: createListingSchemaSchema,
+            onChange: zCreateListingSchema,
         },
     });
 

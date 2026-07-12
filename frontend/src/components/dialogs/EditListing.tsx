@@ -1,7 +1,6 @@
 import { queryClient } from '@/lib/query';
-import { useEditListing } from '@/queries/api/shopkeeperComponents';
-import { ListingSchema, ListingStatus } from '@/queries/api/shopkeeperSchemas';
-import { editListingSchemaSchema } from '@/queries/api/shopkeeperZod';
+import { useEditListingMutation, type ListingSchema, type ListingStatus } from '@/queries/api';
+import { zEditListingSchema } from '@/queries/api/zod.gen';
 import {
     addToast,
     Alert,
@@ -42,11 +41,11 @@ export default function EditListingDialog({
         },
         onSubmit: ({ value }) => handleSubmit(value),
         validators: {
-            onChange: editListingSchemaSchema,
+            onChange: zEditListingSchema,
         },
     });
 
-    const { mutateAsync: editListing, isPending: mutationPending } = useEditListing();
+    const { mutateAsync: editListing, isPending: mutationPending } = useEditListingMutation();
 
     function handleOpenChange(open: boolean) {
         form.reset();
@@ -57,9 +56,9 @@ export default function EditListingDialog({
         }
     }
 
-    async function handleSubmit(value: z.infer<typeof editListingSchemaSchema>) {
+    async function handleSubmit(value: z.infer<typeof zEditListingSchema>) {
         try {
-            const newListing = await editListing({ pathParams: { listingId: listing.id }, body: value });
+            const newListing = await editListing({ path: { listing_id: listing.id }, body: value });
             addToast({
                 title: 'Listing edited successfully',
                 endContent: (
@@ -68,7 +67,7 @@ export default function EditListingDialog({
                     </Button>
                 ),
             });
-            queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
+            queryClient.invalidateQueries({ queryKey: ['getListings'] });
             handleOpenChange(false);
         } catch (e) {
             form.setErrorMap({

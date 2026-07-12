@@ -5,19 +5,18 @@ import { queryClient } from '@/lib/query';
 import { defaultQueryParams, useStore } from '@/lib/state';
 import { arraysEqual, cn, pluralize } from '@/lib/utils';
 import {
-    getListingsQuery,
-    useGetUserIssueCount,
-    useHideImage,
-    useHideListing,
-    useSuspenseGetListings,
-} from '@/queries/api/shopkeeperComponents';
+    getListingsOptions,
+    useGetUserIssueCountQuery,
+    useHideImageMutation,
+    useHideListingMutation,
+} from '@/queries/api';
 import type {
     FullListingSchema,
     ListingImageSchema,
     ListingIssueIcon,
     ListingIssueResolutionLocation,
-} from '@/queries/api/shopkeeperSchemas';
-import { listingStatusSchema, listingTypeSchema } from '@/queries/api/shopkeeperZod';
+} from '@/queries/api';
+import { zListingStatus, zListingType } from '@/queries/api/zod.gen';
 import {
     Button,
     Card,
@@ -32,7 +31,7 @@ import {
     Tooltip,
     useDisclosure,
 } from '@heroui/react';
-import { keepPreviousData } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, stripSearchParams, useNavigate } from '@tanstack/react-router';
 import { zodValidator } from '@tanstack/zod-adapter';
 import useEmblaCarousel from 'embla-carousel-react';
@@ -56,8 +55,8 @@ import { useWindowSize } from 'usehooks-ts';
 import { z } from 'zod';
 
 const searchSchema = z.object({
-    status: z.array(listingStatusSchema).default(defaultQueryParams.status),
-    type: z.array(listingTypeSchema).default(defaultQueryParams.type),
+    status: z.array(zListingStatus).default(defaultQueryParams.status),
+    type: z.array(zListingType).default(defaultQueryParams.type),
     owner: z.array(z.string()).optional(),
     has_issues: z.boolean().optional(),
 });
@@ -71,7 +70,7 @@ export const Route = createFileRoute('/')({
     loaderDeps: ({ search: { status, type, owner, has_issues } }) => ({ status, type, owner, has_issues }),
     loader: ({ deps: { status, type, owner, has_issues } }) =>
         queryClient.ensureQueryData(
-            getListingsQuery({ body: { statuses: status, types: type, owners: owner, has_issues } }),
+            getListingsOptions({ body: { statuses: status, types: type, owners: owner, has_issues } }),
         ),
 });
 
@@ -158,7 +157,7 @@ function ListingAlertDialog({
 function ListingImage({ image }: { image: ListingImageSchema }) {
     const { user } = useStore();
     const { isOpen, onOpenChange, onOpen } = useDisclosure();
-    const { mutateAsync: hideImage, isPending: hideImagePending } = useHideImage();
+    const { mutateAsync: hideImage, isPending: hideImagePending } = useHideImageMutation();
     return (
         <div>
             <img
@@ -178,10 +177,10 @@ function ListingImage({ image }: { image: ListingImageSchema }) {
                                 color="danger"
                                 onPress={async () => {
                                     await hideImage({
-                                        pathParams: { imageId: image.id },
+                                        path: { image_id: image.id },
                                     });
                                     queryClient.invalidateQueries({
-                                        queryKey: ['api', 'listings'],
+                                        queryKey: ['getListings'],
                                     });
                                 }}
                                 disabled={hideImagePending}
@@ -235,7 +234,7 @@ function ListingImageCarousel({ images }: { images: ListingImageSchema[] }) {
 
 function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>) {
     const { user } = useStore();
-    const { mutateAsync: hideListing, isPending: hidePending } = useHideListing();
+    const { mutateAsync: hideListing, isPending: hidePending } = useHideListingMutation();
     const {
         isOpen: editDialogIsOpen,
         onOpenChange: editDialogOnOpenChange,
@@ -286,8 +285,8 @@ function ListingCard({ data: listing }: RenderComponentProps<FullListingSchema>)
                             <Button
                                 color="danger"
                                 onPress={async () => {
-                                    await hideListing({ pathParams: { listingId: listing.id } });
-                                    queryClient.invalidateQueries({ queryKey: ['api', 'listings'] });
+                                    await hideListing({ path: { listing_id: listing.id } });
+                                    queryClient.invalidateQueries({ queryKey: ['getListings'] });
                                 }}
                                 disabled={hidePending}
                             >
@@ -324,18 +323,17 @@ function RouteComponent() {
     const filtersActive = statusFilterSet || ownerFilterSet || typeFilterSet || hasIssuesFilterSet;
 
     const { width: windowWidth } = useWindowSize();
-    const { data: listings } = useSuspenseGetListings(
-        {
+    const { data: listings } = useSuspenseQuery(
+        getListingsOptions({
             body: {
                 statuses: filteredStatuses,
                 owners: filteredOwners,
                 types: filteredTypes,
                 has_issues: filterHasIssues,
             },
-        },
-        { placeholderData: keepPreviousData },
+        }),
     );
-    const { data: issueCount } = useGetUserIssueCount({});
+    const { data: issueCount } = useGetUserIssueCountQuery();
     const currentUserId = useStore((state) => state.user?.id);
 
     let columnCount;

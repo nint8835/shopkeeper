@@ -1,4 +1,4 @@
-import type { DiscordUser, ListingStatus, ListingType } from '@/queries/api/shopkeeperSchemas';
+import type { DiscordUser, ListingStatus, ListingType } from '@/queries/api';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 

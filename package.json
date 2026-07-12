@@ -7,8 +7,7 @@
         "dev": "vite",
         "build": "tsc && vite build",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-        "preview": "vite preview",
-        "gen-openapi": "npx openapi-codegen gen shopkeeper && npx ts-to-zod frontend/src/queries/api/shopkeeperSchemas.ts frontend/src/queries/api/shopkeeperZod.ts && npx prettier -w frontend/src/queries/**/*.ts"
+        "preview": "vite preview"
     },
     "dependencies": {
         "@heroui/react": "^2.8.1",
@@ -35,8 +34,8 @@
         "zustand": "^4.5.4"
     },
     "devDependencies": {
-        "@openapi-codegen/cli": "^3.1.0",
-        "@openapi-codegen/typescript": "^11.0.1",
+        "@hey-api/openapi-ts": "^0.99.0",
+        "@hey-api/vite-plugin": "^0.3.2",
         "@tailwindcss/typography": "^0.5.16",
         "@tanstack/eslint-plugin-query": "^5.81.2",
         "@tanstack/router-plugin": "^1.129.8",
@@ -52,7 +51,6 @@
         "prettier": "^3.3.2",
         "prettier-plugin-tailwindcss": "^0.6.4",
         "tailwindcss": "^4.1.11",
-        "ts-to-zod": "^3.8.7",
         "typescript": "^5.2.2",
         "vite": "^5.2.0"
     }

@@ -1,6 +1,6 @@
 import { queryClient } from '@/lib/query';
 import { useStore } from '@/lib/state';
-import { fetchGetCurrentUser } from '@/queries/api/shopkeeperComponents';
+import { getCurrentUser } from '@/queries/api';
 import { HeroUIProvider, ToastProvider } from '@heroui/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -14,7 +14,7 @@ export const Route = createRootRoute({
             return;
         }
 
-        const currentUser = await fetchGetCurrentUser({});
+        const { data: currentUser } = await getCurrentUser();
         if (!currentUser) {
             throw redirect({
                 to: '/auth/login',
