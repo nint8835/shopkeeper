@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import and_, func, not_, select
@@ -26,7 +26,7 @@ listings_router = APIRouter(
 @listings_router.post("/search", response_model=list[FullListingSchema])
 async def get_listings(
     filters: SearchListingsSchema,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Any:
     """Retrieve a list of listings."""
     listings_query = (
@@ -55,8 +55,8 @@ async def get_listings(
 @listings_router.post("/", response_model=ListingSchema)
 async def create_listing(
     listing: CreateListingSchema,
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user: Annotated[DiscordUser, Depends(require_discord_user)],
 ) -> Listing:
     """Create a new listing."""
     new_listing = await Listing.create(
@@ -75,8 +75,8 @@ async def create_listing(
 async def edit_listing(
     listing_id: int,
     listing: EditListingSchema,
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user: Annotated[DiscordUser, Depends(require_discord_user)],
 ) -> Listing:
     """Edit an existing listing."""
     return await Listing.edit(
@@ -93,8 +93,8 @@ async def edit_listing(
 @listings_router.post("/{listing_id}/hide", status_code=202)
 async def hide_listing(
     listing_id: int,
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user: Annotated[DiscordUser, Depends(require_discord_user)],
 ) -> None:
     """Hide a listing. This route requires you to be the owner of the bot."""
     if user.id != str(config.owner_id):
@@ -110,13 +110,11 @@ async def hide_listing(
     listing.is_hidden = True
     await db.commit()
 
-    return None
-
 
 @listings_router.get("/issue-count")
 async def get_user_issue_count(
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user: Annotated[DiscordUser, Depends(require_discord_user)],
 ) -> int:
     """Retrieve a count of the number of listings owned by the user with issues needing resolution."""
     return (

@@ -9,7 +9,7 @@ from .config import config
 
 
 class Base(AsyncAttrs, DeclarativeBase):
-    type_annotation_map = {
+    type_annotation_map: typing.ClassVar = {
         enum.Enum: sqlalchemy.Enum(enum.Enum, native_enum=False),
         typing.Literal: sqlalchemy.Enum(enum.Enum, native_enum=False),
     }

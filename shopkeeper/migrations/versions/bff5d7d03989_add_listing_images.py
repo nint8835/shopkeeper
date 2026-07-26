@@ -10,8 +10,9 @@ import asyncio
 import enum
 import typing
 import uuid
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence, Union, cast
+from typing import cast
 
 import discord
 import sqlalchemy as sa
@@ -23,13 +24,13 @@ from shopkeeper.config import config
 
 # revision identifiers, used by Alembic.
 revision: str = "bff5d7d03989"
-down_revision: Union[str, None] = "1acae44de005"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "1acae44de005"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 class Base(AsyncAttrs, DeclarativeBase):
-    type_annotation_map = {
+    type_annotation_map: typing.ClassVar = {
         enum.Enum: sa.Enum(enum.Enum, native_enum=False),
         typing.Literal: sa.Enum(enum.Enum, native_enum=False),
     }
@@ -57,8 +58,7 @@ class ListingImage(Base):
         image_path = Path(str(listing_id)) / (str(uuid.uuid4()) + attachment_extension)
         file_path = config.image_path / image_path
 
-        with open(file_path, "wb") as f:
-            await attachment.save(f)
+        await attachment.save(file_path)
 
         instance = ListingImage(listing_id=listing_id, path=str(image_path))
         session.add(instance)

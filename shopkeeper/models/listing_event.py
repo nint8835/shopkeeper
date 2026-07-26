@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -24,11 +24,9 @@ class ListingEvent(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     type: Mapped[EventType]
-    from_value: Mapped[Optional[str]]
-    to_value: Mapped[Optional[str]]
-    time: Mapped[datetime] = mapped_column(
-        default=lambda: datetime.now(tz=timezone.utc)
-    )
+    from_value: Mapped[str | None]
+    to_value: Mapped[str | None]
+    time: Mapped[datetime] = mapped_column(default=lambda: datetime.now(tz=UTC))
 
     listing_id: Mapped[int] = mapped_column(ForeignKey("listings.id"))
     listing: Mapped["Listing"] = relationship(back_populates="events")

@@ -46,8 +46,7 @@ class SPAStaticFiles(StaticFiles):
         except StarletteHTTPException as exc:
             if exc.status_code == 404:
                 return await super().get_response("index.html", scope)
-            else:
-                raise exc
+            raise
 
 
 def generate_unique_id(route: APIRoute) -> str:

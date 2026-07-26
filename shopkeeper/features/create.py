@@ -45,7 +45,7 @@ class CreateListingModal(discord.ui.Modal):
         self, interaction: discord.Interaction, error: Exception
     ) -> None:
         await interaction.response.send_message(
-            f"Something went wrong.\n```py\n{"\n".join(traceback.format_exception(error))}\n```",
+            f"Something went wrong.\n```py\n{'\n'.join(traceback.format_exception(error))}\n```",
             ephemeral=True,
         )
 

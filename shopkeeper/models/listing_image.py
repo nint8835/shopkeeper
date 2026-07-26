@@ -52,8 +52,7 @@ class ListingImage(Base):
         image_path = Path(str(listing_id)) / (str(uuid.uuid4()) + attachment_extension)
         file_path = config.image_path / image_path
 
-        with open(file_path, "wb") as f:
-            await attachment.save(f)
+        await attachment.save(file_path)
 
         instance = ListingImage(
             listing_id=listing_id,

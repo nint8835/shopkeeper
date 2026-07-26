@@ -4,8 +4,7 @@ import discord
 from discord import app_commands
 from sqlalchemy import select
 
-import shopkeeper.models.listing as listing
-import shopkeeper.models.listing_image as listing_image
+from shopkeeper.models import listing, listing_image
 
 from .config import config
 from .db import async_session
@@ -45,26 +44,25 @@ class ShopkeeperBot(discord.Client):
             if not message.attachments:
                 return
 
-            async with async_session() as session:
-                async with session.begin():
-                    message_listing = (
-                        await session.execute(
-                            select(listing.Listing).filter_by(
-                                thread_id=message.channel.id, owner_id=message.author.id
-                            )
+            async with async_session() as session, session.begin():
+                message_listing = (
+                    await session.execute(
+                        select(listing.Listing).filter_by(
+                            thread_id=message.channel.id, owner_id=message.author.id
                         )
-                    ).scalar_one_or_none()
+                    )
+                ).scalar_one_or_none()
 
-                    if not message_listing:
-                        return
+                if not message_listing:
+                    return
 
-                    for attachment in message.attachments:
-                        await listing_image.ListingImage.from_attachment(
-                            listing_id=message_listing.id,
-                            attachment=attachment,
-                            session=session,
-                        )
-                    await session.commit()
+                for attachment in message.attachments:
+                    await listing_image.ListingImage.from_attachment(
+                        listing_id=message_listing.id,
+                        attachment=attachment,
+                        session=session,
+                    )
+                await session.commit()
         except:  # noqa
             traceback.print_exc()
 

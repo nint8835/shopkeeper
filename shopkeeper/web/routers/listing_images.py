@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
@@ -20,7 +20,7 @@ listing_images_router = APIRouter(
 
 
 @listing_images_router.get("/{image_id}", include_in_schema=False)
-async def get_image(image_id: int, db: AsyncSession = Depends(get_db)) -> Any:
+async def get_image(image_id: int, db: Annotated[AsyncSession, Depends(get_db)]) -> Any:
     """Retrieve a listing image."""
 
     image = (
@@ -37,7 +37,9 @@ async def get_image(image_id: int, db: AsyncSession = Depends(get_db)) -> Any:
 
 
 @listing_images_router.get("/{image_id}/thumbnail", include_in_schema=False)
-async def get_image_thumbnail(image_id: int, db: AsyncSession = Depends(get_db)) -> Any:
+async def get_image_thumbnail(
+    image_id: int, db: Annotated[AsyncSession, Depends(get_db)]
+) -> Any:
     """Retrieve a listing image thumbnail."""
 
     image = (
@@ -63,8 +65,8 @@ async def get_image_thumbnail(image_id: int, db: AsyncSession = Depends(get_db))
 @listing_images_router.post("/{image_id}/hide", status_code=202)
 async def hide_image(
     image_id: int,
-    db: AsyncSession = Depends(get_db),
-    user: DiscordUser = Depends(require_discord_user),
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user: Annotated[DiscordUser, Depends(require_discord_user)],
 ) -> Any:
     """Hide a listing image. This route requires you to be the owner of the bot."""
     if user.id != str(config.owner_id):

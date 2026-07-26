@@ -1,8 +1,9 @@
+from collections.abc import Callable
 from dataclasses import dataclass
 from difflib import unified_diff
 from enum import Enum
 from types import EllipsisType
-from typing import TYPE_CHECKING, Callable, Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 import discord
 from fastapi import HTTPException
@@ -10,10 +11,10 @@ from sqlalchemy import ColumnElement, and_, not_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, joinedload, mapped_column, relationship
 
-import shopkeeper.bot as bot
-import shopkeeper.models.listing_event as listing_event
+from shopkeeper import bot
 from shopkeeper.config import config
 from shopkeeper.db import Base
+from shopkeeper.models import listing_event
 
 if TYPE_CHECKING:
     from .listing_event import ListingEvent
@@ -208,7 +209,7 @@ class Listing(Base):
             )
 
             edited_message_sections: list[str] = []
-            listing_events: list["ListingEvent"] = []
+            listing_events: list[ListingEvent] = []
             should_close_thread = False
 
             if title is not ...:

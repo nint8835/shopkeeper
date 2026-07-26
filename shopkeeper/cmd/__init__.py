@@ -4,7 +4,7 @@ import uvicorn
 
 from shopkeeper.bot import client, guild
 from shopkeeper.config import config
-from shopkeeper.features import *  # noqa: F401, F403
+from shopkeeper.features import *
 
 from .utils import async_command
 
